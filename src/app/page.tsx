@@ -1,110 +1,411 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
-import ChatPanel from "@/components/ChatPanel";
-import ArtifactsPanel from "@/components/ArtifactsPanel";
-import { useChat } from "@/hooks/useChat";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
+import { getProjects, createProject, deleteProject, Project } from "@/lib/db";
 
-const MIN_CHAT_PCT = 20;
-const MAX_CHAT_PCT = 80;
-const DEFAULT_CHAT_PCT = 60;
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
-export default function Home() {
-  const { messages, isStreaming, sendMessage, stopStreaming, clearMessages } = useChat();
-  const [chatPct, setChatPct] = useState(DEFAULT_CHAT_PCT);
-  const [artifactFullscreen, setArtifactFullscreen] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+function CreateProjectModal({
+  onClose,
+  onCreate,
+}: {
+  onClose: () => void;
+  onCreate: (name: string, description: string) => Promise<void>;
+}) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsDragging(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isDragging) return;
-
-    const onMouseMove = (e: MouseEvent) => {
-      const container = containerRef.current;
-      if (!container) return;
-      const rect = container.getBoundingClientRect();
-      const pct = ((e.clientX - rect.left) / rect.width) * 100;
-      setChatPct(Math.min(MAX_CHAT_PCT, Math.max(MIN_CHAT_PCT, pct)));
-    };
-
-    const onMouseUp = () => setIsDragging(false);
-
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-  }, [isDragging]);
+    if (!name.trim()) return;
+    setLoading(true);
+    setError("");
+    try {
+      await onCreate(name.trim(), description.trim());
+    } catch {
+      setError("Failed to create project. Please try again.");
+      setLoading(false);
+    }
+  };
 
   return (
     <div
-      ref={containerRef}
-      className="flex h-screen overflow-hidden"
-      style={{
-        background: "#0f0f0f",
-        cursor: isDragging ? "col-resize" : "default",
-        userSelect: isDragging ? "none" : "auto",
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: "rgba(0,0,0,0.7)" }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      {/* Left: Chat */}
       <div
-        className="flex flex-col h-full"
-        style={{
-          width: artifactFullscreen ? "0%" : `${chatPct}%`,
-          overflow: "hidden",
-          transition: artifactFullscreen ? "width 0.25s ease" : undefined,
-        }}
+        className="w-full max-w-md p-6 rounded-xl"
+        style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
       >
-        <ChatPanel
-          messages={messages}
-          isStreaming={isStreaming}
-          onSend={sendMessage}
-          onStop={stopStreaming}
-          onClear={clearMessages}
-        />
+        <h2 className="text-lg font-semibold mb-5" style={{ color: "#e5e5e5" }}>
+          New Project
+        </h2>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div>
+            <label className="block text-xs mb-1.5" style={{ color: "#9ca3af" }}>
+              Project name *
+            </label>
+            <input
+              autoFocus
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="My awesome project"
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{
+                background: "#0f0f0f",
+                border: "1px solid #2a2a2a",
+                color: "#e5e5e5",
+              }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "#d97706")}
+              onBlur={(e) => (e.currentTarget.style.borderColor = "#2a2a2a")}
+            />
+          </div>
+          <div>
+            <label className="block text-xs mb-1.5" style={{ color: "#9ca3af" }}>
+              Description (optional)
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="What is this project about?"
+              rows={3}
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none"
+              style={{
+                background: "#0f0f0f",
+                border: "1px solid #2a2a2a",
+                color: "#e5e5e5",
+              }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "#d97706")}
+              onBlur={(e) => (e.currentTarget.style.borderColor = "#2a2a2a")}
+            />
+          </div>
+          {error && <p className="text-xs" style={{ color: "#f87171" }}>{error}</p>}
+          <div className="flex gap-2 justify-end pt-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-lg text-sm"
+              style={{ background: "#2a2a2a", color: "#9ca3af" }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!name.trim() || loading}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-opacity"
+              style={{
+                background: "#d97706",
+                color: "#0f0f0f",
+                opacity: !name.trim() || loading ? 0.5 : 1,
+              }}
+            >
+              {loading ? "Creating…" : "Create Project"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function ProjectCard({
+  project,
+  onOpen,
+  onDelete,
+}: {
+  project: Project;
+  onOpen: () => void;
+  onDelete: () => void;
+}) {
+  const [showMenu, setShowMenu] = useState(false);
+
+  return (
+    <div
+      className="group relative flex flex-col gap-3 p-5 rounded-xl cursor-pointer transition-all duration-200"
+      style={{
+        background: "#1a1a1a",
+        border: "1px solid #2a2a2a",
+      }}
+      onClick={onOpen}
+      onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#3a3a3a")}
+      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#2a2a2a")}
+    >
+      {/* Icon */}
+      <div
+        className="w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold"
+        style={{ background: "#d97706", color: "#0f0f0f" }}
+      >
+        {project.name[0].toUpperCase()}
       </div>
 
-      {/* Drag handle */}
-      {!artifactFullscreen && (
+      {/* Name + description */}
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-sm truncate" style={{ color: "#e5e5e5" }}>
+          {project.name}
+        </p>
+        {project.description && (
+          <p
+            className="text-xs mt-1 line-clamp-2"
+            style={{ color: "#6b7280" }}
+          >
+            {project.description}
+          </p>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs" style={{ color: "#4b5563" }}>
+          {formatDate(project.created_at)}
+        </span>
+        <div className="flex items-center gap-1">
+          <span
+            className="text-xs px-2 py-0.5 rounded-full"
+            style={{ background: "#0f0f0f", color: "#6b7280", border: "1px solid #2a2a2a" }}
+          >
+            Active
+          </span>
+        </div>
+      </div>
+
+      {/* Context menu button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowMenu((v) => !v);
+        }}
+        className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ color: "#6b7280" }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = "#e5e5e5")}
+        onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="5" r="1.5" />
+          <circle cx="12" cy="12" r="1.5" />
+          <circle cx="12" cy="19" r="1.5" />
+        </svg>
+      </button>
+
+      {showMenu && (
         <div
-          onMouseDown={handleMouseDown}
-          className="flex items-center justify-center h-full shrink-0"
-          style={{
-            width: "5px",
-            cursor: "col-resize",
-            background: isDragging ? "#d97706" : "#2a2a2a",
-            transition: "background 0.15s",
-            zIndex: 10,
-          }}
-          onMouseEnter={(e) => {
-            if (!isDragging) e.currentTarget.style.background = "#3a3a3a";
-          }}
-          onMouseLeave={(e) => {
-            if (!isDragging) e.currentTarget.style.background = "#2a2a2a";
-          }}
+          className="absolute top-10 right-3 z-10 py-1 rounded-lg shadow-lg"
+          style={{ background: "#1f1f1f", border: "1px solid #2a2a2a", minWidth: "120px" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={() => { setShowMenu(false); onOpen(); }}
+            className="w-full text-left px-3 py-2 text-xs transition-colors"
+            style={{ color: "#9ca3af" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#e5e5e5")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
+          >
+            Open
+          </button>
+          <button
+            onClick={() => { setShowMenu(false); onDelete(); }}
+            className="w-full text-left px-3 py-2 text-xs transition-colors"
+            style={{ color: "#f87171" }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#2a1a1a")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+          >
+            Delete
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function Home() {
+  const { user, signOut } = useAuth();
+  const router = useRouter();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
+
+  const loadProjects = useCallback(async () => {
+    if (!user) return;
+    try {
+      const data = await getProjects(user.id);
+      setProjects(data);
+    } catch (err) {
+      console.error("Failed to load projects:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    loadProjects();
+  }, [loadProjects]);
+
+  const handleCreate = async (name: string, description: string) => {
+    if (!user) return;
+    const project = await createProject(user.id, name, description);
+    setShowCreate(false);
+    sessionStorage.setItem(`project_name_${project.id}`, project.name);
+    router.push(`/projects/${project.id}`);
+  };
+
+  const handleDelete = async (projectId: string) => {
+    if (!confirm("Delete this project and all its chats?")) return;
+    try {
+      await deleteProject(projectId);
+      setProjects((prev) => prev.filter((p) => p.id !== projectId));
+    } catch (err) {
+      console.error("Failed to delete project:", err);
+    }
+  };
+
+  return (
+    <div className="min-h-screen" style={{ background: "#0f0f0f" }}>
+      {/* Header */}
+      <header
+        className="flex items-center justify-between px-6 py-4 border-b"
+        style={{ borderColor: "#1f1f1f" }}
+      >
+        <div className="flex items-center gap-2.5">
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold"
+            style={{ background: "#d97706", color: "#0f0f0f" }}
+          >
+            Z
+          </div>
+          <span className="text-sm font-semibold" style={{ color: "#e5e5e5" }}>
+            Zai
+          </span>
+        </div>
+
+        {user && (
+          <div className="flex items-center gap-3">
+            <span className="text-xs" style={{ color: "#6b7280" }}>
+              {user.user_metadata?.full_name ?? user.email}
+            </span>
+            {user.user_metadata?.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.user_metadata.avatar_url}
+                alt="Avatar"
+                className="w-7 h-7 rounded-full object-cover"
+                style={{ border: "1px solid #2a2a2a" }}
+              />
+            ) : (
+              <div
+                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                style={{ background: "#2a2a2a", color: "#e5e5e5" }}
+              >
+                {(user.user_metadata?.full_name ?? user.email ?? "U")[0].toUpperCase()}
+              </div>
+            )}
+            <button
+              onClick={signOut}
+              className="text-xs px-3 py-1.5 rounded-lg transition-all"
+              style={{ background: "#1a1a1a", color: "#6b7280", border: "1px solid #2a2a2a" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#f87171")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+            >
+              Sign out
+            </button>
+          </div>
+        )}
+      </header>
+
+      {/* Main content */}
+      <main className="max-w-5xl mx-auto px-6 py-10">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold" style={{ color: "#e5e5e5" }}>
+              Projects
+            </h1>
+            <p className="text-sm mt-1" style={{ color: "#6b7280" }}>
+              Each project has its own chat history and artifacts
+            </p>
+          </div>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all"
+            style={{ background: "#d97706", color: "#0f0f0f" }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            New Project
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-40 rounded-xl animate-pulse"
+                style={{ background: "#1a1a1a" }}
+              />
+            ))}
+          </div>
+        ) : projects.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <div
+              className="w-14 h-14 rounded-xl flex items-center justify-center"
+              style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4b5563" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-medium" style={{ color: "#e5e5e5" }}>
+                No projects yet
+              </p>
+              <p className="text-xs mt-1" style={{ color: "#6b7280" }}>
+                Create your first project to start chatting
+              </p>
+            </div>
+            <button
+              onClick={() => setShowCreate(true)}
+              className="mt-2 px-5 py-2.5 rounded-lg text-sm font-medium"
+              style={{ background: "#d97706", color: "#0f0f0f" }}
+            >
+              Create Project
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {projects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                onOpen={() => {
+                sessionStorage.setItem(`project_name_${project.id}`, project.name);
+                router.push(`/projects/${project.id}`);
+              }}
+                onDelete={() => handleDelete(project.id)}
+              />
+            ))}
+          </div>
+        )}
+      </main>
+
+      {showCreate && (
+        <CreateProjectModal
+          onClose={() => setShowCreate(false)}
+          onCreate={handleCreate}
         />
       )}
-
-      {/* Right: Artifacts */}
-      <div
-        className="flex flex-col h-full"
-        style={{
-          width: artifactFullscreen ? "100%" : `${100 - chatPct}%`,
-          transition: artifactFullscreen ? "width 0.25s ease" : undefined,
-        }}
-      >
-        <ArtifactsPanel
-          messages={messages}
-          fullscreen={artifactFullscreen}
-          onToggleFullscreen={() => setArtifactFullscreen((v) => !v)}
-        />
-      </div>
     </div>
   );
 }

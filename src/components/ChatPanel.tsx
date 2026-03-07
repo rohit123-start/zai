@@ -18,6 +18,9 @@ type Props = {
   onSend: (text: string, images?: ImageAttachment[]) => void;
   onStop: () => void;
   onClear: () => void;
+  hideNewChat?: boolean;
+  projectName?: string;
+  onBack?: () => void;
 };
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
@@ -63,7 +66,7 @@ function fileToImageAttachment(file: File): Promise<ImageAttachment> {
   });
 }
 
-export default function ChatPanel({ messages, isStreaming, onSend, onStop, onClear }: Props) {
+export default function ChatPanel({ messages, isStreaming, onSend, onStop, onClear, hideNewChat, projectName, onBack }: Props) {
   const { user, signOut } = useAuth();
   const [input, setInput] = useState("");
   const [pendingImages, setPendingImages] = useState<ImageAttachment[]>([]);
@@ -181,14 +184,27 @@ export default function ChatPanel({ messages, isStreaming, onSend, onStop, onCle
         style={{ borderColor: "#2a2a2a" }}
       >
         <div className="flex items-center gap-2">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="flex items-center gap-1 text-xs transition-colors mr-1"
+              style={{ color: "#6b7280" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#e5e5e5")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+          )}
           <div
             className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold"
             style={{ background: "#d97706", color: "#0f0f0f" }}
           >
-            C
+            Z
           </div>
           <span className="text-sm font-semibold" style={{ color: "#e5e5e5" }}>
-            Claude
+            {projectName ?? "Claude"}
           </span>
           <span
             className="text-xs px-2 py-0.5 rounded-full"
@@ -199,6 +215,7 @@ export default function ChatPanel({ messages, isStreaming, onSend, onStop, onCle
         </div>
 
         <div className="flex items-center gap-2">
+          {!hideNewChat && (
           <button
             onClick={onClear}
             className="text-xs px-3 py-1.5 transition-all duration-150"
@@ -214,6 +231,7 @@ export default function ChatPanel({ messages, isStreaming, onSend, onStop, onCle
           >
             New Chat
           </button>
+          )}
 
           {/* User avatar + sign out */}
           {user && (
