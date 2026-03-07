@@ -10,6 +10,7 @@ import {
 } from "react";
 import { Message, ImageAttachment } from "@/hooks/useChat";
 import MessageBubble from "./MessageBubble";
+import { useAuth } from "./AuthProvider";
 
 type Props = {
   messages: Message[];
@@ -63,6 +64,7 @@ function fileToImageAttachment(file: File): Promise<ImageAttachment> {
 }
 
 export default function ChatPanel({ messages, isStreaming, onSend, onStop, onClear }: Props) {
+  const { user, signOut } = useAuth();
   const [input, setInput] = useState("");
   const [pendingImages, setPendingImages] = useState<ImageAttachment[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
@@ -195,21 +197,60 @@ export default function ChatPanel({ messages, isStreaming, onSend, onStop, onCle
             claude-sonnet-4-6
           </span>
         </div>
-        <button
-          onClick={onClear}
-          className="text-xs px-3 py-1.5 transition-all duration-150"
-          style={{ background: "#1a1a1a", color: "#9ca3af", border: "1px solid #2a2a2a" }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = "#e5e5e5";
-            e.currentTarget.style.borderColor = "#3a3a3a";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = "#9ca3af";
-            e.currentTarget.style.borderColor = "#2a2a2a";
-          }}
-        >
-          New Chat
-        </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onClear}
+            className="text-xs px-3 py-1.5 transition-all duration-150"
+            style={{ background: "#1a1a1a", color: "#9ca3af", border: "1px solid #2a2a2a" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#e5e5e5";
+              e.currentTarget.style.borderColor = "#3a3a3a";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#9ca3af";
+              e.currentTarget.style.borderColor = "#2a2a2a";
+            }}
+          >
+            New Chat
+          </button>
+
+          {/* User avatar + sign out */}
+          {user && (
+            <div className="flex items-center gap-2">
+              {user.user_metadata?.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.user_metadata.avatar_url}
+                  alt={user.user_metadata.full_name ?? "User"}
+                  className="w-7 h-7 rounded-full object-cover"
+                  style={{ border: "1px solid #3a3a3a" }}
+                />
+              ) : (
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                  style={{ background: "#2a2a2a", color: "#e5e5e5" }}
+                >
+                  {(user.user_metadata?.full_name ?? user.email ?? "U")[0].toUpperCase()}
+                </div>
+              )}
+              <button
+                onClick={signOut}
+                className="text-xs px-2 py-1 rounded transition-all duration-150"
+                style={{ color: "#6b7280" }}
+                title="Sign out"
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#f87171")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
