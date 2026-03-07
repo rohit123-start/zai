@@ -1,0 +1,405 @@
+"use client";
+
+import {
+  useRef,
+  useEffect,
+  useState,
+  KeyboardEvent,
+  useCallback,
+  ChangeEvent,
+} from "react";
+import { Message, ImageAttachment } from "@/hooks/useChat";
+import MessageBubble from "./MessageBubble";
+
+type Props = {
+  messages: Message[];
+  isStreaming: boolean;
+  onSend: (text: string, images?: ImageAttachment[]) => void;
+  onStop: () => void;
+  onClear: () => void;
+};
+
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+const MAX_IMAGES = 5;
+const MAX_SIZE_MB = 5;
+
+function TypingIndicator() {
+  return (
+    <div className="flex justify-start mb-4">
+      <div
+        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 mr-2"
+        style={{ background: "#d97706", color: "#0f0f0f" }}
+      >
+        C
+      </div>
+      <div
+        className="flex items-center gap-1.5 px-4 py-3"
+        style={{
+          background: "#1f1f1f",
+          border: "1px solid #2a2a2a",
+          borderRadius: "12px 12px 12px 2px",
+        }}
+      >
+        <span className="typing-dot w-1.5 h-1.5 rounded-full" style={{ background: "#6b7280" }} />
+        <span className="typing-dot w-1.5 h-1.5 rounded-full" style={{ background: "#6b7280" }} />
+        <span className="typing-dot w-1.5 h-1.5 rounded-full" style={{ background: "#6b7280" }} />
+      </div>
+    </div>
+  );
+}
+
+function fileToImageAttachment(file: File): Promise<ImageAttachment> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      // dataUrl = "data:<mimeType>;base64,<base64data>"
+      const base64 = dataUrl.split(",")[1];
+      resolve({ base64, mimeType: file.type, preview: dataUrl });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+export default function ChatPanel({ messages, isStreaming, onSend, onStop, onClear }: Props) {
+  const [input, setInput] = useState("");
+  const [pendingImages, setPendingImages] = useState<ImageAttachment[]>([]);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isStreaming]);
+
+  const handleInput = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    const el = e.target;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 160) + "px";
+  }, []);
+
+  const handleFileChange = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
+    setImageError(null);
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+
+    const remaining = MAX_IMAGES - pendingImages.length;
+    if (remaining <= 0) {
+      setImageError(`Max ${MAX_IMAGES} images allowed.`);
+      e.target.value = "";
+      return;
+    }
+
+    const toProcess = files.slice(0, remaining);
+    const oversized = toProcess.filter((f) => f.size > MAX_SIZE_MB * 1024 * 1024);
+    if (oversized.length) {
+      setImageError(`Each image must be under ${MAX_SIZE_MB}MB.`);
+      e.target.value = "";
+      return;
+    }
+
+    const invalid = toProcess.filter((f) => !ACCEPTED_TYPES.includes(f.type));
+    if (invalid.length) {
+      setImageError("Only JPEG, PNG, GIF, and WebP images are supported.");
+      e.target.value = "";
+      return;
+    }
+
+    try {
+      const attachments = await Promise.all(toProcess.map(fileToImageAttachment));
+      setPendingImages((prev) => [...prev, ...attachments]);
+    } catch {
+      setImageError("Failed to process image(s). Please try again.");
+    }
+
+    e.target.value = "";
+  }, [pendingImages.length]);
+
+  const removeImage = useCallback((index: number) => {
+    setPendingImages((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const canSend = (input.trim().length > 0 || pendingImages.length > 0) && !isStreaming;
+
+  const submit = useCallback(() => {
+    if (!canSend) return;
+    const text = input.trim();
+    const imgs = pendingImages.length > 0 ? pendingImages : undefined;
+    setInput("");
+    setPendingImages([]);
+    setImageError(null);
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
+    onSend(text || "(no text)", imgs);
+  }, [canSend, input, pendingImages, onSend]);
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        submit();
+      }
+    },
+    [submit]
+  );
+
+  // Paste images directly into the chat
+  const handlePaste = useCallback(async (e: React.ClipboardEvent) => {
+    const items = Array.from(e.clipboardData.items).filter(
+      (item) => item.kind === "file" && ACCEPTED_TYPES.includes(item.type)
+    );
+    if (!items.length) return;
+
+    const files = items.map((item) => item.getAsFile()).filter(Boolean) as File[];
+    const remaining = MAX_IMAGES - pendingImages.length;
+    const toProcess = files.slice(0, remaining);
+    if (!toProcess.length) return;
+
+    try {
+      const attachments = await Promise.all(toProcess.map(fileToImageAttachment));
+      setPendingImages((prev) => [...prev, ...attachments]);
+    } catch {
+      setImageError("Failed to paste image.");
+    }
+  }, [pendingImages.length]);
+
+  const isEmpty = messages.length === 0;
+  const lastMessageIsStreaming =
+    isStreaming &&
+    messages.length > 0 &&
+    messages[messages.length - 1].role === "assistant";
+
+  return (
+    <div className="flex flex-col h-full" style={{ background: "#0f0f0f" }}>
+      {/* Top bar */}
+      <div
+        className="flex items-center justify-between px-5 py-3 border-b shrink-0"
+        style={{ borderColor: "#2a2a2a" }}
+      >
+        <div className="flex items-center gap-2">
+          <div
+            className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold"
+            style={{ background: "#d97706", color: "#0f0f0f" }}
+          >
+            C
+          </div>
+          <span className="text-sm font-semibold" style={{ color: "#e5e5e5" }}>
+            Claude
+          </span>
+          <span
+            className="text-xs px-2 py-0.5 rounded-full"
+            style={{ background: "#1a1a1a", color: "#6b7280", border: "1px solid #2a2a2a" }}
+          >
+            claude-sonnet-4-6
+          </span>
+        </div>
+        <button
+          onClick={onClear}
+          className="text-xs px-3 py-1.5 transition-all duration-150"
+          style={{ background: "#1a1a1a", color: "#9ca3af", border: "1px solid #2a2a2a" }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "#e5e5e5";
+            e.currentTarget.style.borderColor = "#3a3a3a";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "#9ca3af";
+            e.currentTarget.style.borderColor = "#2a2a2a";
+          }}
+        >
+          New Chat
+        </button>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-5 py-4">
+        {isEmpty ? (
+          <div className="flex flex-col items-center justify-center h-full gap-4">
+            <div
+              className="w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold"
+              style={{ background: "#d97706", color: "#0f0f0f" }}
+            >
+              C
+            </div>
+            <div className="text-center">
+              <p className="text-base font-semibold mb-1" style={{ color: "#e5e5e5" }}>
+                How can I help you today?
+              </p>
+              <p className="text-sm" style={{ color: "#6b7280" }}>
+                Ask me anything — I can write code, explain concepts, and more.
+              </p>
+              <p className="text-xs mt-2" style={{ color: "#4b5563" }}>
+                📎 You can also attach images
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {messages.map((msg) => (
+              <MessageBubble key={msg.id} message={msg} />
+            ))}
+            {isStreaming && !lastMessageIsStreaming && <TypingIndicator />}
+          </>
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input area */}
+      <div
+        className="shrink-0 px-4 pb-4 pt-2 border-t"
+        style={{ borderColor: "#2a2a2a" }}
+      >
+        {/* Image previews */}
+        {pendingImages.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2 px-1">
+            {pendingImages.map((img, i) => (
+              <div key={i} className="relative group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={img.preview}
+                  alt={`attachment ${i + 1}`}
+                  className="w-16 h-16 object-cover"
+                  style={{ border: "1px solid #2a2a2a", borderRadius: "6px" }}
+                />
+                <button
+                  onClick={() => removeImage(i)}
+                  className="absolute -top-1.5 -right-1.5 w-4 h-4 flex items-center justify-center rounded-full text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                  style={{ background: "#ef4444", color: "#fff" }}
+                  aria-label="Remove image"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+            {pendingImages.length < MAX_IMAGES && (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="w-16 h-16 flex flex-col items-center justify-center gap-1 transition-colors duration-150"
+                style={{
+                  border: "1px dashed #3a3a3a",
+                  borderRadius: "6px",
+                  color: "#6b7280",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#d97706")}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#3a3a3a")}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span className="text-xs">Add</span>
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Error */}
+        {imageError && (
+          <p className="text-xs mb-2 px-1" style={{ color: "#f87171" }}>
+            {imageError}
+          </p>
+        )}
+
+        {/* Input box */}
+        <div
+          className="flex items-end gap-2 px-3 py-2"
+          style={{
+            background: "#1a1a1a",
+            border: "1px solid #2a2a2a",
+            borderRadius: "8px",
+          }}
+        >
+          {/* Attach button */}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isStreaming || pendingImages.length >= MAX_IMAGES}
+            className="shrink-0 w-7 h-7 flex items-center justify-center rounded transition-all duration-150 mb-0.5"
+            style={{
+              color: pendingImages.length >= MAX_IMAGES ? "#3a3a3a" : "#6b7280",
+              opacity: isStreaming ? 0.4 : 1,
+            }}
+            onMouseEnter={(e) => {
+              if (!isStreaming && pendingImages.length < MAX_IMAGES)
+                e.currentTarget.style.color = "#d97706";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color =
+                pendingImages.length >= MAX_IMAGES ? "#3a3a3a" : "#6b7280";
+            }}
+            aria-label="Attach image"
+            title="Attach image (JPEG, PNG, GIF, WebP — max 5MB)"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+          </button>
+
+          <textarea
+            ref={textareaRef}
+            value={input}
+            onChange={handleInput}
+            onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
+            placeholder={pendingImages.length > 0 ? "Add a message (optional)…" : "Message Claude…"}
+            rows={1}
+            className="flex-1 resize-none bg-transparent text-sm outline-none leading-relaxed py-1"
+            style={{
+              color: "#e5e5e5",
+              maxHeight: "160px",
+              overflowY: "auto",
+              caretColor: "#d97706",
+            }}
+          />
+
+          {isStreaming ? (
+            <button
+              onClick={onStop}
+              className="shrink-0 w-8 h-8 flex items-center justify-center rounded transition-all duration-150"
+              style={{ background: "#ef4444", color: "#fff" }}
+              aria-label="Stop generation"
+              title="Stop generation"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="4" y="4" width="16" height="16" rx="2" />
+              </svg>
+            </button>
+          ) : (
+            <button
+              onClick={submit}
+              disabled={!canSend}
+              className="shrink-0 w-8 h-8 flex items-center justify-center rounded transition-all duration-150"
+              style={{
+                background: canSend ? "#d97706" : "#2a2a2a",
+                color: canSend ? "#0f0f0f" : "#4b5563",
+                opacity: canSend ? 1 : 0.5,
+              }}
+              aria-label="Send message"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        <p className="text-center text-xs mt-2" style={{ color: "#3a3a3a" }}>
+          Enter to send · Shift+Enter for newline · paste or drag images
+        </p>
+      </div>
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={ACCEPTED_TYPES.join(",")}
+        multiple
+        className="hidden"
+        onChange={handleFileChange}
+      />
+    </div>
+  );
+}
