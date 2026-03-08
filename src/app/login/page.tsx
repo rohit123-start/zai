@@ -25,20 +25,20 @@ function LoginContent() {
         {/* Logo */}
         <div className="flex flex-col items-center gap-3">
           <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-bold"
-            style={{ background: "#d97706", color: "#0f0f0f" }}
+            className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-black zai-logo"
+            style={{ background: "#d97706", color: "#0f0f0f", letterSpacing: "-1px" }}
           >
-            C
+            Z
           </div>
           <div className="text-center">
             <h1
               className="text-xl font-semibold"
               style={{ color: "#e5e5e5" }}
             >
-              Welcome to Claude Clone
+              Welcome to Zai
             </h1>
             <p className="text-sm mt-1" style={{ color: "#6b7280" }}>
-              Sign in to start chatting
+              Your AI design &amp; code assistant
             </p>
           </div>
         </div>

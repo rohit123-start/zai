@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Claude Clone",
-  description: "AI chat interface powered by Claude",
+  title: "Zai",
+  description: "AI-powered design and code assistant",
 };
 
 export default function RootLayout({

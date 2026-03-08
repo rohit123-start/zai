@@ -29,40 +29,69 @@ const MAX_SIZE_MB = 5;
 
 function TypingIndicator() {
   return (
-    <div className="flex justify-start mb-4">
+    <div className="flex justify-start mb-4 message-in">
       <div
-        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 mr-2"
-        style={{ background: "#d97706", color: "#0f0f0f" }}
+        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 mt-0.5 mr-2"
+        style={{
+          background: "#d97706",
+          color: "#0f0f0f",
+          letterSpacing: "-0.5px",
+          animation: "zaiPulse 1.5s ease-in-out infinite",
+        }}
       >
-        C
+        Z
       </div>
       <div
-        className="flex items-center gap-1.5 px-4 py-3"
+        className="flex items-center gap-2 px-4 py-3"
         style={{
           background: "#1f1f1f",
           border: "1px solid #2a2a2a",
           borderRadius: "12px 12px 12px 2px",
         }}
       >
-        <span className="typing-dot w-1.5 h-1.5 rounded-full" style={{ background: "#6b7280" }} />
-        <span className="typing-dot w-1.5 h-1.5 rounded-full" style={{ background: "#6b7280" }} />
-        <span className="typing-dot w-1.5 h-1.5 rounded-full" style={{ background: "#6b7280" }} />
+        <span className="typing-dot w-2 h-2 rounded-full" style={{ background: "#d97706" }} />
+        <span className="typing-dot w-2 h-2 rounded-full" style={{ background: "#d97706" }} />
+        <span className="typing-dot w-2 h-2 rounded-full" style={{ background: "#d97706" }} />
       </div>
     </div>
   );
 }
 
+const MAX_IMAGE_DIM = 1024;
+const JPEG_QUALITY = 0.85;
+
 function fileToImageAttachment(file: File): Promise<ImageAttachment> {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      // dataUrl = "data:<mimeType>;base64,<base64data>"
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    img.onload = () => {
+      let { width, height } = img;
+
+      if (width > MAX_IMAGE_DIM || height > MAX_IMAGE_DIM) {
+        const ratio = Math.min(MAX_IMAGE_DIM / width, MAX_IMAGE_DIM / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+
+      URL.revokeObjectURL(objectUrl);
+
+      const dataUrl = canvas.toDataURL("image/jpeg", JPEG_QUALITY);
       const base64 = dataUrl.split(",")[1];
-      resolve({ base64, mimeType: file.type, preview: dataUrl });
+      resolve({ base64, mimeType: "image/jpeg", preview: dataUrl });
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Failed to load image"));
+    };
+
+    img.src = objectUrl;
   });
 }
 
@@ -204,7 +233,7 @@ export default function ChatPanel({ messages, isStreaming, onSend, onStop, onCle
             Z
           </div>
           <span className="text-sm font-semibold" style={{ color: "#e5e5e5" }}>
-            {projectName ?? "Claude"}
+            {projectName ?? "Zai"}
           </span>
           <span
             className="text-xs px-2 py-0.5 rounded-full"
@@ -275,28 +304,32 @@ export default function ChatPanel({ messages, isStreaming, onSend, onStop, onCle
       <div className="flex-1 overflow-y-auto px-5 py-4">
         {isEmpty ? (
           <div className="flex flex-col items-center justify-center h-full gap-4">
-            <div
-              className="w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold"
-              style={{ background: "#d97706", color: "#0f0f0f" }}
-            >
-              C
-            </div>
-            <div className="text-center">
-              <p className="text-base font-semibold mb-1" style={{ color: "#e5e5e5" }}>
-                How can I help you today?
-              </p>
-              <p className="text-sm" style={{ color: "#6b7280" }}>
-                Ask me anything — I can write code, explain concepts, and more.
-              </p>
-              <p className="text-xs mt-2" style={{ color: "#4b5563" }}>
-                📎 You can also attach images
-              </p>
-            </div>
+          <div
+            className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-black zai-logo"
+            style={{ background: "#d97706", color: "#0f0f0f", letterSpacing: "-1px" }}
+          >
+            Z
+          </div>
+          <div className="text-center">
+            <p className="text-base font-semibold mb-1" style={{ color: "#e5e5e5" }}>
+              What are we building today?
+            </p>
+            <p className="text-sm" style={{ color: "#6b7280" }}>
+              Describe your idea — Zai will design and code it instantly.
+            </p>
+            <p className="text-xs mt-2" style={{ color: "#4b5563" }}>
+              Attach images to replicate designs pixel-perfectly
+            </p>
+          </div>
           </div>
         ) : (
           <>
-            {messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} />
+            {messages.map((msg, i) => (
+              <MessageBubble
+                key={msg.id}
+                message={msg}
+                isStreaming={isStreaming && i === messages.length - 1 && msg.role === "assistant"}
+              />
             ))}
             {isStreaming && !lastMessageIsStreaming && <TypingIndicator />}
           </>
