@@ -6,8 +6,56 @@ import {
   saveMessage,
   saveArtifacts,
   updateChatSessionTitle,
+  getDesignGuideline,
+  DesignGuideline,
 } from "@/lib/db";
 import { parseArtifactsFromMessages } from "@/utils/parseArtifacts";
+
+// ─── DG helpers (call internal API routes) ───────────────────────────────────
+
+function hasCodeBlock(text: string): boolean {
+  return /```\w+/.test(text);
+}
+
+async function callDgExtract(
+  artifactHtml: string,
+  projectId: string,
+  userId: string
+): Promise<string | null> {
+  try {
+    const res = await fetch("/api/dg/extract", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ artifactHtml, projectId, userId }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.dg ?? null;
+  } catch {
+    return null;
+  }
+}
+
+
+async function callDgSync(
+  artifactHtml: string,
+  currentDg: string,
+  projectId: string,
+  userId: string
+): Promise<string | null> {
+  try {
+    const res = await fetch("/api/dg/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ artifactHtml, currentDg, projectId, userId }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.changed ? data.dg : null;
+  } catch {
+    return null;
+  }
+}
 
 export type Role = "user" | "assistant";
 
@@ -57,7 +105,12 @@ export function useChat(persist?: PersistConfig) {
   const persistRef = useRef(persist);
   persistRef.current = persist;
 
-  // Load persisted messages when session changes
+  // Project-level design guideline — one structured JSON string per project
+  const [projectDG, setProjectDG] = useState<string | null>(null);
+  const projectDGRef = useRef<string | null>(null);
+  projectDGRef.current = projectDG;
+
+  // Load persisted messages + project DG when session changes
   useEffect(() => {
     if (!persist?.sessionId) {
       setMessages([]);
@@ -66,15 +119,16 @@ export function useChat(persist?: PersistConfig) {
     }
     setIsLoading(true);
     setMessages([]);
-    getMessages(persist.sessionId)
-      .then((rows) => {
-        setMessages(
-          rows.map((r) => ({
-            id: r.id,
-            role: r.role,
-            content: r.content,
-          }))
-        );
+
+    Promise.all([
+      getMessages(persist.sessionId).then((rows) =>
+        rows.map((r) => ({ id: r.id, role: r.role as Role, content: r.content }))
+      ),
+      persist.projectId ? getDesignGuideline(persist.projectId) : Promise.resolve(null),
+    ])
+      .then(([msgs, dg]) => {
+        setMessages(msgs);
+        setProjectDG(dg?.dg ?? null);
       })
       .catch(console.error)
       .finally(() => setIsLoading(false));
@@ -132,6 +186,9 @@ export function useChat(persist?: PersistConfig) {
       // Track final content for persistence
       const finalContentRef = { current: "" };
 
+      // Always pass the project DG to Sonnet if one exists
+      const dgContext: string | null = projectDGRef.current ?? null;
+
       try {
         const controller = new AbortController();
         abortControllerRef.current = controller;
@@ -144,6 +201,7 @@ export function useChat(persist?: PersistConfig) {
               role,
               content: buildContent(content, imgs),
             })),
+            dgContext,
           }),
           signal: controller.signal,
         });
@@ -217,6 +275,26 @@ export function useChat(persist?: PersistConfig) {
                 p.userId,
                 dbMsg.id
               );
+
+              // ── DG extract / sync ─────────────────────────────────────────
+              // Prefer HTML artifact; fall back to first artifact
+              const htmlArtifact = artifacts.find((a) => a.language === "html") ?? artifacts[0];
+              const currentDG = projectDGRef.current;
+
+              if (!currentDG) {
+                // First artifact in this project — extract fresh structured DG
+                const dg = await callDgExtract(htmlArtifact.content, p.projectId, p.userId);
+                if (dg) setProjectDG(dg);
+              } else {
+                // Existing DG — sync only if design meaningfully changed
+                const updated = await callDgSync(
+                  htmlArtifact.content,
+                  currentDG,
+                  p.projectId,
+                  p.userId
+                );
+                if (updated) setProjectDG(updated);
+              }
             }
           } catch (err) {
             console.error("[useChat] Failed to persist assistant message:", err);

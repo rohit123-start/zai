@@ -7,7 +7,12 @@ const anthropic = new Anthropic({
 
 export async function POST(request: Request) {
   try {
-    const { messages } = await request.json();
+    const { messages, dgContext } = await request.json();
+
+    // Inject project design guidelines into the system prompt when available
+    const system = dgContext
+      ? `${SYSTEM_PROMPT}\n\n## Project Design Guidelines\nThis project has established design guidelines. Follow them precisely when generating or editing artifacts:\n\n${dgContext}`
+      : SYSTEM_PROMPT;
 
     const encoder = new TextEncoder();
     let controllerClosed = false;
@@ -39,7 +44,7 @@ export async function POST(request: Request) {
           const response = await anthropic.messages.stream({
             model: "claude-sonnet-4-6",
             max_tokens: 32000,
-            system: SYSTEM_PROMPT,
+            system,
             messages,
           });
 

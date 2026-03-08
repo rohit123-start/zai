@@ -2,6 +2,15 @@ import { createClient } from "@/lib/supabase/client";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+export type DesignGuideline = {
+  id: string;
+  project_id: string;
+  user_id: string;
+  dg: string;          // structured JSON design guideline (stored in compressed_dg column)
+  created_at: string;
+  updated_at: string;
+};
+
 export type Project = {
   id: string;
   user_id: string;
@@ -211,4 +220,20 @@ export async function getArtifacts(sessionId: string): Promise<DBArtifact[]> {
     .order("created_at", { ascending: true });
   if (error) throw error;
   return data ?? [];
+}
+
+// ─── Design Guidelines (one per project) ─────────────────────────────────────
+
+export async function getDesignGuideline(
+  projectId: string
+): Promise<DesignGuideline | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("design_guidelines")
+    .select("id, project_id, user_id, compressed_dg, created_at, updated_at")
+    .eq("project_id", projectId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  return { ...data, dg: data.compressed_dg } as DesignGuideline;
 }
