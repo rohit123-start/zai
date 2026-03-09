@@ -137,7 +137,6 @@ export async function POST(request: Request) {
         {
           project_id: projectId,
           user_id: userId,
-          full_dg: "",        // deprecated — kept for schema compat
           compressed_dg: dg,
           updated_at: new Date().toISOString(),
         },

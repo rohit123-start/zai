@@ -18,6 +18,7 @@ type Props = {
   onSend: (text: string, images?: ImageAttachment[]) => void;
   onStop: () => void;
   onClear: () => void;
+  onDeletePages?: () => void;
   hideNewChat?: boolean;
   projectName?: string;
   onBack?: () => void;
@@ -95,7 +96,7 @@ function fileToImageAttachment(file: File): Promise<ImageAttachment> {
   });
 }
 
-export default function ChatPanel({ messages, isStreaming, onSend, onStop, onClear, hideNewChat, projectName, onBack }: Props) {
+export default function ChatPanel({ messages, isStreaming, onSend, onStop, onClear, onDeletePages, hideNewChat, projectName, onBack }: Props) {
   const { user, signOut } = useAuth();
   const [input, setInput] = useState("");
   const [pendingImages, setPendingImages] = useState<ImageAttachment[]>([]);
@@ -243,11 +244,75 @@ export default function ChatPanel({ messages, isStreaming, onSend, onStop, onCle
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          {/* Clear chat */}
+          <button
+            onClick={onClear}
+            disabled={isStreaming || messages.length === 0}
+            title="Clear chat history"
+            className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded transition-all duration-150"
+            style={{
+              background: "transparent",
+              color: messages.length === 0 ? "#3a3a3a" : "#6b7280",
+              border: "1px solid #2a2a2a",
+              opacity: isStreaming ? 0.4 : 1,
+            }}
+            onMouseEnter={(e) => {
+              if (!isStreaming && messages.length > 0) {
+                e.currentTarget.style.color = "#f87171";
+                e.currentTarget.style.borderColor = "rgba(248,113,113,0.3)";
+                e.currentTarget.style.background = "rgba(248,113,113,0.06)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = messages.length === 0 ? "#3a3a3a" : "#6b7280";
+              e.currentTarget.style.borderColor = "#2a2a2a";
+              e.currentTarget.style.background = "transparent";
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" />
+            </svg>
+            Clear Chat
+          </button>
+
+          {/* Delete pages */}
+          {onDeletePages && (
+            <button
+              onClick={onDeletePages}
+              disabled={isStreaming}
+              title="Delete all pages"
+              className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded transition-all duration-150"
+              style={{
+                background: "transparent",
+                color: "#6b7280",
+                border: "1px solid #2a2a2a",
+                opacity: isStreaming ? 0.4 : 1,
+              }}
+              onMouseEnter={(e) => {
+                if (!isStreaming) {
+                  e.currentTarget.style.color = "#f87171";
+                  e.currentTarget.style.borderColor = "rgba(248,113,113,0.3)";
+                  e.currentTarget.style.background = "rgba(248,113,113,0.06)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#6b7280";
+                e.currentTarget.style.borderColor = "#2a2a2a";
+                e.currentTarget.style.background = "transparent";
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18" /><line x1="9" y1="14" x2="15" y2="14" />
+              </svg>
+              Delete Pages
+            </button>
+          )}
+
           {!hideNewChat && (
           <button
             onClick={onClear}
-            className="text-xs px-3 py-1.5 transition-all duration-150"
+            className="text-xs px-3 py-1.5 rounded transition-all duration-150"
             style={{ background: "#1a1a1a", color: "#9ca3af", border: "1px solid #2a2a2a" }}
             onMouseEnter={(e) => {
               e.currentTarget.style.color = "#e5e5e5";

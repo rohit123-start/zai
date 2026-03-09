@@ -5,13 +5,19 @@ import {
   getMessages,
   saveMessage,
   saveArtifacts,
-  updateChatSessionTitle,
   getDesignGuideline,
-  DesignGuideline,
+  deleteMessages,
+  upsertProjectPage,
+  deleteProjectPages,
+  upsertProjectFile,
+  deleteProjectFiles,
+  type ProjectPage,
+  type ProjectFile,
 } from "@/lib/db";
+import { parseFilesFromText, isMultiFileResponse } from "@/utils/parseFiles";
 import { parseArtifactsFromMessages } from "@/utils/parseArtifacts";
 
-// ─── DG helpers (call internal API routes) ───────────────────────────────────
+// ─── DG helpers ───────────────────────────────────────────────────────────────
 
 function hasCodeBlock(text: string): boolean {
   return /```\w+/.test(text);
@@ -36,7 +42,6 @@ async function callDgExtract(
   }
 }
 
-
 async function callDgSync(
   artifactHtml: string,
   currentDg: string,
@@ -57,6 +62,8 @@ async function callDgSync(
   }
 }
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 export type Role = "user" | "assistant";
 
 export type ImageAttachment = {
@@ -73,10 +80,10 @@ export type Message = {
 };
 
 export type PersistConfig = {
-  sessionId: string;
   projectId: string;
   userId: string;
-  onTitleUpdate?: (title: string) => void;
+  onPagesUpdate?: (pages: ProjectPage[]) => void;
+  onFilesUpdate?: (files: ProjectFile[]) => void;
 };
 
 function generateId(): string {
@@ -97,6 +104,8 @@ function buildContent(
   ];
 }
 
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+
 export function useChat(persist?: PersistConfig) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -105,14 +114,13 @@ export function useChat(persist?: PersistConfig) {
   const persistRef = useRef(persist);
   persistRef.current = persist;
 
-  // Project-level design guideline — one structured JSON string per project
   const [projectDG, setProjectDG] = useState<string | null>(null);
   const projectDGRef = useRef<string | null>(null);
   projectDGRef.current = projectDG;
 
-  // Load persisted messages + project DG when session changes
+  // Load messages + DG for this project
   useEffect(() => {
-    if (!persist?.sessionId) {
+    if (!persist?.projectId) {
       setMessages([]);
       setIsLoading(false);
       return;
@@ -121,10 +129,10 @@ export function useChat(persist?: PersistConfig) {
     setMessages([]);
 
     Promise.all([
-      getMessages(persist.sessionId).then((rows) =>
+      getMessages(persist.projectId).then((rows) =>
         rows.map((r) => ({ id: r.id, role: r.role as Role, content: r.content }))
       ),
-      persist.projectId ? getDesignGuideline(persist.projectId) : Promise.resolve(null),
+      getDesignGuideline(persist.projectId),
     ])
       .then(([msgs, dg]) => {
         setMessages(msgs);
@@ -133,7 +141,7 @@ export function useChat(persist?: PersistConfig) {
       .catch(console.error)
       .finally(() => setIsLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [persist?.sessionId]);
+  }, [persist?.projectId]);
 
   const stopStreaming = useCallback(() => {
     abortControllerRef.current?.abort();
@@ -156,25 +164,15 @@ export function useChat(persist?: PersistConfig) {
       setMessages(updatedMessages);
       setIsStreaming(true);
 
-      // Persist user message (fire-and-forget) + auto-title on first message
+      // Persist user message (fire-and-forget)
       if (p) {
         saveMessage(
-          p.sessionId,
           p.projectId,
           p.userId,
           "user",
           userInput.trim(),
           images?.map((i) => i.mimeType)
         ).catch(console.error);
-
-        if (messages.length === 0) {
-          const title =
-            userInput.trim().slice(0, 50) +
-            (userInput.trim().length > 50 ? "…" : "");
-          updateChatSessionTitle(p.sessionId, title)
-            .then(() => p.onTitleUpdate?.(title))
-            .catch(console.error);
-        }
       }
 
       const assistantId = generateId();
@@ -183,10 +181,7 @@ export function useChat(persist?: PersistConfig) {
         { id: assistantId, role: "assistant", content: "" },
       ]);
 
-      // Track final content for persistence
       const finalContentRef = { current: "" };
-
-      // Always pass the project DG to Sonnet if one exists
       const dgContext: string | null = projectDGRef.current ?? null;
 
       try {
@@ -206,9 +201,7 @@ export function useChat(persist?: PersistConfig) {
           signal: controller.signal,
         });
 
-        if (!response.ok || !response.body) {
-          throw new Error("Failed to connect to API");
-        }
+        if (!response.ok || !response.body) throw new Error("Failed to connect to API");
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -226,9 +219,7 @@ export function useChat(persist?: PersistConfig) {
             for (const line of part.split("\n")) {
               if (!line.startsWith("data: ")) continue;
               const raw = line.slice(6).trim();
-              if (raw === "[DONE]") {
-                break outer; // fall through to persistence block below
-              }
+              if (raw === "[DONE]") break outer;
               try {
                 const parsed = JSON.parse(raw);
                 if (parsed.text) {
@@ -248,11 +239,10 @@ export function useChat(persist?: PersistConfig) {
           }
         }
 
-        // Persist assistant message + artifacts after streaming completes
+        // Persist assistant message + artifacts + pages + DG sync
         if (p && finalContentRef.current) {
           try {
             const dbMsg = await saveMessage(
-              p.sessionId,
               p.projectId,
               p.userId,
               "assistant",
@@ -265,52 +255,74 @@ export function useChat(persist?: PersistConfig) {
 
             if (artifacts.length > 0) {
               await saveArtifacts(
-                artifacts.map(({ title, language, content }) => ({
-                  title,
-                  language,
-                  content,
-                })),
-                p.sessionId,
+                artifacts.map(({ title, language, content }) => ({ title, language, content })),
                 p.projectId,
                 p.userId,
                 dbMsg.id
               );
 
-              // ── DG extract / sync ─────────────────────────────────────────
-              // Prefer HTML artifact; fall back to first artifact
-              const htmlArtifact = artifacts.find((a) => a.language === "html") ?? artifacts[0];
+              // ── Multi-file format (--- FILE: path ---) ────────────────────
+              if (isMultiFileResponse(finalContentRef.current)) {
+                const parsedFiles = parseFilesFromText(finalContentRef.current);
+                const completeFiles = parsedFiles.filter((f) => !f.partial);
+                if (completeFiles.length > 0) {
+                  const upserted: ProjectFile[] = await Promise.all(
+                    completeFiles.map((f) =>
+                      upsertProjectFile(p.projectId, p.userId, f.path, f.content)
+                    )
+                  );
+                  p.onFilesUpdate?.(upserted);
+                }
+              } else {
+                // ── html:PageName or plain html format ─────────────────────
+                const htmlArtifacts = artifacts.filter((a) => a.language === "html");
+                if (htmlArtifacts.length > 0 && p.onPagesUpdate) {
+                  const upserted: ProjectPage[] = await Promise.all(
+                    htmlArtifacts.map((a) =>
+                      upsertProjectPage(
+                        p.projectId,
+                        p.userId,
+                        a.pageName ?? "Home",
+                        a.content
+                      )
+                    )
+                  );
+                  p.onPagesUpdate(upserted);
+                } else if (htmlArtifacts.length > 0) {
+                  htmlArtifacts.forEach((a) =>
+                    upsertProjectPage(
+                      p.projectId,
+                      p.userId,
+                      a.pageName ?? "Home",
+                      a.content
+                    ).catch(console.error)
+                  );
+                }
+              }
+
+              const htmlArtifact =
+                artifacts.find((a) => a.language === "html") ?? artifacts[0];
               const currentDG = projectDGRef.current;
 
               if (!currentDG) {
-                // First artifact in this project — extract fresh structured DG
                 const dg = await callDgExtract(htmlArtifact.content, p.projectId, p.userId);
                 if (dg) setProjectDG(dg);
               } else {
-                // Existing DG — sync only if design meaningfully changed
                 const updated = await callDgSync(
-                  htmlArtifact.content,
-                  currentDG,
-                  p.projectId,
-                  p.userId
+                  htmlArtifact.content, currentDG, p.projectId, p.userId
                 );
                 if (updated) setProjectDG(updated);
               }
             }
           } catch (err) {
-            console.error("[useChat] Failed to persist assistant message:", err);
+            console.error("[useChat] persist failed:", err);
           }
         }
       } catch (err) {
         if (err instanceof Error && err.name === "AbortError") {
-          // User stopped — keep whatever was streamed; persist partial
           if (p && finalContentRef.current) {
-            saveMessage(
-              p.sessionId,
-              p.projectId,
-              p.userId,
-              "assistant",
-              finalContentRef.current
-            ).catch(console.error);
+            saveMessage(p.projectId, p.userId, "assistant", finalContentRef.current)
+              .catch(console.error);
           }
         } else {
           setMessages((prev) =>
@@ -328,9 +340,28 @@ export function useChat(persist?: PersistConfig) {
     [messages, isStreaming]
   );
 
+  // Clears chat messages from memory and DB
   const clearMessages = useCallback(() => {
     setMessages([]);
+    setProjectDG(null);
+    const p = persistRef.current;
+    if (p) deleteMessages(p.projectId).catch(console.error);
   }, []);
 
-  return { messages, isStreaming, isLoading, sendMessage, stopStreaming, clearMessages };
+  // Deletes all project pages + files from DB and notifies parent
+  const deletePages = useCallback(() => {
+    const p = persistRef.current;
+    if (!p) return;
+    Promise.all([
+      deleteProjectPages(p.projectId),
+      deleteProjectFiles(p.projectId),
+    ])
+      .then(() => {
+        p.onPagesUpdate?.([]);
+        p.onFilesUpdate?.([]);
+      })
+      .catch(console.error);
+  }, []);
+
+  return { messages, isStreaming, isLoading, sendMessage, stopStreaming, clearMessages, deletePages };
 }

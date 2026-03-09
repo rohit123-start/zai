@@ -75,7 +75,6 @@ ${artifactHtml}
         {
           project_id: projectId,
           user_id: userId,
-          full_dg: "",
           compressed_dg: dgStr,
           updated_at: new Date().toISOString(),
         },

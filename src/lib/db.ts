@@ -6,7 +6,7 @@ export type DesignGuideline = {
   id: string;
   project_id: string;
   user_id: string;
-  dg: string;          // structured JSON design guideline (stored in compressed_dg column)
+  dg: string;
   created_at: string;
   updated_at: string;
 };
@@ -20,18 +20,8 @@ export type Project = {
   updated_at: string;
 };
 
-export type ChatSession = {
-  id: string;
-  project_id: string;
-  user_id: string;
-  title: string;
-  created_at: string;
-  updated_at: string;
-};
-
 export type DBMessage = {
   id: string;
-  session_id: string;
   project_id: string;
   user_id: string;
   role: "user" | "assistant";
@@ -42,7 +32,6 @@ export type DBMessage = {
 
 export type DBArtifact = {
   id: string;
-  session_id: string;
   project_id: string;
   user_id: string;
   message_id: string | null;
@@ -99,70 +88,29 @@ export async function deleteProject(projectId: string): Promise<void> {
   if (error) throw error;
 }
 
-// ─── Chat Sessions ────────────────────────────────────────────────────────────
+// ─── Messages (per project) ───────────────────────────────────────────────────
 
-export async function getChatSessions(projectId: string): Promise<ChatSession[]> {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("chat_sessions")
-    .select("*")
-    .eq("project_id", projectId)
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return data ?? [];
-}
-
-export async function createChatSession(
-  projectId: string,
-  userId: string,
-  title = "New Chat"
-): Promise<ChatSession> {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("chat_sessions")
-    .insert({ project_id: projectId, user_id: userId, title })
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
-}
-
-export async function updateChatSessionTitle(
-  sessionId: string,
-  title: string
-): Promise<void> {
+export async function deleteMessages(projectId: string): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase
-    .from("chat_sessions")
-    .update({ title, updated_at: new Date().toISOString() })
-    .eq("id", sessionId);
-  if (error) throw error;
-}
-
-export async function deleteChatSession(sessionId: string): Promise<void> {
-  const supabase = createClient();
-  const { error } = await supabase
-    .from("chat_sessions")
+    .from("messages")
     .delete()
-    .eq("id", sessionId);
+    .eq("project_id", projectId);
   if (error) throw error;
 }
 
-// ─── Messages ─────────────────────────────────────────────────────────────────
-
-export async function getMessages(sessionId: string): Promise<DBMessage[]> {
+export async function getMessages(projectId: string): Promise<DBMessage[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("messages")
     .select("*")
-    .eq("session_id", sessionId)
+    .eq("project_id", projectId)
     .order("created_at", { ascending: true });
   if (error) throw error;
   return data ?? [];
 }
 
 export async function saveMessage(
-  sessionId: string,
   projectId: string,
   userId: string,
   role: "user" | "assistant",
@@ -173,7 +121,6 @@ export async function saveMessage(
   const { data, error } = await supabase
     .from("messages")
     .insert({
-      session_id: sessionId,
       project_id: projectId,
       user_id: userId,
       role,
@@ -186,11 +133,10 @@ export async function saveMessage(
   return data;
 }
 
-// ─── Artifacts ────────────────────────────────────────────────────────────────
+// ─── Artifacts (per project) ──────────────────────────────────────────────────
 
 export async function saveArtifacts(
   artifacts: Array<{ title: string; language: string; content: string }>,
-  sessionId: string,
   projectId: string,
   userId: string,
   messageId: string
@@ -199,7 +145,6 @@ export async function saveArtifacts(
   const supabase = createClient();
   const { error } = await supabase.from("artifacts").insert(
     artifacts.map((a) => ({
-      session_id: sessionId,
       project_id: projectId,
       user_id: userId,
       message_id: messageId,
@@ -211,15 +156,129 @@ export async function saveArtifacts(
   if (error) throw error;
 }
 
-export async function getArtifacts(sessionId: string): Promise<DBArtifact[]> {
+export async function getArtifacts(projectId: string): Promise<DBArtifact[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("artifacts")
     .select("*")
-    .eq("session_id", sessionId)
+    .eq("project_id", projectId)
     .order("created_at", { ascending: true });
   if (error) throw error;
   return data ?? [];
+}
+
+// ─── Project Pages (multi-page preview, one per page per project) ────────────
+
+export type ProjectPage = {
+  id: string;
+  project_id: string;
+  user_id: string;
+  page_name: string;
+  html_content: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export async function getProjectPages(projectId: string): Promise<ProjectPage[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("project_pages")
+    .select("*")
+    .eq("project_id", projectId)
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function deleteProjectPages(projectId: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("project_pages")
+    .delete()
+    .eq("project_id", projectId);
+  if (error) throw error;
+}
+
+export async function upsertProjectPage(
+  projectId: string,
+  userId: string,
+  pageName: string,
+  htmlContent: string
+): Promise<ProjectPage> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("project_pages")
+    .upsert(
+      {
+        project_id: projectId,
+        user_id: userId,
+        page_name: pageName,
+        html_content: htmlContent,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "project_id,page_name" }
+    )
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+// ─── Project Files (file-based multi-page system) ────────────────────────────
+
+export type ProjectFile = {
+  id: string;
+  project_id: string;
+  user_id: string;
+  file_path: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export async function getProjectFiles(projectId: string): Promise<ProjectFile[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("project_files")
+    .select("*")
+    .eq("project_id", projectId)
+    .order("file_path", { ascending: true });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function upsertProjectFile(
+  projectId: string,
+  userId: string,
+  filePath: string,
+  content: string
+): Promise<ProjectFile> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("project_files")
+    .upsert(
+      {
+        project_id: projectId,
+        user_id: userId,
+        file_path: filePath,
+        content,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "project_id,file_path" }
+    )
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteProjectFiles(projectId: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("project_files")
+    .delete()
+    .eq("project_id", projectId);
+  if (error) throw error;
 }
 
 // ─── Design Guidelines (one per project) ─────────────────────────────────────
