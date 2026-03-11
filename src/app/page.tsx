@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import type { User } from "@supabase/supabase-js";
 import { useAuth } from "@/components/AuthProvider";
 import { getProjects, createProject, deleteProject, Project } from "@/lib/db";
+import { createClient } from "@/lib/supabase/client";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -11,6 +13,108 @@ function formatDate(iso: string) {
     day: "numeric",
     year: "numeric",
   });
+}
+
+function ProfileMenu({
+  user,
+  isAdmin,
+  onAdmin,
+  onSignOut,
+}: {
+  user: User;
+  isAdmin: boolean;
+  onAdmin: () => void;
+  onSignOut: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const displayName = user.user_metadata?.full_name ?? user.email ?? "User";
+  const initial = displayName[0].toUpperCase();
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 rounded-xl px-2 py-1.5 transition-colors"
+        style={{ border: "1px solid transparent" }}
+        onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#2a2a2a")}
+        onMouseLeave={(e) => { if (!open) e.currentTarget.style.borderColor = "transparent"; }}
+      >
+        {user.user_metadata?.avatar_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={user.user_metadata.avatar_url}
+            alt="Avatar"
+            className="w-7 h-7 rounded-full object-cover"
+            style={{ border: "1px solid #2a2a2a" }}
+          />
+        ) : (
+          <div
+            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+            style={{ background: "#2a2a2a", color: "#e5e5e5" }}
+          >
+            {initial}
+          </div>
+        )}
+        {/* chevron */}
+        <svg
+          width="12" height="12" viewBox="0 0 12 12" fill="none"
+          style={{ color: "#6b7280", transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 150ms" }}
+        >
+          <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+
+      {open && (
+        <>
+          {/* backdrop */}
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          {/* dropdown */}
+          <div
+            className="absolute right-0 mt-2 z-20 rounded-xl py-1 min-w-48"
+            style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
+          >
+            {/* user info */}
+            <div className="px-4 py-3" style={{ borderBottom: "1px solid #2a2a2a" }}>
+              <p className="text-sm font-medium truncate" style={{ color: "#e5e5e5" }}>{displayName}</p>
+              {user.user_metadata?.full_name && (
+                <p className="text-xs mt-0.5 truncate" style={{ color: "#6b7280" }}>{user.email}</p>
+              )}
+            </div>
+
+            {/* admin link */}
+            {isAdmin && (
+              <button
+                onClick={() => { setOpen(false); onAdmin(); }}
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors text-left"
+                style={{ color: "#d97706" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#1f1a10")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                </svg>
+                Admin Dashboard
+              </button>
+            )}
+
+            {/* sign out */}
+            <button
+              onClick={() => { setOpen(false); onSignOut(); }}
+              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors text-left"
+              style={{ color: "#6b7280" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#1f1010"; e.currentTarget.style.color = "#f87171"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#6b7280"; }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              Sign out
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 function CreateProjectModal({
@@ -233,6 +337,7 @@ export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const loadProjects = useCallback(async () => {
     if (!user) return;
@@ -249,6 +354,23 @@ export default function Home() {
   useEffect(() => {
     loadProjects();
   }, [loadProjects]);
+
+  useEffect(() => {
+    if (!user) return;
+    const supabase = createClient();
+    supabase
+      .from("user_profiles")
+      .select("role")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("[admin check] user_profiles query failed:", error.message);
+          return;
+        }
+        setIsAdmin(data?.role === "admin");
+      });
+  }, [user]);
 
   const handleCreate = async (name: string, description: string) => {
     if (!user) return;
@@ -288,36 +410,12 @@ export default function Home() {
         </div>
 
         {user && (
-          <div className="flex items-center gap-3">
-            <span className="text-xs" style={{ color: "#6b7280" }}>
-              {user.user_metadata?.full_name ?? user.email}
-            </span>
-            {user.user_metadata?.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={user.user_metadata.avatar_url}
-                alt="Avatar"
-                className="w-7 h-7 rounded-full object-cover"
-                style={{ border: "1px solid #2a2a2a" }}
-              />
-            ) : (
-              <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-                style={{ background: "#2a2a2a", color: "#e5e5e5" }}
-              >
-                {(user.user_metadata?.full_name ?? user.email ?? "U")[0].toUpperCase()}
-              </div>
-            )}
-            <button
-              onClick={signOut}
-              className="text-xs px-3 py-1.5 rounded-lg transition-all"
-              style={{ background: "#1a1a1a", color: "#6b7280", border: "1px solid #2a2a2a" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#f87171")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-            >
-              Sign out
-            </button>
-          </div>
+          <ProfileMenu
+            user={user}
+            isAdmin={isAdmin}
+            onAdmin={() => router.push("/admin")}
+            onSignOut={signOut}
+          />
         )}
       </header>
 
