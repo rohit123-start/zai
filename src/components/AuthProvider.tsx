@@ -14,6 +14,8 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithOtp: (email: string) => Promise<{ error: string | null }>;
+  verifyOtp: (email: string, token: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 };
 
@@ -48,12 +50,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, [supabase]);
 
+  const signInWithOtp = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: true },
+    });
+    return { error: error?.message ?? null };
+  }, [supabase]);
+
+  const verifyOtp = useCallback(async (email: string, token: string) => {
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "email",
+    });
+    return { error: error?.message ?? null };
+  }, [supabase]);
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
   }, [supabase]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signInWithOtp, verifyOtp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
