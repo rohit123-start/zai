@@ -283,6 +283,82 @@ export async function deleteProjectFiles(projectId: string): Promise<void> {
 
 // ─── Design Guidelines (one per project) ─────────────────────────────────────
 
+// ─── Token Usage ─────────────────────────────────────────────────────────────
+
+export type TokenUsage = {
+  id: string;
+  project_id: string;
+  user_id: string;
+  endpoint: string;
+  model: string;
+  input_tokens: number;
+  output_tokens: number;
+  created_at: string;
+};
+
+export type TokenSummary = {
+  input_tokens: number;
+  output_tokens: number;
+  total_tokens: number;
+  requests: number;
+};
+
+export async function saveTokenUsage(
+  projectId: string,
+  userId: string,
+  endpoint: string,
+  model: string,
+  inputTokens: number,
+  outputTokens: number
+): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase.from("token_usage").insert({
+    project_id: projectId,
+    user_id: userId,
+    endpoint,
+    model,
+    input_tokens: inputTokens,
+    output_tokens: outputTokens,
+  });
+  if (error) console.error("[saveTokenUsage]", error);
+}
+
+export async function getProjectTokenSummary(
+  projectId: string
+): Promise<TokenSummary> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("token_usage")
+    .select("input_tokens, output_tokens")
+    .eq("project_id", projectId);
+  if (error || !data) return { input_tokens: 0, output_tokens: 0, total_tokens: 0, requests: 0 };
+  return {
+    input_tokens:  data.reduce((s, r) => s + r.input_tokens,  0),
+    output_tokens: data.reduce((s, r) => s + r.output_tokens, 0),
+    total_tokens:  data.reduce((s, r) => s + r.input_tokens + r.output_tokens, 0),
+    requests: data.length,
+  };
+}
+
+export async function getUserTokenSummary(
+  userId: string
+): Promise<TokenSummary> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("token_usage")
+    .select("input_tokens, output_tokens")
+    .eq("user_id", userId);
+  if (error || !data) return { input_tokens: 0, output_tokens: 0, total_tokens: 0, requests: 0 };
+  return {
+    input_tokens:  data.reduce((s, r) => s + r.input_tokens,  0),
+    output_tokens: data.reduce((s, r) => s + r.output_tokens, 0),
+    total_tokens:  data.reduce((s, r) => s + r.input_tokens + r.output_tokens, 0),
+    requests: data.length,
+  };
+}
+
+// ─── Design Guidelines (one per project) ─────────────────────────────────────
+
 export async function getDesignGuideline(
   projectId: string
 ): Promise<DesignGuideline | null> {

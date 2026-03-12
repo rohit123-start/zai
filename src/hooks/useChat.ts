@@ -82,9 +82,56 @@ export type Message = {
 export type PersistConfig = {
   projectId: string;
   userId: string;
+  pages?: ProjectPage[];
+  files?: ProjectFile[];
   onPagesUpdate?: (pages: ProjectPage[]) => void;
   onFilesUpdate?: (files: ProjectFile[]) => void;
 };
+
+// ─── Context compression ──────────────────────────────────────────────────────
+
+// Produces a compact summary of an assistant message that contained code.
+// Full HTML is stripped; only intent + metadata kept.
+function summariseAssistantMessage(content: string): string {
+  // Extract any explanatory prose (non-code lines)
+  const prose = content
+    .replace(/```[\s\S]*?```/g, "")         // remove fenced blocks
+    .replace(/---\s*FILE:[\s\S]*$/m, "")    // remove --- FILE: blocks
+    .trim();
+
+  // Count artifacts / files
+  const fenceMatches = [...content.matchAll(/```(\w+)(?::([^\n`]+))?/g)];
+  const fileMatches  = [...content.matchAll(/---\s*FILE:\s*([^\n-]+)/g)];
+
+  const parts: string[] = [];
+
+  if (prose) parts.push(prose.slice(0, 200) + (prose.length > 200 ? "…" : ""));
+
+  if (fileMatches.length > 0) {
+    const names = fileMatches.map((m) => m[1].trim());
+    parts.push(`[Generated files: ${names.join(", ")}]`);
+  } else if (fenceMatches.length > 0) {
+    const names = fenceMatches.map((m) =>
+      m[2] ? `${m[2]}.html` : m[1]
+    );
+    parts.push(`[Generated: ${names.join(", ")}]`);
+  }
+
+  return parts.join("\n") || "[Code output]";
+}
+
+// Compresses the messages array before sending to the API:
+// - Assistant messages containing code → summary only
+// - All other messages → unchanged
+type ApiMessage = { role: string; content: ReturnType<typeof buildContent> };
+function compressForAPI(messages: Message[]): ApiMessage[] {
+  return messages.map((m) => {
+    if (m.role === "assistant" && hasCodeBlock(m.content)) {
+      return { role: "assistant", content: summariseAssistantMessage(m.content) };
+    }
+    return { role: m.role, content: buildContent(m.content, m.images) };
+  });
+}
 
 function generateId(): string {
   return Math.random().toString(36).slice(2, 10);
@@ -106,10 +153,17 @@ function buildContent(
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
+export type TokenUsageSnapshot = {
+  input: number;
+  output: number;
+  total: number;
+};
+
 export function useChat(persist?: PersistConfig) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [isLoading, setIsLoading] = useState(!!persist);
+  const [lastUsage, setLastUsage] = useState<TokenUsageSnapshot | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const persistRef = useRef(persist);
   persistRef.current = persist;
@@ -188,15 +242,38 @@ export function useChat(persist?: PersistConfig) {
         const controller = new AbortController();
         abortControllerRef.current = controller;
 
+        // Keep last 20 messages max; always preserve the first (original brief).
+        const HISTORY_LIMIT = 20;
+        const trimmed =
+          updatedMessages.length > HISTORY_LIMIT
+            ? [updatedMessages[0], ...updatedMessages.slice(-(HISTORY_LIMIT - 1))]
+            : updatedMessages;
+
+        // Compress: replace HTML/code in assistant messages with summaries.
+        // Full code is injected once via currentPages/currentFiles below.
+        const compressed = compressForAPI(trimmed);
+
+        // Current page state from DB — injected into system prompt server-side
+        const p = persistRef.current;
+        const currentPages = (p?.pages ?? []).map((pg) => ({
+          name: pg.page_name,
+          html: pg.html_content,
+        }));
+        const currentFiles = (p?.files ?? []).map((f) => ({
+          path: f.file_path,
+          content: f.content,
+        }));
+
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            messages: updatedMessages.map(({ role, content, images: imgs }) => ({
-              role,
-              content: buildContent(content, imgs),
-            })),
+            messages: compressed,
             dgContext,
+            currentPages: currentPages.length > 0 ? currentPages : undefined,
+            currentFiles: currentFiles.length > 0 ? currentFiles : undefined,
+            projectId: p?.projectId,
+            userId: p?.userId,
           }),
           signal: controller.signal,
         });
@@ -231,6 +308,12 @@ export function useChat(persist?: PersistConfig) {
                         : m
                     )
                   );
+                } else if (parsed.usage) {
+                  setLastUsage({
+                    input: parsed.usage.input,
+                    output: parsed.usage.output,
+                    total: parsed.usage.input + parsed.usage.output,
+                  });
                 }
               } catch {
                 // ignore malformed chunks
@@ -300,18 +383,19 @@ export function useChat(persist?: PersistConfig) {
                 }
               }
 
-              const htmlArtifact =
-                artifacts.find((a) => a.language === "html") ?? artifacts[0];
-              const currentDG = projectDGRef.current;
-
-              if (!currentDG) {
-                const dg = await callDgExtract(htmlArtifact.content, p.projectId, p.userId);
-                if (dg) setProjectDG(dg);
-              } else {
-                const updated = await callDgSync(
-                  htmlArtifact.content, currentDG, p.projectId, p.userId
-                );
-                if (updated) setProjectDG(updated);
+              // Only run DG extract/sync for HTML artifacts with meaningful content (>500 chars)
+              const htmlArtifact = artifacts.find((a) => a.language === "html");
+              if (htmlArtifact && htmlArtifact.content.length > 500) {
+                const currentDG = projectDGRef.current;
+                if (!currentDG) {
+                  const dg = await callDgExtract(htmlArtifact.content, p.projectId, p.userId);
+                  if (dg) setProjectDG(dg);
+                } else {
+                  const updated = await callDgSync(
+                    htmlArtifact.content, currentDG, p.projectId, p.userId
+                  );
+                  if (updated) setProjectDG(updated);
+                }
               }
             }
           } catch (err) {
@@ -363,5 +447,5 @@ export function useChat(persist?: PersistConfig) {
       .catch(console.error);
   }, []);
 
-  return { messages, isStreaming, isLoading, sendMessage, stopStreaming, clearMessages, deletePages };
+  return { messages, isStreaming, isLoading, lastUsage, sendMessage, stopStreaming, clearMessages, deletePages };
 }

@@ -85,6 +85,16 @@ ${artifactHtml}
 
     if (dbErr) throw dbErr;
 
+    // Track token usage (fire-and-forget)
+    supabase.from("token_usage").insert({
+      project_id: projectId,
+      user_id: userId,
+      endpoint: "dg/sync",
+      model: "claude-haiku-4-5",
+      input_tokens: response.usage.input_tokens,
+      output_tokens: response.usage.output_tokens,
+    }).then(({ error }) => { if (error) console.error("[token_usage dg/sync]", error); });
+
     return Response.json({ changed: true, dg: data.compressed_dg });
   } catch (err) {
     console.error("[dg/sync]", err);

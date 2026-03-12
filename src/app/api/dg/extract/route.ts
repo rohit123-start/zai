@@ -147,6 +147,16 @@ export async function POST(request: Request) {
 
     if (dbErr) throw dbErr;
 
+    // Track token usage (fire-and-forget)
+    supabase.from("token_usage").insert({
+      project_id: projectId,
+      user_id: userId,
+      endpoint: "dg/extract",
+      model: "claude-haiku-4-5",
+      input_tokens: response.usage.input_tokens,
+      output_tokens: response.usage.output_tokens,
+    }).then(({ error }) => { if (error) console.error("[token_usage dg/extract]", error); });
+
     return Response.json({ dg: data.compressed_dg });
   } catch (err) {
     console.error("[dg/extract]", err);

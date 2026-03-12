@@ -4,7 +4,7 @@ import { use, useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { getProjectPages, getProjectFiles, type ProjectPage, type ProjectFile } from "@/lib/db";
-import { useChat, PersistConfig } from "@/hooks/useChat";
+import { useChat, PersistConfig, type TokenUsageSnapshot } from "@/hooks/useChat";
 import ChatPanel from "@/components/ChatPanel";
 import ProjectPreview from "@/components/ProjectPreview";
 
@@ -27,7 +27,7 @@ function ChatWorkspace({
   pagesLoading: boolean;
   onBack: () => void;
 }) {
-  const { messages, isStreaming, isLoading, sendMessage, stopStreaming, clearMessages, deletePages } =
+  const { messages, isStreaming, isLoading, lastUsage, sendMessage, stopStreaming, clearMessages, deletePages } =
     useChat(persist);
   const [chatPct, setChatPct] = useState(DEFAULT_CHAT_PCT);
   const [previewFullscreen, setPreviewFullscreen] = useState(false);
@@ -89,6 +89,7 @@ function ChatWorkspace({
         <ChatPanel
           messages={messages}
           isStreaming={isStreaming}
+          lastUsage={lastUsage}
           onSend={sendMessage}
           onStop={stopStreaming}
           onClear={clearMessages}
@@ -195,6 +196,8 @@ export default function ProjectPage({
     ? {
         projectId,
         userId: user.id,
+        pages,
+        files,
         onPagesUpdate: handlePagesUpdate,
         onFilesUpdate: handleFilesUpdate,
       }

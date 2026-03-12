@@ -8,13 +8,14 @@ import {
   useCallback,
   ChangeEvent,
 } from "react";
-import { Message, ImageAttachment } from "@/hooks/useChat";
+import { Message, ImageAttachment, type TokenUsageSnapshot } from "@/hooks/useChat";
 import MessageBubble from "./MessageBubble";
 import { useAuth } from "./AuthProvider";
 
 type Props = {
   messages: Message[];
   isStreaming: boolean;
+  lastUsage?: TokenUsageSnapshot | null;
   onSend: (text: string, images?: ImageAttachment[]) => void;
   onStop: () => void;
   onClear: () => void;
@@ -96,7 +97,7 @@ function fileToImageAttachment(file: File): Promise<ImageAttachment> {
   });
 }
 
-export default function ChatPanel({ messages, isStreaming, onSend, onStop, onClear, onDeletePages, hideNewChat, projectName, onBack }: Props) {
+export default function ChatPanel({ messages, isStreaming, lastUsage, onSend, onStop, onClear, onDeletePages, hideNewChat, projectName, onBack }: Props) {
   const { user, signOut } = useAuth();
   const [input, setInput] = useState("");
   const [pendingImages, setPendingImages] = useState<ImageAttachment[]>([]);
@@ -242,6 +243,18 @@ export default function ChatPanel({ messages, isStreaming, onSend, onStop, onCle
           >
             claude-sonnet-4-6
           </span>
+          {lastUsage && (
+            <span
+              className="text-xs px-2 py-0.5 rounded-full flex items-center gap-1"
+              title={`Last request: ${lastUsage.input.toLocaleString()} input + ${lastUsage.output.toLocaleString()} output tokens`}
+              style={{ background: "#1a1a1a", color: "#6b7280", border: "1px solid #2a2a2a" }}
+            >
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+              {lastUsage.total.toLocaleString()}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-1.5">
