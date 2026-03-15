@@ -13,13 +13,6 @@ type UserProfile = {
   created_at: string;
 };
 
-type Invitation = {
-  id: string;
-  email: string;
-  role: "admin" | "member";
-  access: "read" | "write";
-  created_at: string;
-};
 
 const ROLE_COLORS = {
   admin:  { bg: "#2a1a3a", color: "#c084fc", border: "#5b21b6" },
@@ -57,22 +50,11 @@ export default function AdminPage() {
   const router = useRouter();
 
   const [users, setUsers] = useState<UserProfile[]>([]);
-  const [pendingInvites, setPendingInvites] = useState<Invitation[]>([]);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // invite form
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"admin" | "member">("member");
-  const [inviteAccess, setInviteAccess] = useState<"read" | "write">("read");
-  const [inviting, setInviting] = useState(false);
-  const [inviteMsg, setInviteMsg] = useState<{ ok: boolean; text: string } | null>(null);
-
   // per-row busy state
   const [busyRow, setBusyRow] = useState<string | null>(null);
-
-  // active tab
-  const [tab, setTab] = useState<"users" | "invites">("users");
 
   const fetchData = useCallback(async () => {
     setFetching(true);
@@ -81,7 +63,6 @@ export default function AdminPage() {
     if (res.ok) {
       const json = await res.json();
       setUsers(json.users);
-      setPendingInvites(json.pendingInvites);
     } else {
       const json = await res.json();
       setError(json.error ?? "Failed to load");
@@ -92,27 +73,6 @@ export default function AdminPage() {
   useEffect(() => {
     if (!authLoading) fetchData();
   }, [authLoading, fetchData]);
-
-  async function handleInvite(e: React.FormEvent) {
-    e.preventDefault();
-    if (!inviteEmail.trim()) return;
-    setInviting(true);
-    setInviteMsg(null);
-    const res = await fetch("/api/admin/invite", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: inviteEmail.trim(), role: inviteRole, access: inviteAccess }),
-    });
-    const json = await res.json();
-    if (res.ok) {
-      setInviteMsg({ ok: true, text: `Invite sent to ${inviteEmail}` });
-      setInviteEmail("");
-      fetchData();
-    } else {
-      setInviteMsg({ ok: false, text: json.error ?? "Failed to invite" });
-    }
-    setInviting(false);
-  }
 
   async function updateUser(id: string, patch: { role?: string; access?: string }) {
     setBusyRow(id);
@@ -129,14 +89,6 @@ export default function AdminPage() {
     if (!confirm(`Remove ${email}? This cannot be undone.`)) return;
     setBusyRow(id);
     await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
-    await fetchData();
-    setBusyRow(null);
-  }
-
-  async function cancelInvite(id: string, email: string) {
-    if (!confirm(`Cancel invite for ${email}?`)) return;
-    setBusyRow(id);
-    await fetch(`/api/admin/invitations/${id}`, { method: "DELETE" });
     await fetchData();
     setBusyRow(null);
   }
@@ -206,11 +158,10 @@ export default function AdminPage() {
       <main className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-8">
 
         {/* Stats row */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {[
-            { label: "Total users",     value: users.length },
-            { label: "Pending invites", value: pendingInvites.length },
-            { label: "Your role",       value: myProfile?.role ?? "—" },
+            { label: "Total users", value: users.length },
+            { label: "Your role",   value: myProfile?.role ?? "—" },
           ].map(({ label, value }) => (
             <div
               key={label}
@@ -223,81 +174,12 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {/* Invite form */}
-        <div className="rounded-xl p-6" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
-          <h2 className="text-sm font-semibold mb-4" style={{ color: "#e5e5e5" }}>Invite a user</h2>
-          <form onSubmit={handleInvite} className="flex flex-col gap-3">
-            <div className="flex gap-3">
-              <input
-                type="email"
-                placeholder="user@example.com"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                required
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none"
-                style={{ background: "#111", color: "#e5e5e5", border: "1px solid #2a2a2a" }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = "#d97706")}
-                onBlur={(e) => (e.currentTarget.style.borderColor = "#2a2a2a")}
-              />
-              <select
-                value={inviteRole}
-                onChange={(e) => setInviteRole(e.target.value as "admin" | "member")}
-                className="px-3 py-2.5 rounded-xl text-sm outline-none"
-                style={{ background: "#111", color: "#e5e5e5", border: "1px solid #2a2a2a" }}
-              >
-                <option value="member">Member</option>
-                <option value="admin">Admin</option>
-              </select>
-              <select
-                value={inviteAccess}
-                onChange={(e) => setInviteAccess(e.target.value as "read" | "write")}
-                className="px-3 py-2.5 rounded-xl text-sm outline-none"
-                style={{ background: "#111", color: "#e5e5e5", border: "1px solid #2a2a2a" }}
-              >
-                <option value="read">Read</option>
-                <option value="write">Write</option>
-              </select>
-              <button
-                type="submit"
-                disabled={inviting || !inviteEmail.trim()}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
-                style={{
-                  background: inviting || !inviteEmail.trim() ? "#3a2a10" : "#d97706",
-                  color: inviting || !inviteEmail.trim() ? "#78450a" : "#0f0f0f",
-                  cursor: inviting || !inviteEmail.trim() ? "not-allowed" : "pointer",
-                }}
-              >
-                {inviting && <Spinner />}
-                {inviting ? "Sending…" : "Send invite"}
-              </button>
-            </div>
-            {inviteMsg && (
-              <p
-                className="text-xs"
-                style={{ color: inviteMsg.ok ? "#4ade80" : "#f87171" }}
-              >
-                {inviteMsg.text}
-              </p>
-            )}
-          </form>
-        </div>
-
-        {/* Tabs */}
+        {/* Users section */}
         <div>
-          <div className="flex gap-1 mb-4" style={{ borderBottom: "1px solid #1f1f1f" }}>
-            {(["users", "invites"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className="px-4 py-2 text-sm font-medium capitalize transition-colors"
-                style={{
-                  color: tab === t ? "#d97706" : "#6b7280",
-                  borderBottom: tab === t ? "2px solid #d97706" : "2px solid transparent",
-                }}
-              >
-                {t === "users" ? `Users (${users.length})` : `Pending invites (${pendingInvites.length})`}
-              </button>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold" style={{ color: "#e5e5e5" }}>
+              Users ({users.length})
+            </h2>
           </div>
 
           {error && (
@@ -310,7 +192,7 @@ export default function AdminPage() {
             <div className="flex justify-center py-12" style={{ color: "#4b5563" }}>
               <Spinner />
             </div>
-          ) : tab === "users" ? (
+          ) : (
             /* ── Users table ── */
             <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
               <table className="w-full text-sm">
@@ -407,67 +289,6 @@ export default function AdminPage() {
                     <tr>
                       <td colSpan={5} className="px-4 py-8 text-center text-sm" style={{ color: "#4b5563" }}>
                         No users yet.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            /* ── Pending invites table ── */
-            <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr style={{ background: "#1a1a1a", borderBottom: "1px solid #2a2a2a" }}>
-                    {["Email", "Role", "Access", "Invited", "Actions"].map((h) => (
-                      <th key={h} className="px-4 py-3 text-left font-medium" style={{ color: "#6b7280" }}>
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingInvites.map((inv, i) => {
-                    const busy = busyRow === inv.id;
-                    return (
-                      <tr
-                        key={inv.id}
-                        style={{
-                          background: i % 2 === 0 ? "#111" : "#131313",
-                          borderBottom: "1px solid #1f1f1f",
-                          opacity: busy ? 0.5 : 1,
-                        }}
-                      >
-                        <td className="px-4 py-3" style={{ color: "#e5e5e5" }}>{inv.email}</td>
-                        <td className="px-4 py-3"><Badge type="role" value={inv.role} /></td>
-                        <td className="px-4 py-3"><Badge type="access" value={inv.access} /></td>
-                        <td className="px-4 py-3 text-xs" style={{ color: "#6b7280" }}>
-                          {new Date(inv.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="px-4 py-3">
-                          <button
-                            onClick={() => cancelInvite(inv.id, inv.email)}
-                            disabled={busy}
-                            className="text-xs px-3 py-1.5 rounded-lg transition-colors"
-                            style={{
-                              color: "#f87171",
-                              border: "1px solid #3a2020",
-                              opacity: busy ? 0.3 : 1,
-                              cursor: busy ? "not-allowed" : "pointer",
-                            }}
-                            onMouseEnter={(e) => { if (!busy) e.currentTarget.style.background = "#2a1a1a"; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
-                          >
-                            {busy ? "…" : "Cancel"}
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {pendingInvites.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="px-4 py-8 text-center text-sm" style={{ color: "#4b5563" }}>
-                        No pending invites.
                       </td>
                     </tr>
                   )}

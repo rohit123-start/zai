@@ -4,9 +4,11 @@ import { use, useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { getProjectPages, getProjectFiles, type ProjectPage, type ProjectFile } from "@/lib/db";
+import { createClient } from "@/lib/supabase/client";
 import { useChat, PersistConfig, type TokenUsageSnapshot } from "@/hooks/useChat";
 import ChatPanel from "@/components/ChatPanel";
 import ProjectPreview from "@/components/ProjectPreview";
+import ShareProjectModal from "@/components/ShareProjectModal";
 
 const MIN_CHAT_PCT = 20;
 const MAX_CHAT_PCT = 80;
@@ -32,6 +34,7 @@ function ChatWorkspace({
   const [chatPct, setChatPct] = useState(DEFAULT_CHAT_PCT);
   const [previewFullscreen, setPreviewFullscreen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -59,10 +62,10 @@ function ChatWorkspace({
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center" style={{ background: "#0f0f0f" }}>
+      <div className="flex-1 flex items-center justify-center" style={{ background: "#000" }}>
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: "#d97706 transparent #d97706 transparent" }} />
-          <span className="text-xs" style={{ color: "#6b7280" }}>Loading…</span>
+          <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: "#06b6d4 transparent #06b6d4 transparent" }} />
+          <span className="text-xs" style={{ color: "#71717a", fontFamily: "var(--font-dm-mono)" }}>Loading…</span>
         </div>
       </div>
     );
@@ -97,6 +100,7 @@ function ChatWorkspace({
           hideNewChat
           projectName={projectName}
           onBack={onBack}
+          onShare={() => setShowShare(true)}
         />
       </div>
 
@@ -106,14 +110,14 @@ function ChatWorkspace({
           onMouseDown={handleMouseDown}
           className="flex items-center justify-center h-full shrink-0"
           style={{
-            width: "5px",
+            width: "4px",
             cursor: "col-resize",
-            background: isDragging ? "#d97706" : "#2a2a2a",
+            background: isDragging ? "#06b6d4" : "rgba(255,255,255,0.06)",
             transition: "background 0.15s",
             zIndex: 10,
           }}
-          onMouseEnter={(e) => { if (!isDragging) e.currentTarget.style.background = "#3a3a3a"; }}
-          onMouseLeave={(e) => { if (!isDragging) e.currentTarget.style.background = "#2a2a2a"; }}
+          onMouseEnter={(e) => { if (!isDragging) e.currentTarget.style.background = "rgba(6,182,212,0.3)"; }}
+          onMouseLeave={(e) => { if (!isDragging) e.currentTarget.style.background = "rgba(255,255,255,0.06)"; }}
         />
       )}
 
@@ -135,6 +139,14 @@ function ChatWorkspace({
           onToggleFullscreen={() => setPreviewFullscreen((v) => !v)}
         />
       </div>
+
+      {showShare && (
+        <ShareProjectModal
+          projectId={persist.projectId}
+          projectName={projectName}
+          onClose={() => setShowShare(false)}
+        />
+      )}
     </div>
   );
 }
@@ -155,10 +167,31 @@ export default function ProjectPage({
   const [files, setFiles] = useState<ProjectFile[]>([]);
   const [pagesLoading, setPagesLoading] = useState(false);
 
+  // Load project name — try sessionStorage first, then DB (needed for collaborators)
   useEffect(() => {
     const cached = sessionStorage.getItem(`project_name_${projectId}`);
-    if (cached) setProjectName(cached);
-  }, [projectId]);
+    if (cached) {
+      setProjectName(cached);
+      return;
+    }
+    if (!user) return;
+    const supabase = createClient();
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("projects")
+          .select("name")
+          .eq("id", projectId)
+          .single();
+        if (data?.name) {
+          setProjectName(data.name);
+          sessionStorage.setItem(`project_name_${projectId}`, data.name);
+        }
+      } catch {
+        // non-critical — project name falls back to "Project"
+      }
+    })();
+  }, [projectId, user]);
 
   // Load existing pages + files from DB when user is ready
   useEffect(() => {
@@ -204,7 +237,7 @@ export default function ProjectPage({
     : undefined;
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "#0f0f0f" }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: "#000" }}>
       {persistConfig ? (
         <ChatWorkspace
           persist={persistConfig}
@@ -218,7 +251,7 @@ export default function ProjectPage({
         <div className="flex-1 flex items-center justify-center">
           <div
             className="w-8 h-8 rounded-full border-2 animate-spin"
-            style={{ borderColor: "#d97706 transparent #d97706 transparent" }}
+            style={{ borderColor: "#06b6d4 transparent #06b6d4 transparent" }}
           />
         </div>
       )}

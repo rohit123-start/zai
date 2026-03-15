@@ -1,13 +1,34 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0f0f0f;
-  --color-panel: #1a1a1a;
-  --color-border: #2a2a2a;
-  --color-text: #e5e5e5;
-  --color-accent: #d97706;
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --color-background: #000000;
+  --color-surface: #0a0a0a;
+  --color-surface2: #111111;
+  --color-border: rgba(255,255,255,0.07);
+  --color-border-bright: rgba(255,255,255,0.12);
+  --color-text: #ffffff;
+  --color-text-muted: #71717a;
+  --color-text-dim: #3f3f46;
+  --color-accent: #06b6d4;
+  --color-accent-dim: rgba(6,182,212,0.1);
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-dm-mono), ui-monospace, monospace;
+}
+
+:root {
+  --bg: #000000;
+  --s1: #0a0a0a;
+  --s2: #111111;
+  --s3: #161616;
+  --b: rgba(255,255,255,0.06);
+  --bb: rgba(255,255,255,0.1);
+  --a: #06b6d4;
+  --ad: rgba(6,182,212,0.1);
+  --ag: rgba(6,182,212,0.2);
+  --t: #ffffff;
+  --tm: #71717a;
+  --td: #3f3f46;
 }
 
 * {
@@ -17,9 +38,10 @@
 html,
 body {
   height: 100%;
-  background-color: #0f0f0f;
-  color: #e5e5e5;
+  background-color: #000;
+  color: #fff;
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ─── Scrollbars ─────────────────────────────────────────────────────────────*/
@@ -48,10 +70,10 @@ body {
   to   { opacity: 1; }
 }
 
-/* Zai logo idle pulse */
+/* Logo idle pulse */
 @keyframes zaiPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(217,119,6,0.5); }
-  50%       { box-shadow: 0 0 0 6px rgba(217,119,6,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(6,182,212,0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(6,182,212,0); }
 }
 
 /* Typing dots */
@@ -96,7 +118,7 @@ body {
   content: "▋";
   display: inline-block;
   margin-left: 1px;
-  color: #d97706;
+  color: #06b6d4;
   animation: cursorBlink 0.9s step-end infinite;
   font-size: 0.85em;
   vertical-align: baseline;
@@ -110,10 +132,11 @@ body {
 .typing-dot:nth-child(3) { animation-delay: 0.30s; }
 
 /* ─── Prose / Markdown ───────────────────────────────────────────────────────*/
-.prose-dark { color: #e5e5e5; }
+.prose-dark { color: rgba(255,255,255,0.8); }
 .prose-dark p  { margin: 0.5em 0; line-height: 1.6; }
 .prose-dark h1, .prose-dark h2, .prose-dark h3, .prose-dark h4 {
-  color: #f5f5f5; font-weight: 600; margin: 1em 0 0.5em;
+  color: #fff; font-weight: 600; margin: 1em 0 0.5em;
+  font-family: var(--font-display);
 }
 .prose-dark h1 { font-size: 1.5em; }
 .prose-dark h2 { font-size: 1.25em; }
@@ -121,20 +144,27 @@ body {
 .prose-dark ul, .prose-dark ol { padding-left: 1.5em; margin: 0.5em 0; }
 .prose-dark li { margin: 0.25em 0; }
 .prose-dark code {
-  background: #2a2a2a; padding: 0.15em 0.4em; border-radius: 3px;
-  font-family: var(--font-mono); font-size: 0.875em; color: #e5b45a;
+  background: rgba(6,182,212,0.08); padding: 0.15em 0.4em; border-radius: 3px;
+  font-family: var(--font-mono); font-size: 0.875em; color: #22d3ee;
+  border: 1px solid rgba(6,182,212,0.15);
 }
 .prose-dark pre {
-  background: #111; border: 1px solid #2a2a2a; border-radius: 6px;
+  background: #0a0a0a; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
   padding: 1em; overflow-x: auto; margin: 0.75em 0;
 }
-.prose-dark pre code { background: none; padding: 0; color: #e5e5e5; font-size: 0.85em; }
-.prose-dark a  { color: #d97706; text-decoration: underline; }
+.prose-dark pre code { background: none; padding: 0; color: rgba(255,255,255,0.7); font-size: 0.85em; border: none; }
+.prose-dark a  { color: #06b6d4; text-decoration: underline; }
 .prose-dark blockquote {
-  border-left: 3px solid #2a2a2a; padding-left: 1em;
-  color: #9ca3af; margin: 0.75em 0;
+  border-left: 3px solid rgba(6,182,212,0.3); padding-left: 1em;
+  color: #71717a; margin: 0.75em 0;
 }
 .prose-dark table { width: 100%; border-collapse: collapse; margin: 0.75em 0; font-size: 0.9em; }
-.prose-dark th, .prose-dark td { border: 1px solid #2a2a2a; padding: 0.5em 0.75em; }
-.prose-dark th  { background: #1f1f1f; font-weight: 600; }
-.prose-dark hr  { border: none; border-top: 1px solid #2a2a2a; margin: 1em 0; }
+.prose-dark th, .prose-dark td { border: 1px solid rgba(255,255,255,0.08); padding: 0.5em 0.75em; }
+.prose-dark th  { background: #0a0a0a; font-weight: 600; }
+.prose-dark hr  { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 1em 0; }
+
+/* ─── Dot grid pattern ─── */
+.dot-grid {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 28px 28px;
+}

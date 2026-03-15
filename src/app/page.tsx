@@ -4,222 +4,75 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { useAuth } from "@/components/AuthProvider";
-import { getProjects, createProject, deleteProject, Project } from "@/lib/db";
-import { createClient } from "@/lib/supabase/client";
+import { getProjects, deleteProject, Project } from "@/lib/db";
+import ShareProjectModal from "@/components/ShareProjectModal";
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+function formatTimeAgo(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-function ProfileMenu({
-  user,
-  isAdmin,
-  onAdmin,
-  onSignOut,
-}: {
-  user: User;
-  isAdmin: boolean;
-  onAdmin: () => void;
-  onSignOut: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const displayName = user.user_metadata?.full_name ?? user.email ?? "User";
+const ACCENT_COLORS = [
+  "#06b6d4", "#10b981", "#8b5cf6", "#f59e0b", "#ec4899", "#ef4444", "#22d3ee",
+];
+
+function getAccentForProject(id: string) {
+  let hash = 0;
+  for (const ch of id) hash = ((hash << 5) - hash) + ch.charCodeAt(0);
+  return ACCENT_COLORS[Math.abs(hash) % ACCENT_COLORS.length];
+}
+
+function ProfileDropdown({ user, onSignOut, onClose }: { user: User; onSignOut: () => void; onClose: () => void }) {
+  const displayName = user.user_metadata?.full_name ?? user.email?.split("@")[0] ?? "User";
   const initial = displayName[0].toUpperCase();
 
   return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-xl px-2 py-1.5 transition-colors"
-        style={{ border: "1px solid transparent" }}
-        onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#2a2a2a")}
-        onMouseLeave={(e) => { if (!open) e.currentTarget.style.borderColor = "transparent"; }}
+    <>
+      <div className="fixed inset-0 z-40" onClick={onClose} />
+      <div
+        className="fixed z-50 rounded-xl py-1.5"
+        style={{
+          top: 62, right: 16,
+          background: "#0f0f0f",
+          border: "1px solid rgba(255,255,255,0.1)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.7)",
+          minWidth: 200,
+        }}
       >
-        {user.user_metadata?.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={user.user_metadata.avatar_url}
-            alt="Avatar"
-            className="w-7 h-7 rounded-full object-cover"
-            style={{ border: "1px solid #2a2a2a" }}
-          />
-        ) : (
-          <div
-            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-            style={{ background: "#2a2a2a", color: "#e5e5e5" }}
-          >
+        {/* user info */}
+        <div className="flex items-center gap-2.5 px-3 py-2.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0"
+            style={{ background: "linear-gradient(135deg,#06b6d4,#0891b2)", color: "#000" }}>
             {initial}
           </div>
-        )}
-        {/* chevron */}
-        <svg
-          width="12" height="12" viewBox="0 0 12 12" fill="none"
-          style={{ color: "#6b7280", transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 150ms" }}
-        >
-          <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-
-      {open && (
-        <>
-          {/* backdrop */}
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          {/* dropdown */}
-          <div
-            className="absolute right-0 mt-2 z-20 rounded-xl py-1 min-w-48"
-            style={{ background: "#1a1a1a", border: "1px solid #2a2a2a", boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}
+          <div className="min-w-0">
+            <p className="text-sm font-semibold truncate" style={{ color: "#fff", fontFamily: "var(--font-space-grotesk)" }}>{displayName}</p>
+            <p className="text-xs truncate" style={{ color: "#3f3f46" }}>{user.email}</p>
+          </div>
+        </div>
+        <div style={{ padding: "4px" }}>
+          <button
+            onClick={() => { onClose(); onSignOut(); }}
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg transition-colors text-left"
+            style={{ color: "rgba(239,68,68,0.7)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; e.currentTarget.style.color = "#ef4444"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "rgba(239,68,68,0.7)"; }}
           >
-            {/* user info */}
-            <div className="px-4 py-3" style={{ borderBottom: "1px solid #2a2a2a" }}>
-              <p className="text-sm font-medium truncate" style={{ color: "#e5e5e5" }}>{displayName}</p>
-              {user.user_metadata?.full_name && (
-                <p className="text-xs mt-0.5 truncate" style={{ color: "#6b7280" }}>{user.email}</p>
-              )}
-            </div>
-
-            {/* admin link */}
-            {isAdmin && (
-              <button
-                onClick={() => { setOpen(false); onAdmin(); }}
-                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors text-left"
-                style={{ color: "#d97706" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#1f1a10")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-                </svg>
-                Admin Dashboard
-              </button>
-            )}
-
-            {/* sign out */}
-            <button
-              onClick={() => { setOpen(false); onSignOut(); }}
-              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors text-left"
-              style={{ color: "#6b7280" }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#1f1010"; e.currentTarget.style.color = "#f87171"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#6b7280"; }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-              </svg>
-              Sign out
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-function CreateProjectModal({
-  onClose,
-  onCreate,
-}: {
-  onClose: () => void;
-  onCreate: (name: string, description: string) => Promise<void>;
-}) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    setLoading(true);
-    setError("");
-    try {
-      await onCreate(name.trim(), description.trim());
-    } catch {
-      setError("Failed to create project. Please try again.");
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "rgba(0,0,0,0.7)" }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div
-        className="w-full max-w-md p-6 rounded-xl"
-        style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
-      >
-        <h2 className="text-lg font-semibold mb-5" style={{ color: "#e5e5e5" }}>
-          New Project
-        </h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-xs mb-1.5" style={{ color: "#9ca3af" }}>
-              Project name *
-            </label>
-            <input
-              autoFocus
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="My awesome project"
-              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
-              style={{
-                background: "#0f0f0f",
-                border: "1px solid #2a2a2a",
-                color: "#e5e5e5",
-              }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "#d97706")}
-              onBlur={(e) => (e.currentTarget.style.borderColor = "#2a2a2a")}
-            />
-          </div>
-          <div>
-            <label className="block text-xs mb-1.5" style={{ color: "#9ca3af" }}>
-              Description (optional)
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="What is this project about?"
-              rows={3}
-              className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none"
-              style={{
-                background: "#0f0f0f",
-                border: "1px solid #2a2a2a",
-                color: "#e5e5e5",
-              }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "#d97706")}
-              onBlur={(e) => (e.currentTarget.style.borderColor = "#2a2a2a")}
-            />
-          </div>
-          {error && <p className="text-xs" style={{ color: "#f87171" }}>{error}</p>}
-          <div className="flex gap-2 justify-end pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm"
-              style={{ background: "#2a2a2a", color: "#9ca3af" }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={!name.trim() || loading}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-opacity"
-              style={{
-                background: "#d97706",
-                color: "#0f0f0f",
-                opacity: !name.trim() || loading ? 0.5 : 1,
-              }}
-            >
-              {loading ? "Creating…" : "Create Project"}
-            </button>
-          </div>
-        </form>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Sign out
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -227,106 +80,117 @@ function ProjectCard({
   project,
   onOpen,
   onDelete,
+  onShare,
 }: {
   project: Project;
   onOpen: () => void;
   onDelete: () => void;
+  onShare: () => void;
 }) {
-  const [showMenu, setShowMenu] = useState(false);
+  const accent = getAccentForProject(project.id);
+  const initial = project.name[0].toUpperCase();
 
   return (
     <div
-      className="group relative flex flex-col gap-3 p-5 rounded-xl cursor-pointer transition-all duration-200"
-      style={{
-        background: "#1a1a1a",
-        border: "1px solid #2a2a2a",
-      }}
+      className="group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-200"
+      style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)" }}
       onClick={onOpen}
-      onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#3a3a3a")}
-      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#2a2a2a")}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.5)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
     >
-      {/* Icon */}
-      <div
-        className="w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold"
-        style={{ background: "#d97706", color: "#0f0f0f" }}
-      >
-        {project.name[0].toUpperCase()}
+      {/* Thumbnail */}
+      <div className="relative overflow-hidden" style={{ height: 140, background: "#050505" }}>
+        <div style={{
+          position: "absolute", inset: 0,
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px)",
+          backgroundSize: "20px 20px",
+        }} />
+        {/* Phone mock */}
+        <div style={{
+          position: "absolute", bottom: -4, left: "50%", transform: "translateX(-50%)",
+          width: 64, background: "#050505",
+          border: "1.5px solid rgba(255,255,255,0.1)", borderRadius: 12,
+          overflow: "hidden", boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
+        }}>
+          <div style={{ height: 12, background: "#050505", display: "flex", alignItems: "center", justifyContent: "flex-end", padding: "0 4px" }}>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: accent, opacity: 0.7 }} />
+          </div>
+          <div style={{ background: "#050505", padding: "3px 4px" }}>
+            <div style={{ height: 3, background: accent, width: "55%", borderRadius: 1, marginBottom: 2 }} />
+            <div style={{ height: 3, background: `${accent}4d`, width: "40%", borderRadius: 1, marginBottom: 3 }} />
+            <div style={{ height: 22, background: `${accent}14`, border: `1px solid ${accent}33`, borderRadius: 4, marginBottom: 3 }} />
+            <div style={{ height: 2, background: "rgba(255,255,255,0.08)", width: "80%", borderRadius: 1, marginBottom: 2 }} />
+            <div style={{ height: 2, background: "rgba(255,255,255,0.05)", width: "60%", borderRadius: 1, marginBottom: 3 }} />
+            <div style={{ height: 8, width: 36, borderRadius: 2, background: `${accent}66`, margin: "4px auto 0" }} />
+          </div>
+        </div>
+        {/* Glow */}
+        <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 70% 50% at 50% 100%, ${accent}1a 0%, transparent 70%)`, pointerEvents: "none" }} />
+        {/* Hover actions */}
+        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={(e) => { e.stopPropagation(); onShare(); }}
+            className="flex items-center justify-center rounded-lg transition-all"
+            style={{ width: 28, height: 28, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.1)", color: "#71717a" }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "#71717a"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}
+            title="Share"
+          >
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); if (confirm(`Delete "${project.name}"?`)) onDelete(); }}
+            className="flex items-center justify-center rounded-lg transition-all"
+            style={{ width: 28, height: 28, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.1)", color: "#71717a" }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "#ef4444"; e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "#71717a"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}
+            title="Delete"
+          >
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
-      {/* Name + description */}
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm truncate" style={{ color: "#e5e5e5" }}>
-          {project.name}
-        </p>
-        {project.description && (
-          <p
-            className="text-xs mt-1 line-clamp-2"
-            style={{ color: "#6b7280" }}
-          >
-            {project.description}
+      {/* Body */}
+      <div style={{ padding: "12px 14px 14px" }}>
+        <div className="flex items-start justify-between gap-2 mb-1.5">
+          <p className="font-semibold text-sm truncate" style={{ color: "#fff", fontFamily: "var(--font-space-grotesk)", letterSpacing: "-0.2px" }}>
+            {project.name}
           </p>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="flex items-center justify-between">
-        <span className="text-xs" style={{ color: "#4b5563" }}>
-          {formatDate(project.created_at)}
-        </span>
-        <div className="flex items-center gap-1">
-          <span
-            className="text-xs px-2 py-0.5 rounded-full"
-            style={{ background: "#0f0f0f", color: "#6b7280", border: "1px solid #2a2a2a" }}
-          >
+          <span className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ background: "rgba(16,185,129,0.1)", color: "#10b981", border: "1px solid rgba(16,185,129,0.2)", fontFamily: "var(--font-dm-mono)" }}>
             Active
           </span>
         </div>
-      </div>
-
-      {/* Context menu button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowMenu((v) => !v);
-        }}
-        className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ color: "#6b7280" }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = "#e5e5e5")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-          <circle cx="12" cy="5" r="1.5" />
-          <circle cx="12" cy="12" r="1.5" />
-          <circle cx="12" cy="19" r="1.5" />
-        </svg>
-      </button>
-
-      {showMenu && (
-        <div
-          className="absolute top-10 right-3 z-10 py-1 rounded-lg shadow-lg"
-          style={{ background: "#1f1f1f", border: "1px solid #2a2a2a", minWidth: "120px" }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            onClick={() => { setShowMenu(false); onOpen(); }}
-            className="w-full text-left px-3 py-2 text-xs transition-colors"
-            style={{ color: "#9ca3af" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#e5e5e5")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
-          >
-            Open
-          </button>
-          <button
-            onClick={() => { setShowMenu(false); onDelete(); }}
-            className="w-full text-left px-3 py-2 text-xs transition-colors"
-            style={{ color: "#f87171" }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#2a1a1a")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-          >
-            Delete
-          </button>
+        <div className="flex items-center gap-1.5" style={{ fontFamily: "var(--font-dm-mono)", fontSize: 10, color: "#3f3f46" }}>
+          <span>{formatTimeAgo(project.created_at)}</span>
+          {project.industry && (
+            <>
+              <span style={{ width: 2, height: 2, borderRadius: "50%", background: "#3f3f46", display: "inline-block" }} />
+              <span>{project.industry}</span>
+            </>
+          )}
         </div>
-      )}
+        {/* Platform tags */}
+        {project.platform && project.platform.length > 0 && (
+          <div className="flex gap-1 mt-2 flex-wrap">
+            {project.platform.slice(0, 3).map((p: string) => (
+              <span key={p} className="text-xs px-1.5 py-0.5 rounded" style={{
+                background: p === "iOS" ? "rgba(6,182,212,0.05)" : p === "Android" ? "rgba(16,185,129,0.05)" : "rgba(139,92,246,0.05)",
+                color: p === "iOS" ? "rgba(6,182,212,0.7)" : p === "Android" ? "rgba(16,185,129,0.7)" : "rgba(139,92,246,0.7)",
+                border: `1px solid ${p === "iOS" ? "rgba(6,182,212,0.15)" : p === "Android" ? "rgba(16,185,129,0.15)" : "rgba(139,92,246,0.15)"}`,
+                fontFamily: "var(--font-dm-mono)", fontSize: 9, letterSpacing: "0.2px",
+              }}>
+                {p}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -336,16 +200,25 @@ export default function Home() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreate, setShowCreate] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [shareProject, setShareProject] = useState<Project | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeSection, setActiveSection] = useState<"projects" | "shared" | "archive">("projects");
+
+  const displayName = user?.user_metadata?.full_name ?? user?.email?.split("@")[0] ?? "User";
+  const initial = displayName[0]?.toUpperCase() ?? "U";
 
   const loadProjects = useCallback(async () => {
     if (!user) return;
+    setLoadError(null);
     try {
       const data = await getProjects(user.id);
       setProjects(data);
-    } catch (err) {
-      console.error("Failed to load projects:", err);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : (err as { message?: string })?.message ?? String(err);
+      setLoadError(msg);
     } finally {
       setLoading(false);
     }
@@ -355,33 +228,7 @@ export default function Home() {
     loadProjects();
   }, [loadProjects]);
 
-  useEffect(() => {
-    if (!user) return;
-    const supabase = createClient();
-    supabase
-      .from("user_profiles")
-      .select("role")
-      .eq("user_id", user.id)
-      .single()
-      .then(({ data, error }) => {
-        if (error) {
-          console.error("[admin check] user_profiles query failed:", error.message);
-          return;
-        }
-        setIsAdmin(data?.role === "admin");
-      });
-  }, [user]);
-
-  const handleCreate = async (name: string, description: string) => {
-    if (!user) return;
-    const project = await createProject(user.id, name, description);
-    setShowCreate(false);
-    sessionStorage.setItem(`project_name_${project.id}`, project.name);
-    router.push(`/projects/${project.id}`);
-  };
-
   const handleDelete = async (projectId: string) => {
-    if (!confirm("Delete this project and all its chats?")) return;
     try {
       await deleteProject(projectId);
       setProjects((prev) => prev.filter((p) => p.id !== projectId));
@@ -390,118 +237,252 @@ export default function Home() {
     }
   };
 
+  const filteredProjects = projects.filter((p) =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const NavItem = ({ icon, label, badge, section }: { icon: React.ReactNode; label: string; badge?: string | number; section: "projects" | "shared" | "archive" }) => (
+    <button
+      onClick={() => setActiveSection(section)}
+      className="flex items-center gap-2.5 w-full rounded-lg transition-all relative text-left"
+      style={{
+        padding: "8px 12px",
+        background: activeSection === section ? "rgba(6,182,212,0.1)" : "transparent",
+        color: activeSection === section ? "#fff" : "#71717a",
+      }}
+      onMouseEnter={(e) => { if (activeSection !== section) e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
+      onMouseLeave={(e) => { if (activeSection !== section) e.currentTarget.style.background = "transparent"; }}
+    >
+      <span style={{ width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: activeSection === section ? "#06b6d4" : "#71717a" }}>{icon}</span>
+      {!sidebarCollapsed && <span style={{ fontSize: 13, fontWeight: 500, flex: 1 }}>{label}</span>}
+      {!sidebarCollapsed && badge !== undefined && (
+        <span style={{ fontFamily: "var(--font-dm-mono)", fontSize: 9, fontWeight: 500, background: "rgba(6,182,212,0.1)", color: "#06b6d4", border: "1px solid rgba(6,182,212,0.2)", borderRadius: 4, padding: "2px 6px" }}>
+          {badge}
+        </span>
+      )}
+    </button>
+  );
+
   return (
-    <div className="min-h-screen" style={{ background: "#0f0f0f" }}>
-      {/* Header */}
-      <header
-        className="flex items-center justify-between px-6 py-4 border-b"
-        style={{ borderColor: "#1f1f1f" }}
-      >
-        <div className="flex items-center gap-2.5">
-          <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold"
-            style={{ background: "#d97706", color: "#0f0f0f" }}
-          >
-            Z
-          </div>
-          <span className="text-sm font-semibold" style={{ color: "#e5e5e5" }}>
-            Zai
-          </span>
-        </div>
+    <div className="flex h-screen overflow-hidden" style={{ background: "#000", fontFamily: "var(--font-dm-sans)" }}>
 
-        {user && (
-          <ProfileMenu
-            user={user}
-            isAdmin={isAdmin}
-            onAdmin={() => router.push("/admin")}
-            onSignOut={signOut}
-          />
-        )}
-      </header>
-
-      {/* Main content */}
-      <main className="max-w-5xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold" style={{ color: "#e5e5e5" }}>
-              Projects
-            </h1>
-            <p className="text-sm mt-1" style={{ color: "#6b7280" }}>
-              Each project has its own chat history and artifacts
-            </p>
-          </div>
+      {/* ── UNIFIED HEADER ── */}
+      <div className="fixed top-0 left-0 right-0 z-20 flex items-stretch" style={{ height: 56, background: "rgba(0,0,0,0.95)", borderBottom: "1px solid rgba(255,255,255,0.06)", backdropFilter: "blur(12px)" }}>
+        {/* Brand */}
+        <div className="flex items-center gap-2.5 flex-shrink-0 px-4" style={{ width: sidebarCollapsed ? 64 : 240, borderRight: "1px solid rgba(255,255,255,0.06)", transition: "width 0.25s ease" }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0"
+            style={{ background: "#06b6d4", color: "#000", fontFamily: "var(--font-space-grotesk)" }}>Z</div>
+          {!sidebarCollapsed && (
+            <span className="font-bold text-base" style={{ color: "#fff", fontFamily: "var(--font-space-grotesk)", letterSpacing: "-0.3px" }}>zeach</span>
+          )}
           <button
-            onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all"
-            style={{ background: "#d97706", color: "#0f0f0f" }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+            onClick={() => setSidebarCollapsed(v => !v)}
+            className="flex items-center justify-center rounded-full transition-all ml-auto flex-shrink-0"
+            style={{ width: 20, height: 20, background: "#111", border: "1px solid rgba(255,255,255,0.1)", color: "#71717a" }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)"; e.currentTarget.style.background = "#161616"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.background = "#111"; }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+              style={{ transform: sidebarCollapsed ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.25s" }}>
+              <path d="M15 18l-6-6 6-6" />
             </svg>
-            New Project
           </button>
         </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-40 rounded-xl animate-pulse"
-                style={{ background: "#1a1a1a" }}
-              />
-            ))}
+        {/* Main header area */}
+        <div className="flex items-center gap-3 flex-1 px-5">
+          <div className="flex items-baseline gap-2 mr-auto">
+            <span className="font-bold text-sm" style={{ color: "#fff", fontFamily: "var(--font-space-grotesk)", letterSpacing: "-0.3px" }}>
+              {activeSection === "projects" ? "Projects" : activeSection === "shared" ? "Shared" : "Archive"}
+            </span>
+            <span style={{ fontFamily: "var(--font-dm-mono)", fontSize: 11, color: "#3f3f46" }}>
+              {activeSection === "projects" ? `${projects.length} projects` : ""}
+            </span>
           </div>
-        ) : projects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <div
-              className="w-14 h-14 rounded-xl flex items-center justify-center"
-              style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4b5563" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-              </svg>
-            </div>
-            <div className="text-center">
-              <p className="text-sm font-medium" style={{ color: "#e5e5e5" }}>
-                No projects yet
-              </p>
-              <p className="text-xs mt-1" style={{ color: "#6b7280" }}>
-                Create your first project to start chatting
-              </p>
-            </div>
+
+          {/* Search */}
+          <div className="flex items-center gap-2 rounded-lg px-3 py-1.5 transition-all"
+            style={{ background: "#111", border: "1px solid rgba(255,255,255,0.06)", width: 220 }}
+            onFocus={() => {}}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3f3f46" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search projects…"
+              className="bg-transparent border-none outline-none text-sm flex-1"
+              style={{ color: "#fff", fontFamily: "var(--font-dm-sans)" }}
+            />
+          </div>
+
+          {/* New project */}
+          <button
+            onClick={() => router.push("/projects/new")}
+            className="flex items-center gap-1.5 rounded-lg text-xs font-semibold transition-all"
+            style={{ background: "#06b6d4", color: "#000", padding: "7px 14px", fontFamily: "var(--font-dm-mono)", letterSpacing: "0.2px" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#22d3ee"; e.currentTarget.style.boxShadow = "0 0 16px rgba(6,182,212,0.3)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "#06b6d4"; e.currentTarget.style.boxShadow = "none"; }}
+          >
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New project
+          </button>
+
+          {/* Avatar */}
+          <div className="relative">
             <button
-              onClick={() => setShowCreate(true)}
-              className="mt-2 px-5 py-2.5 rounded-lg text-sm font-medium"
-              style={{ background: "#d97706", color: "#0f0f0f" }}
+              onClick={() => setProfileOpen(v => !v)}
+              className="flex items-center justify-center rounded-lg font-bold text-sm flex-shrink-0"
+              style={{ width: 30, height: 30, background: "linear-gradient(135deg,#06b6d4,#0891b2)", color: "#000", fontFamily: "var(--font-space-grotesk)" }}
             >
-              Create Project
+              {initial}
             </button>
+            {profileOpen && user && (
+              <ProfileDropdown user={user} onSignOut={signOut} onClose={() => setProfileOpen(false)} />
+            )}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onOpen={() => {
-                sessionStorage.setItem(`project_name_${project.id}`, project.name);
-                router.push(`/projects/${project.id}`);
-              }}
-                onDelete={() => handleDelete(project.id)}
-              />
-            ))}
+        </div>
+      </div>
+
+      {/* ── SIDEBAR ── */}
+      <aside
+        className="flex-shrink-0 flex flex-col overflow-hidden"
+        style={{
+          width: sidebarCollapsed ? 64 : 240,
+          background: "#0a0a0a",
+          borderRight: "1px solid rgba(255,255,255,0.06)",
+          transition: "width 0.25s ease",
+          marginTop: 56,
+          height: "calc(100vh - 56px)",
+        }}
+      >
+        <nav className="flex-1 p-2.5 flex flex-col gap-0.5 overflow-y-auto">
+          {!sidebarCollapsed && (
+            <div style={{ fontFamily: "var(--font-dm-mono)", fontSize: 9, letterSpacing: "0.6px", color: "#3f3f46", textTransform: "uppercase", padding: "8px 8px 4px" }}>
+              Workspace
+            </div>
+          )}
+          <NavItem
+            section="projects"
+            label="Projects"
+            badge={projects.length}
+            icon={<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>}
+          />
+          <NavItem
+            section="shared"
+            label="Shared"
+            icon={<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51L8.59 10.49"/></svg>}
+          />
+          <NavItem
+            section="archive"
+            label="Archive"
+            icon={<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/></svg>}
+          />
+
+          {!sidebarCollapsed && (
+            <div style={{ fontFamily: "var(--font-dm-mono)", fontSize: 9, letterSpacing: "0.6px", color: "#3f3f46", textTransform: "uppercase", padding: "12px 8px 4px", marginTop: 4 }}>
+              Account
+            </div>
+          )}
+          <button
+            className="flex items-center gap-2.5 w-full rounded-lg transition-all text-left"
+            style={{ padding: "8px 12px", color: "#71717a" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.color = "#fff"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#71717a"; }}
+          >
+            <span style={{ width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            </span>
+            {!sidebarCollapsed && <span style={{ fontSize: 13, fontWeight: 500 }}>Settings</span>}
+          </button>
+        </nav>
+
+        {/* Credits bar */}
+        {!sidebarCollapsed && (
+          <div style={{ padding: "14px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+            <div className="flex items-center justify-between mb-2">
+              <span style={{ fontFamily: "var(--font-dm-mono)", fontSize: 9, letterSpacing: "0.5px", color: "#3f3f46", textTransform: "uppercase" }}>Credits</span>
+              <span style={{ fontFamily: "var(--font-dm-mono)", fontSize: 11, fontWeight: 500, color: "#06b6d4" }}>340 / 500</span>
+            </div>
+            <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 2, overflow: "hidden", marginBottom: 6 }}>
+              <div style={{ height: "100%", width: "68%", background: "linear-gradient(90deg,#06b6d4,#22d3ee)", borderRadius: 2 }} />
+            </div>
+            <p style={{ fontSize: 11, color: "#3f3f46" }}>160 left · resets in 12d</p>
           </div>
         )}
+      </aside>
+
+      {/* ── MAIN CONTENT ── */}
+      <main className="flex-1 overflow-y-auto" style={{ marginTop: 56, scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.06) transparent" }}>
+        <div style={{ padding: 24, maxWidth: 1100, margin: "0 auto" }}>
+
+          {loadError && (
+            <div className="mb-6 rounded-xl px-4 py-3 text-sm" style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", color: "#f87171" }}>
+              <span className="font-medium">Could not load projects: </span>{loadError}
+            </div>
+          )}
+
+          {activeSection === "archive" ? (
+            <div className="flex flex-col items-center justify-center py-24 gap-4">
+              <div className="flex items-center justify-center rounded-2xl" style={{ width: 56, height: 56, border: "1px solid rgba(255,255,255,0.1)", color: "#3f3f46" }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+              </div>
+              <div className="text-center">
+                <p className="font-semibold text-lg" style={{ color: "#fff", fontFamily: "var(--font-space-grotesk)" }}>Archive is empty</p>
+                <p className="text-sm mt-1" style={{ color: "#71717a" }}>Archived projects will appear here.</p>
+              </div>
+            </div>
+          ) : loading ? (
+            <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="rounded-xl animate-pulse" style={{ height: 220, background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)" }} />
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
+              {/* New project card */}
+              <div
+                className="rounded-xl flex flex-col items-center justify-center gap-2.5 cursor-pointer transition-all duration-200 relative overflow-hidden"
+                style={{ minHeight: 220, border: "1.5px dashed rgba(6,182,212,0.25)", background: "rgba(6,182,212,0.03)" }}
+                onClick={() => router.push("/projects/new")}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(6,182,212,0.5)"; e.currentTarget.style.background = "rgba(6,182,212,0.06)"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(6,182,212,0.08)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(6,182,212,0.25)"; e.currentTarget.style.background = "rgba(6,182,212,0.03)"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+              >
+                <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 60% 50% at 50% 100%, rgba(6,182,212,0.06) 0%, transparent 70%)", pointerEvents: "none" }} />
+                <div className="flex items-center justify-center rounded-xl transition-all" style={{ width: 44, height: 44, border: "1.5px solid rgba(6,182,212,0.4)", background: "rgba(6,182,212,0.08)", color: "#06b6d4" }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </div>
+                <p className="font-semibold text-sm" style={{ color: "#fff", fontFamily: "var(--font-space-grotesk)", letterSpacing: "-0.2px" }}>New project</p>
+                <p style={{ fontFamily: "var(--font-dm-mono)", fontSize: 11, color: "#71717a", letterSpacing: "0.2px" }}>describe → generate</p>
+              </div>
+
+              {filteredProjects.length === 0 && searchQuery ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-16" style={{ gridColumn: "1/-1" }}>
+                  <p className="text-sm" style={{ color: "#71717a" }}>No projects match &quot;{searchQuery}&quot;</p>
+                </div>
+              ) : (
+                filteredProjects.map((project) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    onOpen={() => {
+                      sessionStorage.setItem(`project_name_${project.id}`, project.name);
+                      router.push(`/projects/${project.id}`);
+                    }}
+                    onDelete={() => handleDelete(project.id)}
+                    onShare={() => setShareProject(project)}
+                  />
+                ))
+              )}
+            </div>
+          )}
+        </div>
       </main>
 
-      {showCreate && (
-        <CreateProjectModal
-          onClose={() => setShowCreate(false)}
-          onCreate={handleCreate}
+      {shareProject && (
+        <ShareProjectModal
+          projectId={shareProject.id}
+          projectName={shareProject.name}
+          onClose={() => setShareProject(null)}
         />
       )}
     </div>
