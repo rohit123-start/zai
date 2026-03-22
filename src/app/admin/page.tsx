@@ -23,9 +23,12 @@ const ACCESS_COLORS = {
   read:  { bg: "#1f1f1f", color: "#9ca3af", border: "#374151" },
 };
 
+type BadgeStyle = { bg: string; color: string; border: string };
+const FALLBACK_STYLE: BadgeStyle = { bg: "#1f1f1f", color: "#9ca3af", border: "#374151" };
+
 function Badge({ type, value }: { type: "role" | "access"; value: string }) {
-  const map = type === "role" ? ROLE_COLORS : ACCESS_COLORS;
-  const style = map[value as keyof typeof map] ?? { bg: "#1f1f1f", color: "#9ca3af", border: "#374151" };
+  const map: Record<string, BadgeStyle> = type === "role" ? ROLE_COLORS : ACCESS_COLORS;
+  const style: BadgeStyle = map[value] ?? FALLBACK_STYLE;
   return (
     <span
       className="px-2 py-0.5 rounded-full text-xs font-medium"

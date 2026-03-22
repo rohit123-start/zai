@@ -335,7 +335,7 @@ export default function VisualDirectionPage() {
     try {
       await saveVisualDirection(projectId, {
         style_pack: selectedPack,
-        font_pairing: fontPair.label,
+        font_pairing: fontPair?.label ?? `${chosenPack.tokens.heading_font} + ${chosenPack.tokens.body_font}`,
         inspiration_images: inspirationUrls,
         reference_urls: referenceUrls,
         brain,
