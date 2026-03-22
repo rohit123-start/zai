@@ -1,0 +1,952 @@
+{
+  "archetype_id": "map_core",
+  "archetype_name": "Map & Location-Based",
+  "description": "Location-aware platform where the map is the primary interface. Industry brain defines what is being discovered or tracked on the map. This core defines how location, navigation, and proximity work.",
+  "valid_industries": [
+    "Travel & Lifestyle",
+    "Real Estate",
+    "Transport & Logistics"
+  ],
+  "icon_pack": {
+    "default_library": {
+      "name": "Lucide",
+      "variant": "Rounded line",
+      "url": "https://lucide.dev"
+    },
+    "industry_overrides": {
+      "Real Estate": {
+        "name": "Material Symbols",
+        "variant": "Outlined",
+        "url": "https://fonts.google.com/icons"
+      },
+      "Transport & Logistics": {
+        "name": "Material Symbols",
+        "variant": "Sharp",
+        "url": "https://fonts.google.com/icons"
+      }
+    },
+    "core_nav_icons": [
+      "home",
+      "search",
+      "map",
+      "heart",
+      "user",
+      "bell",
+      "list",
+      "compass",
+      "arrow-back",
+      "filter"
+    ],
+    "core_domain_icons": [
+      "map-pin",
+      "navigation",
+      "compass",
+      "route",
+      "layers",
+      "locate",
+      "zoom-in",
+      "flag",
+      "star",
+      "share-2"
+    ]
+  },
+  "landing_page": {
+    "sections": [
+      {
+        "id": "hero",
+        "generates_images": true
+      },
+      {
+        "id": "map_preview",
+        "generates_images": true
+      },
+      {
+        "id": "pricing",
+        "generates_images": false
+      },
+      {
+        "id": "cta_footer",
+        "generates_images": false
+      }
+    ]
+  },
+  "core_entities": {
+    "entities": [
+      "User",
+      "Location",
+      "Place",
+      "Route",
+      "Pin",
+      "Review",
+      "CheckIn",
+      "Notification",
+      "Search",
+      "Category",
+      "Tracking",
+      "Address"
+    ],
+    "relationships": [
+      "User has a current Location",
+      "Place has a Location and belongs to a Category",
+      "Pin is placed by User on the map \u2014 saved or custom",
+      "Route connects two or more Locations",
+      "Review belongs to User, written about a Place",
+      "CheckIn belongs to User at a Place",
+      "Tracking belongs to a moving entity (driver, shipment, delivery) with a live Location",
+      "Address is a resolved Location \u2014 street, city, coordinates",
+      "Search returns Places near a Location",
+      "Notification belongs to User, triggered by proximity or tracking events"
+    ]
+  },
+  "tiers": {
+    "mvp": {
+      "tier": "MVP",
+      "description": "Core map \u2014 discover places, search by location, view detail, get directions.",
+      "screen_count": 8,
+      "primary_flows": [
+        "Open app \u2192 map loads at current location \u2192 browse nearby places \u2192 tap pin \u2192 view place detail \u2192 get directions",
+        "Search location or place \u2192 results on map and list \u2192 tap result \u2192 detail \u2192 directions",
+        "Save place \u2192 view saved places \u2192 navigate to saved place"
+      ],
+      "secondary_flows": [
+        "Share location",
+        "Report incorrect place",
+        "Filter by category",
+        "View place reviews"
+      ],
+      "screens": [
+        {
+          "id": "map_home",
+          "name": "Map Home",
+          "purpose": "Primary map view \u2014 current location, nearby places, search",
+          "visual": "Full-screen map. Current location dot. Place pins. Search bar at top. Category chips.",
+          "entities": [
+            "Location",
+            "Place",
+            "Pin"
+          ],
+          "actions": [
+            "View current location",
+            "Tap place pin",
+            "Search location",
+            "Filter by category",
+            "Zoom and pan",
+            "Toggle map style",
+            "List view toggle"
+          ]
+        },
+        {
+          "id": "place_detail",
+          "name": "Place Detail",
+          "purpose": "Full place information \u2014 photos, details, reviews, actions",
+          "visual": "Slides up from bottom. Place photos. Name and category. Rating. Details. Actions row.",
+          "entities": [
+            "Place",
+            "Review",
+            "Location"
+          ],
+          "actions": [
+            "View photos",
+            "Get directions",
+            "Save place",
+            "Share place",
+            "Call place",
+            "View website",
+            "Read reviews",
+            "Report place"
+          ]
+        },
+        {
+          "id": "search",
+          "name": "Search",
+          "purpose": "Search places, addresses, and categories",
+          "visual": "Search bar. Recent searches. Category shortcuts. Results list with map pins.",
+          "entities": [
+            "Place",
+            "Address",
+            "Category"
+          ],
+          "actions": [
+            "Type to search",
+            "Recent searches",
+            "Category shortcut",
+            "Tap result \u2014 show on map and open detail"
+          ]
+        },
+        {
+          "id": "directions",
+          "name": "Directions / Navigation",
+          "purpose": "Route from current location to destination",
+          "visual": "Route on map. Step-by-step panel. Mode selector \u2014 drive, walk, transit, bike. ETA.",
+          "entities": [
+            "Route",
+            "Location",
+            "Address"
+          ],
+          "actions": [
+            "View route on map",
+            "Select transport mode",
+            "Start navigation",
+            "View step by step",
+            "View ETA",
+            "View alternative routes"
+          ]
+        },
+        {
+          "id": "navigation_active",
+          "name": "Active Navigation",
+          "purpose": "Turn-by-turn navigation full screen",
+          "visual": "Map fills screen. Current instruction prominent. Next turn. ETA. End navigation.",
+          "entities": [
+            "Route",
+            "Location"
+          ],
+          "actions": [
+            "Follow turn by turn",
+            "View next instruction",
+            "View ETA",
+            "Mute voice guidance",
+            "End navigation",
+            "Report incident"
+          ]
+        },
+        {
+          "id": "saved_places",
+          "name": "Saved Places",
+          "purpose": "User's saved and custom pins",
+          "visual": "Saved places list. Custom categories. Map view of saved. Navigate CTA.",
+          "entities": [
+            "Pin",
+            "Place",
+            "User"
+          ],
+          "actions": [
+            "View all saved",
+            "Organise into lists",
+            "Navigate to saved place",
+            "Remove saved",
+            "Share saved list"
+          ]
+        },
+        {
+          "id": "profile",
+          "name": "Profile",
+          "purpose": "User profile, reviews written, check-ins",
+          "visual": "Avatar. Stats \u2014 reviews, check-ins. Contribution history.",
+          "entities": [
+            "User",
+            "Review",
+            "CheckIn"
+          ],
+          "actions": [
+            "View own reviews",
+            "View check-ins",
+            "Edit profile",
+            "View contribution stats"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "Map style, location permissions, units, account",
+          "visual": "Settings list. Map style selector. Units \u2014 km or miles. Location settings.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Select map style",
+            "Set distance units",
+            "Location permission settings",
+            "Account settings",
+            "Log out"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "Map pins cluster at low zoom \u2014 expand on zoom in",
+        "Place detail slides up from bottom as sheet \u2014 map stays visible behind",
+        "Current location button \u2014 tap to re-centre map on user",
+        "Pin tap \u2014 quick preview card slides up \u2014 tap card to open full detail",
+        "Route preview \u2014 map zooms to fit entire route before starting navigation",
+        "Navigation instruction \u2014 large text, icon, and distance remaining",
+        "Long press on map \u2014 drop custom pin \u2014 option to save or get directions"
+      ]
+    },
+    "startup": {
+      "tier": "Startup",
+      "description": "Full location platform with reviews, check-ins, live tracking, and offline maps.",
+      "screen_count": 14,
+      "primary_flows": [
+        "All MVP flows",
+        "Check in to place \u2192 add photo \u2192 share \u2192 view check-in history",
+        "Track live location of entity \u2192 view on map \u2192 receive arrival notification",
+        "Write place review with photos \u2192 review appears on place detail",
+        "Download offline map \u2192 navigate without internet connection"
+      ],
+      "secondary_flows": [
+        "All MVP secondary flows",
+        "Share live location with contact",
+        "Report road or map issue",
+        "View nearby events",
+        "Set home and work shortcuts",
+        "Traffic and incident overlay"
+      ],
+      "screens": [
+        {
+          "id": "map_home",
+          "name": "Map Home",
+          "purpose": "Full map with traffic, incidents, and live tracking overlays",
+          "visual": "Map. Traffic overlay toggle. Incident icons. Live tracking dots. Search bar.",
+          "entities": [
+            "Location",
+            "Place",
+            "Pin",
+            "Tracking"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Toggle traffic layer",
+            "View incident reports",
+            "View live tracked entities"
+          ]
+        },
+        {
+          "id": "place_detail",
+          "name": "Place Detail",
+          "purpose": "Full place with check-in, hours, and popular times",
+          "visual": "Photos. Details. Popular times chart. Check-in CTA. Reviews with photos.",
+          "entities": [
+            "Place",
+            "Review",
+            "Location",
+            "CheckIn"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Check in",
+            "View popular times",
+            "View opening hours",
+            "Add photo"
+          ]
+        },
+        {
+          "id": "search",
+          "name": "Search",
+          "purpose": "Advanced search with filters and radius control",
+          "visual": "Search bar. Filters \u2014 open now, rating, distance. Radius slider. Results.",
+          "entities": [
+            "Place",
+            "Address",
+            "Category"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Filter open now",
+            "Filter by rating",
+            "Set search radius"
+          ]
+        },
+        {
+          "id": "directions",
+          "name": "Directions",
+          "purpose": "Multi-stop directions with traffic and alternatives",
+          "visual": "Route with traffic colour. Multi-stop option. Alternatives. Departure time.",
+          "entities": [
+            "Route",
+            "Location",
+            "Address"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Add stop to route",
+            "View traffic delays",
+            "Set departure time",
+            "View alternatives with time difference"
+          ]
+        },
+        {
+          "id": "navigation_active",
+          "name": "Active Navigation",
+          "purpose": "Navigation with traffic rerouting and incident alerts",
+          "visual": "Full screen. Current instruction. Traffic alert banner. Rerouting indicator.",
+          "entities": [
+            "Route",
+            "Location"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Accept reroute",
+            "View traffic alert",
+            "Report incident during navigation"
+          ]
+        },
+        {
+          "id": "live_tracking",
+          "name": "Live Tracking",
+          "purpose": "Track moving entity in real time on map",
+          "visual": "Map with tracked entity moving. ETA. Distance. Status. Contact CTA.",
+          "entities": [
+            "Tracking",
+            "Location",
+            "User"
+          ],
+          "actions": [
+            "View entity on map",
+            "View ETA",
+            "Contact entity",
+            "Share tracking link",
+            "View tracking history"
+          ]
+        },
+        {
+          "id": "check_in",
+          "name": "Check-In",
+          "purpose": "Check in to a place \u2014 add photo and note",
+          "visual": "Place confirm. Photo upload. Note input. Share toggle. Submit.",
+          "entities": [
+            "CheckIn",
+            "Place",
+            "User"
+          ],
+          "actions": [
+            "Confirm place",
+            "Add photo",
+            "Add note",
+            "Share to profile",
+            "Submit check-in"
+          ]
+        },
+        {
+          "id": "reviews",
+          "name": "Reviews",
+          "purpose": "Write and browse place reviews",
+          "visual": "Star rating. Review form. Photo upload. Review list with photos.",
+          "entities": [
+            "Review",
+            "Place",
+            "User"
+          ],
+          "actions": [
+            "Write review",
+            "Rate place",
+            "Add photos",
+            "Read reviews",
+            "Vote helpful",
+            "Report review"
+          ]
+        },
+        {
+          "id": "saved_places",
+          "name": "Saved Places",
+          "purpose": "Saved places organised into lists \u2014 home, work, custom",
+          "visual": "Home and work shortcuts. Custom lists. Map view of list.",
+          "entities": [
+            "Pin",
+            "Place",
+            "User"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Set home location",
+            "Set work location",
+            "Create custom list"
+          ]
+        },
+        {
+          "id": "offline_maps",
+          "name": "Offline Maps",
+          "purpose": "Download map areas for offline navigation",
+          "visual": "Map with selection box. Download CTA. Downloaded areas list. Storage meter.",
+          "entities": [
+            "Location",
+            "User"
+          ],
+          "actions": [
+            "Select area to download",
+            "Download map",
+            "View downloaded maps",
+            "Delete downloaded map",
+            "Update downloaded map"
+          ]
+        },
+        {
+          "id": "share_location",
+          "name": "Share Location",
+          "purpose": "Share live or static location with contacts",
+          "visual": "Contact selector. Duration selector for live share. Share link. Stop sharing.",
+          "entities": [
+            "User",
+            "Location"
+          ],
+          "actions": [
+            "Select contact",
+            "Set share duration",
+            "Generate share link",
+            "Start sharing",
+            "Stop sharing"
+          ]
+        },
+        {
+          "id": "contributions",
+          "name": "Contributions / Profile",
+          "purpose": "User's reviews, photos, check-ins, and edits",
+          "visual": "Stats bar. Reviews tab. Photos tab. Check-ins tab. Local guide level.",
+          "entities": [
+            "User",
+            "Review",
+            "CheckIn"
+          ],
+          "actions": [
+            "View all contributions",
+            "Edit own review",
+            "Delete review",
+            "View check-in map"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "purpose": "Proximity alerts, tracking updates, review responses",
+          "visual": "Notification list. Proximity alert. Tracking ETA. Review reply.",
+          "entities": [
+            "Notification",
+            "Place",
+            "Tracking"
+          ],
+          "actions": [
+            "View all",
+            "Tap to navigate",
+            "Mark read"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "Full settings with offline maps management and tracking privacy",
+          "visual": "Settings list. Offline maps. Location sharing. Map style. Privacy.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Offline maps settings",
+            "Location sharing privacy",
+            "Navigation voice settings"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP interaction patterns",
+        "Traffic colour on route \u2014 green fast, amber slow, red stopped",
+        "Reroute banner \u2014 faster route found \u2014 accept or dismiss",
+        "Live tracking dot pulses \u2014 indicates real-time movement",
+        "Popular times bar chart \u2014 current time highlighted with live busyness",
+        "Check-in confirm with haptic \u2014 short vibration on submit",
+        "Offline map boundary box \u2014 drag corners to select area",
+        "Proximity notification \u2014 you are near X \u2014 tap to view"
+      ]
+    },
+    "scale": {
+      "tier": "Scale",
+      "description": "Full location platform with business listings management, fleet tracking, AR navigation, and admin.",
+      "screen_count": 22,
+      "primary_flows": [
+        "All MVP and Startup flows",
+        "Business claims listing \u2192 verifies \u2192 manages info, photos, and responses \u2192 views analytics",
+        "Fleet operator tracks all vehicles \u2192 views routes \u2192 sets geofence alerts \u2192 receives breach notification",
+        "AR walking navigation \u2014 camera view with directional overlays",
+        "Admin manages place database \u2192 approves business claims \u2192 resolves reported issues"
+      ],
+      "secondary_flows": [
+        "All previous secondary flows",
+        "Indoor map navigation",
+        "EV charging station layer",
+        "Accessibility route options",
+        "Heatmap analytics for businesses",
+        "Custom map styling for white-label"
+      ],
+      "screens": [
+        {
+          "id": "map_home",
+          "name": "Map Home",
+          "purpose": "Full map with multiple overlay layers and AR toggle",
+          "visual": "Map. Layer toggle panel. AR navigation CTA. Fleet tracking option. Search.",
+          "entities": [
+            "Location",
+            "Place",
+            "Pin",
+            "Tracking"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Toggle layers \u2014 EV, accessibility, traffic",
+            "Start AR navigation",
+            "Switch to fleet view"
+          ]
+        },
+        {
+          "id": "place_detail",
+          "name": "Place Detail",
+          "purpose": "Full place with claimed business badge and Q&A",
+          "visual": "Photos. Claimed badge. Owner response on reviews. Q&A section. Booking CTA.",
+          "entities": [
+            "Place",
+            "Review",
+            "Location",
+            "CheckIn"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View Q&A",
+            "Ask question",
+            "View owner response",
+            "Book directly from map"
+          ]
+        },
+        {
+          "id": "ar_navigation",
+          "name": "AR Navigation",
+          "purpose": "Augmented reality walking directions overlaid on camera",
+          "visual": "Camera view. Direction arrows overlaid. Distance to next turn. Destination pin.",
+          "entities": [
+            "Route",
+            "Location"
+          ],
+          "actions": [
+            "Follow AR directions",
+            "Switch to map view",
+            "View destination pin in AR",
+            "End navigation"
+          ]
+        },
+        {
+          "id": "fleet_tracking",
+          "name": "Fleet Tracking",
+          "purpose": "Track all vehicles or assets on a single map view",
+          "visual": "Map with fleet vehicle icons. Status per vehicle. Selected vehicle panel. ETA.",
+          "entities": [
+            "Tracking",
+            "Location"
+          ],
+          "actions": [
+            "View all fleet on map",
+            "Select vehicle",
+            "View route history",
+            "Set geofence",
+            "Contact driver",
+            "View ETA"
+          ]
+        },
+        {
+          "id": "geofence",
+          "name": "Geofence Management",
+          "purpose": "Draw and manage geofence zones with alert triggers",
+          "visual": "Map with drawn zones. Create zone tool. Alert trigger settings. Active zones list.",
+          "entities": [
+            "Location",
+            "Tracking"
+          ],
+          "actions": [
+            "Draw geofence zone",
+            "Set entry or exit alerts",
+            "View active zones",
+            "Edit zone",
+            "Delete zone",
+            "View breach log"
+          ]
+        },
+        {
+          "id": "search",
+          "name": "Search",
+          "purpose": "Enterprise search with indoor maps and accessibility filters",
+          "visual": "Search. Indoor map toggle. Accessibility filters. Advanced filters.",
+          "entities": [
+            "Place",
+            "Address",
+            "Category"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Indoor map search",
+            "Filter wheelchair accessible",
+            "Filter EV charging nearby"
+          ]
+        },
+        {
+          "id": "directions",
+          "name": "Directions",
+          "purpose": "Full directions with accessibility and EV route options",
+          "visual": "Route. Accessibility mode. EV charging stops on route. Multi-stop.",
+          "entities": [
+            "Route",
+            "Location",
+            "Address"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Wheelchair accessible route",
+            "EV charging stops on route",
+            "Avoid tolls and highways"
+          ]
+        },
+        {
+          "id": "navigation_active",
+          "name": "Active Navigation",
+          "purpose": "Full navigation with lane guidance and speed camera alerts",
+          "visual": "Navigation. Lane guidance overlay. Speed limit display. Camera alert.",
+          "entities": [
+            "Route",
+            "Location"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View lane guidance",
+            "Speed camera alert",
+            "View speed limit"
+          ]
+        },
+        {
+          "id": "business_dashboard",
+          "name": "Business Dashboard",
+          "purpose": "Business manages their listing \u2014 info, photos, responses, analytics",
+          "visual": "Listing preview. Edit info. Photos management. Reviews to respond. Analytics.",
+          "entities": [
+            "Place",
+            "Review"
+          ],
+          "actions": [
+            "Edit business info",
+            "Upload photos",
+            "Respond to reviews",
+            "Answer Q&A",
+            "View analytics",
+            "Post update"
+          ]
+        },
+        {
+          "id": "business_analytics",
+          "name": "Business Analytics",
+          "purpose": "Views, searches, directions clicks, calls, and engagement per listing",
+          "visual": "Views chart. Search terms. Directions requested. Call count. Photo views.",
+          "entities": [
+            "Place"
+          ],
+          "actions": [
+            "View views trend",
+            "View search terms",
+            "View directions stats",
+            "View call analytics",
+            "Export report"
+          ]
+        },
+        {
+          "id": "business_claim",
+          "name": "Claim Business Listing",
+          "purpose": "Business owner claims and verifies their listing",
+          "visual": "Search listing. Claim CTA. Verification method selector. Status tracker.",
+          "entities": [
+            "Place",
+            "User"
+          ],
+          "actions": [
+            "Search for business",
+            "Claim listing",
+            "Select verification method",
+            "Submit verification",
+            "Track claim status"
+          ]
+        },
+        {
+          "id": "heatmap",
+          "name": "Heatmap Analytics",
+          "purpose": "Show foot traffic density on map \u2014 for businesses and admin",
+          "visual": "Map with colour heatmap overlay. Time range selector. Day of week filter.",
+          "entities": [
+            "Location",
+            "Place"
+          ],
+          "actions": [
+            "View heatmap",
+            "Select time range",
+            "Filter by day",
+            "Compare periods"
+          ]
+        },
+        {
+          "id": "live_tracking",
+          "name": "Live Tracking",
+          "purpose": "Enterprise tracking with multi-asset and history replay",
+          "visual": "Map. Multi-asset tracking. History replay slider. Status per asset.",
+          "entities": [
+            "Tracking",
+            "Location",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Track multiple assets",
+            "Replay route history",
+            "Export tracking data"
+          ]
+        },
+        {
+          "id": "reviews",
+          "name": "Reviews",
+          "purpose": "Reviews with business owner response and verified visit badge",
+          "visual": "Reviews. Verified visit badge. Owner response highlighted. Photo reviews.",
+          "entities": [
+            "Review",
+            "Place",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View verified visit reviews",
+            "View owner responses"
+          ]
+        },
+        {
+          "id": "saved_places",
+          "name": "Saved Places",
+          "purpose": "Advanced saved places with shared lists and collaboration",
+          "visual": "Saved lists. Share list. Collaborative list badge. Map view.",
+          "entities": [
+            "Pin",
+            "Place",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Share list with collaborators",
+            "Collaborate on list"
+          ]
+        },
+        {
+          "id": "offline_maps",
+          "name": "Offline Maps",
+          "purpose": "Enterprise offline with auto-update and large area support",
+          "visual": "Download manager. Large area support. Auto-update toggle. Storage.",
+          "entities": [
+            "Location",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Set auto-update",
+            "Download large region"
+          ]
+        },
+        {
+          "id": "admin_places",
+          "name": "Admin \u2014 Place Management",
+          "purpose": "Review reported places, approve claims, manage database",
+          "visual": "Reported places queue. Claim approval queue. Place edit tool. Map preview.",
+          "entities": [
+            "Place",
+            "User"
+          ],
+          "actions": [
+            "Review reported places",
+            "Approve or reject claims",
+            "Edit place data",
+            "Remove place",
+            "Merge duplicate places"
+          ]
+        },
+        {
+          "id": "admin_dashboard",
+          "name": "Admin Dashboard",
+          "purpose": "Platform KPIs \u2014 searches, active users, reviews, tracking volume",
+          "visual": "KPI cards. Search volume chart. Active users map. Reviews count.",
+          "entities": [
+            "User",
+            "Place",
+            "Review"
+          ],
+          "actions": [
+            "View searches",
+            "View active users heat",
+            "View review volume",
+            "View tracking volume",
+            "Export report"
+          ]
+        },
+        {
+          "id": "custom_map_style",
+          "name": "Custom Map Style",
+          "purpose": "White-label map styling for enterprise clients",
+          "visual": "Map style editor. Colour pickers per layer. Preview. Export style JSON.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Customise road colour",
+            "Customise land colour",
+            "Customise water colour",
+            "Preview style",
+            "Export style",
+            "Apply style"
+          ]
+        },
+        {
+          "id": "contributions",
+          "name": "Contributions / Profile",
+          "purpose": "Full contributor profile with level and impact stats",
+          "visual": "Contributor level. Impact stats. Reviews, photos, edits, check-ins tabs.",
+          "entities": [
+            "User",
+            "Review",
+            "CheckIn"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View edit history",
+            "View impact score"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "purpose": "Full alerts with geofence breaches and business analytics alerts",
+          "visual": "All notifications. Geofence breach alert. Business analytics weekly summary.",
+          "entities": [
+            "Notification",
+            "Place",
+            "Tracking"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Geofence breach alert",
+            "Business weekly summary"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "Enterprise settings with custom map style and fleet config",
+          "visual": "Full settings. Fleet settings. Custom map style. API access. Privacy.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Fleet configuration",
+            "Custom map style",
+            "API access settings"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP and Startup interaction patterns",
+        "AR direction arrows animate \u2014 pulse as user approaches turn",
+        "Fleet vehicle icon changes colour \u2014 green moving, amber idle, red stopped",
+        "Geofence draw tool \u2014 tap to add vertices on map, auto-close polygon",
+        "Heatmap intensity slider \u2014 adjust sensitivity of density display",
+        "Business analytics chart \u2014 weekly or monthly toggle \u2014 animates on switch",
+        "Claim verification steps \u2014 numbered indicator, current step highlighted",
+        "History replay slider \u2014 scrub through route history on map",
+        "Lane guidance overlay \u2014 highlighted lane in accent colour on navigation"
+      ]
+    }
+  }
+}

@@ -1,0 +1,926 @@
+{
+  "archetype_id": "ai_core",
+  "archetype_name": "AI Tool",
+  "description": "AI-powered product where the AI is the core experience. Industry brain defines the domain the AI operates in. This core defines how AI interaction, generation, and configuration work.",
+  "valid_industries": [
+    "AI & Technology"
+  ],
+  "icon_pack": {
+    "default_library": {
+      "name": "Lucide",
+      "variant": "Rounded line",
+      "url": "https://lucide.dev"
+    },
+    "industry_overrides": {},
+    "core_nav_icons": [
+      "home",
+      "plus-circle",
+      "clock",
+      "bookmark",
+      "user",
+      "settings",
+      "key",
+      "layers",
+      "arrow-back",
+      "menu"
+    ],
+    "core_domain_icons": [
+      "cpu",
+      "sparkles",
+      "zap",
+      "copy",
+      "refresh-cw",
+      "thumbs-up",
+      "thumbs-down",
+      "stop-circle",
+      "send",
+      "paperclip"
+    ]
+  },
+  "landing_page": {
+    "sections": [
+      {
+        "id": "hero",
+        "generates_images": false
+      },
+      {
+        "id": "how_it_works",
+        "generates_images": false
+      },
+      {
+        "id": "pricing",
+        "generates_images": false
+      },
+      {
+        "id": "cta_footer",
+        "generates_images": false
+      }
+    ]
+  },
+  "core_entities": {
+    "entities": [
+      "User",
+      "Conversation",
+      "Message",
+      "Generation",
+      "Prompt",
+      "Model",
+      "Usage",
+      "APIKey",
+      "Project",
+      "Template",
+      "Output",
+      "Feedback"
+    ],
+    "relationships": [
+      "User owns many Conversations",
+      "Conversation contains many Messages",
+      "Message is either from User or from AI",
+      "Generation is the AI output from a Message or Prompt",
+      "Prompt is a saved input created by User",
+      "Model is the AI model configuration \u2014 version, temperature, context length",
+      "Usage tracks tokens consumed and cost per User or Organisation",
+      "APIKey belongs to User or Organisation \u2014 grants programmatic access",
+      "Project groups Conversations by topic or purpose",
+      "Template is a reusable Prompt created by User",
+      "Output is a saved Generation \u2014 image, text, code, or file",
+      "Feedback belongs to Message \u2014 thumbs up or down plus optional note"
+    ]
+  },
+  "tiers": {
+    "mvp": {
+      "tier": "MVP",
+      "description": "Core AI interaction \u2014 chat with AI, get generations, view history.",
+      "screen_count": 8,
+      "primary_flows": [
+        "Sign up \u2192 start new conversation \u2192 type prompt \u2192 receive AI generation \u2192 continue conversation",
+        "View conversation history \u2192 open past conversation \u2192 continue from where left off",
+        "View usage \u2192 check remaining credits"
+      ],
+      "secondary_flows": [
+        "Copy AI output",
+        "Regenerate response",
+        "Give feedback on response",
+        "Share conversation link"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Home / New Chat",
+          "purpose": "Start new conversation \u2014 prompt entry and quick start options",
+          "visual": "Clean dark interface. Prompt input bar at centre or bottom. Quick start prompts. Model indicator.",
+          "entities": [
+            "Conversation",
+            "Message",
+            "Model"
+          ],
+          "actions": [
+            "Type prompt",
+            "Start new conversation",
+            "Select quick start prompt",
+            "View recent conversations",
+            "Select model"
+          ]
+        },
+        {
+          "id": "conversation",
+          "name": "Conversation / Chat",
+          "purpose": "Active AI conversation \u2014 messages, generations, and controls",
+          "visual": "Message thread. User bubbles right. AI response left with avatar. Streaming text. Input bar.",
+          "entities": [
+            "Conversation",
+            "Message",
+            "Generation",
+            "Feedback"
+          ],
+          "actions": [
+            "Send message",
+            "Regenerate response",
+            "Copy response",
+            "Give thumbs up or down",
+            "Attach file or image",
+            "Stop generation",
+            "Edit user message"
+          ]
+        },
+        {
+          "id": "history",
+          "name": "Conversation History",
+          "purpose": "All past conversations \u2014 search and resume",
+          "visual": "Conversation list with title and date. Search bar. Delete option.",
+          "entities": [
+            "Conversation",
+            "User"
+          ],
+          "actions": [
+            "Browse all conversations",
+            "Search conversations",
+            "Open conversation",
+            "Delete conversation",
+            "Rename conversation"
+          ]
+        },
+        {
+          "id": "saved_outputs",
+          "name": "Saved Outputs",
+          "purpose": "Outputs the user has saved for later use",
+          "visual": "Output cards grid. Type indicator \u2014 text, code, image. Copy and share.",
+          "entities": [
+            "Output",
+            "Generation"
+          ],
+          "actions": [
+            "View saved outputs",
+            "Copy output",
+            "Share output",
+            "Delete output",
+            "Filter by type"
+          ]
+        },
+        {
+          "id": "usage",
+          "name": "Usage & Credits",
+          "purpose": "Current usage, remaining credits, and usage history",
+          "visual": "Credits bar. Used vs remaining. Usage history chart. Upgrade CTA.",
+          "entities": [
+            "Usage",
+            "User"
+          ],
+          "actions": [
+            "View credit balance",
+            "View usage history",
+            "View usage breakdown",
+            "Upgrade plan"
+          ]
+        },
+        {
+          "id": "settings_model",
+          "name": "Model Settings",
+          "purpose": "Select AI model and configure parameters",
+          "visual": "Model selector. Temperature slider. Max tokens. System prompt input.",
+          "entities": [
+            "Model",
+            "User"
+          ],
+          "actions": [
+            "Select model",
+            "Adjust temperature",
+            "Set max tokens",
+            "Set system prompt",
+            "Reset to defaults"
+          ]
+        },
+        {
+          "id": "profile",
+          "name": "Profile",
+          "purpose": "User profile and account management",
+          "visual": "Avatar. Name. Email. Account settings link.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "View profile",
+            "Edit name",
+            "Change password",
+            "Manage account"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "App settings \u2014 theme, language, account, notifications",
+          "visual": "Settings list. Theme toggle. Language. Account section.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Toggle theme",
+            "Select language",
+            "Account settings",
+            "Notification settings",
+            "Log out"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "Streaming text output \u2014 AI response types character by character",
+        "Stop generation button appears during streaming",
+        "Copy button appears on hover or tap of any AI message",
+        "Regenerate button below each AI response",
+        "Conversation auto-titled from first message",
+        "Input bar expands vertically as user types multi-line prompt",
+        "Code blocks in responses \u2014 syntax highlighted, copy button in corner",
+        "Feedback thumbs \u2014 up fills green, down fills red on tap"
+      ]
+    },
+    "startup": {
+      "tier": "Startup",
+      "description": "Full AI tool with prompt library, projects, file uploads, image generation, and team sharing.",
+      "screen_count": 14,
+      "primary_flows": [
+        "All MVP flows",
+        "Create project \u2192 organise conversations \u2192 set project-level system prompt \u2192 generate within project context",
+        "Upload file or image \u2192 reference in prompt \u2192 AI analyses and responds",
+        "Use prompt template \u2192 customise variables \u2192 send \u2192 save output",
+        "Share conversation or output \u2192 recipient views without account"
+      ],
+      "secondary_flows": [
+        "All MVP secondary flows",
+        "Create and save custom template",
+        "Set up custom persona or assistant",
+        "Export conversation as PDF or markdown",
+        "Browse public template library"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Home / New Chat",
+          "purpose": "Personalised home with projects, recent, and prompt suggestions",
+          "visual": "Recent conversations. Projects row. Prompt suggestions by use case. New chat CTA.",
+          "entities": [
+            "Conversation",
+            "Message",
+            "Model",
+            "Project"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View projects",
+            "Start conversation in project",
+            "View prompt suggestions by category"
+          ]
+        },
+        {
+          "id": "conversation",
+          "name": "Conversation / Chat",
+          "purpose": "Rich conversation with file uploads, image generation, and branching",
+          "visual": "Thread. File attachment previews. Image generations inline. Branch conversation option.",
+          "entities": [
+            "Conversation",
+            "Message",
+            "Generation",
+            "Feedback"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Upload file",
+            "Upload image",
+            "Generate image from prompt",
+            "Branch conversation",
+            "Save output"
+          ]
+        },
+        {
+          "id": "projects",
+          "name": "Projects",
+          "purpose": "Organise conversations into projects with shared context",
+          "visual": "Project cards. Conversation count. System prompt indicator. Create project CTA.",
+          "entities": [
+            "Project",
+            "Conversation",
+            "User"
+          ],
+          "actions": [
+            "View all projects",
+            "Create project",
+            "Open project",
+            "Set project system prompt",
+            "Delete project"
+          ]
+        },
+        {
+          "id": "project_detail",
+          "name": "Project Detail",
+          "purpose": "Project conversations and shared context settings",
+          "visual": "Project header. System prompt visible. Conversation list. New chat in project.",
+          "entities": [
+            "Project",
+            "Conversation"
+          ],
+          "actions": [
+            "View project conversations",
+            "New conversation in project",
+            "Edit system prompt",
+            "Share project",
+            "Archive project"
+          ]
+        },
+        {
+          "id": "prompt_library",
+          "name": "Prompt Library",
+          "purpose": "Browse, use, and save prompt templates",
+          "visual": "Category tabs. Prompt cards. Use prompt CTA. Save to own templates.",
+          "entities": [
+            "Template",
+            "Prompt"
+          ],
+          "actions": [
+            "Browse by category",
+            "Search prompts",
+            "Use prompt",
+            "Save to own templates",
+            "Preview prompt"
+          ]
+        },
+        {
+          "id": "my_templates",
+          "name": "My Templates",
+          "purpose": "User's saved and custom prompt templates",
+          "visual": "Template list. Create template CTA. Edit and delete options.",
+          "entities": [
+            "Template",
+            "User"
+          ],
+          "actions": [
+            "View templates",
+            "Create template",
+            "Edit template",
+            "Use template",
+            "Delete template",
+            "Share template"
+          ]
+        },
+        {
+          "id": "file_management",
+          "name": "Files & Uploads",
+          "purpose": "Manage uploaded files used in conversations",
+          "visual": "Uploaded files list. File type icon. Conversation reference. Delete.",
+          "entities": [
+            "Output",
+            "Conversation"
+          ],
+          "actions": [
+            "View uploaded files",
+            "View which conversations use file",
+            "Delete file",
+            "Re-use file in new conversation"
+          ]
+        },
+        {
+          "id": "image_generations",
+          "name": "Image Generations",
+          "purpose": "Gallery of all AI-generated images",
+          "visual": "Image grid. Prompt used below. Download and share. Regenerate.",
+          "entities": [
+            "Generation",
+            "Output"
+          ],
+          "actions": [
+            "View image gallery",
+            "Download image",
+            "Share image",
+            "View prompt used",
+            "Regenerate with same prompt",
+            "Regenerate with edit"
+          ]
+        },
+        {
+          "id": "history",
+          "name": "Conversation History",
+          "purpose": "Full history with project filter and advanced search",
+          "visual": "History list. Project filter. Date filter. Search bar.",
+          "entities": [
+            "Conversation",
+            "User",
+            "Project"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Filter by project",
+            "Filter by date range",
+            "Search within conversations"
+          ]
+        },
+        {
+          "id": "saved_outputs",
+          "name": "Saved Outputs",
+          "purpose": "All saved outputs organised by type",
+          "visual": "Tabs \u2014 all, text, code, images. Output cards. Copy, share, delete.",
+          "entities": [
+            "Output",
+            "Generation"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Filter by type",
+            "Export as file"
+          ]
+        },
+        {
+          "id": "usage",
+          "name": "Usage & Credits",
+          "purpose": "Detailed usage by model and type, with upgrade",
+          "visual": "Credit bar. Usage by model breakdown. Cost estimate. Upgrade CTA.",
+          "entities": [
+            "Usage",
+            "User"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View usage by model",
+            "View cost estimate"
+          ]
+        },
+        {
+          "id": "settings_model",
+          "name": "Model & Persona Settings",
+          "purpose": "Model configuration with custom persona and behaviour settings",
+          "visual": "Model selector. Persona settings. Behaviour sliders. Memory toggle.",
+          "entities": [
+            "Model",
+            "User"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Create custom persona",
+            "Toggle memory",
+            "Set response style"
+          ]
+        },
+        {
+          "id": "share_export",
+          "name": "Share & Export",
+          "purpose": "Share conversations and export outputs",
+          "visual": "Share link toggle. Export format selector. Share conversation preview.",
+          "entities": [
+            "Conversation",
+            "Output"
+          ],
+          "actions": [
+            "Generate share link",
+            "Set link permissions",
+            "Export as markdown",
+            "Export as PDF",
+            "Copy share link"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "Full settings with memory, integrations, and data",
+          "visual": "Settings list. Memory section. Integrations. Data controls. Account.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Memory settings",
+            "Connected apps",
+            "Data export",
+            "Delete account"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP interaction patterns",
+        "File upload \u2014 drag and drop into chat or click to attach",
+        "Image generation \u2014 progress spinner, then image fades in",
+        "Branch conversation \u2014 timeline fork indicator on branched messages",
+        "Template variable \u2014 {variable} highlighted in template \u2014 user fills in",
+        "Project system prompt \u2014 subtle banner in conversation indicating active project",
+        "Output save \u2014 bookmark icon on any AI message \u2014 fills on save",
+        "Share conversation \u2014 toggle generates live link \u2014 copy button"
+      ]
+    },
+    "scale": {
+      "tier": "Scale",
+      "description": "Enterprise AI platform with team workspaces, API access, custom models, compliance, and admin.",
+      "screen_count": 22,
+      "primary_flows": [
+        "All MVP and Startup flows",
+        "Enterprise admin deploys custom model \u2192 sets org-level system prompt \u2192 team uses with shared context",
+        "API user generates key \u2192 builds integration \u2192 monitors usage via API \u2192 stays within limits",
+        "Team shares project \u2192 all members add to same conversation history \u2192 collaborative AI workspace",
+        "Compliance admin reviews conversation logs \u2192 exports audit report \u2192 satisfies enterprise policy",
+        "Admin monitors all usage \u2192 sets per-user limits \u2192 prevents cost overruns"
+      ],
+      "secondary_flows": [
+        "All previous secondary flows",
+        "Custom model fine-tuning workflow",
+        "SSO enterprise login",
+        "Data residency and privacy controls",
+        "Webhook on generation complete",
+        "Rate limiting per team or user"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Home / New Chat",
+          "purpose": "Enterprise home with team projects and org-wide templates",
+          "visual": "Workspace switcher. Team projects. Org templates. Recent. New chat.",
+          "entities": [
+            "Conversation",
+            "Message",
+            "Model",
+            "Project"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Switch workspace",
+            "Browse org templates",
+            "Start from org template"
+          ]
+        },
+        {
+          "id": "conversation",
+          "name": "Conversation / Chat",
+          "purpose": "Full enterprise chat with approval flows and audit trail",
+          "visual": "Thread. Audit trail indicator. Approval request for sensitive outputs. All Startup features.",
+          "entities": [
+            "Conversation",
+            "Message",
+            "Generation",
+            "Feedback"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Request approval on output",
+            "View audit trail for conversation"
+          ]
+        },
+        {
+          "id": "projects",
+          "name": "Projects",
+          "purpose": "Team projects with shared access and permissions",
+          "visual": "Project cards. Team member avatars. Permission badge. Shared indicator.",
+          "entities": [
+            "Project",
+            "Conversation",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Share project with team",
+            "Set project permissions",
+            "View team activity in project"
+          ]
+        },
+        {
+          "id": "team_workspace",
+          "name": "Team Workspace",
+          "purpose": "Shared workspace \u2014 team conversations, outputs, and templates",
+          "visual": "Team feed. Shared conversations. Shared outputs. Team members. Activity.",
+          "entities": [
+            "Project",
+            "Conversation",
+            "User"
+          ],
+          "actions": [
+            "View team activity",
+            "Share to team workspace",
+            "Comment on shared output",
+            "View team members"
+          ]
+        },
+        {
+          "id": "prompt_library",
+          "name": "Prompt Library",
+          "purpose": "Org-level and personal templates with approval workflow",
+          "visual": "Tabs \u2014 org templates, my templates, public. Approval badge on org templates.",
+          "entities": [
+            "Template",
+            "Prompt"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Submit template for org approval",
+            "Approve or reject org template"
+          ]
+        },
+        {
+          "id": "api_access",
+          "name": "API Access",
+          "purpose": "API key management, usage, webhooks, and docs",
+          "visual": "API key list. Usage chart. Rate limit settings. Webhook config. Docs link.",
+          "entities": [
+            "APIKey",
+            "Usage",
+            "User"
+          ],
+          "actions": [
+            "Generate API key",
+            "Set rate limits",
+            "View usage by key",
+            "Configure webhooks",
+            "View documentation",
+            "Revoke key"
+          ]
+        },
+        {
+          "id": "custom_models",
+          "name": "Custom Models",
+          "purpose": "Deploy and manage custom or fine-tuned models",
+          "visual": "Model list. Status badge \u2014 training, deployed, archived. Deploy and configure.",
+          "entities": [
+            "Model",
+            "User"
+          ],
+          "actions": [
+            "View custom models",
+            "Deploy model",
+            "Set model as org default",
+            "View model performance",
+            "Archive model"
+          ]
+        },
+        {
+          "id": "model_fine_tuning",
+          "name": "Model Fine-Tuning",
+          "purpose": "Upload training data and fine-tune a custom model",
+          "visual": "Step flow. Data upload. Training config. Progress. Evaluation. Deploy.",
+          "entities": [
+            "Model",
+            "User"
+          ],
+          "actions": [
+            "Upload training data",
+            "Set training parameters",
+            "Start fine-tuning",
+            "Monitor progress",
+            "Evaluate model",
+            "Deploy model"
+          ]
+        },
+        {
+          "id": "usage_admin",
+          "name": "Usage & Cost Management",
+          "purpose": "Org-wide usage dashboard with per-user limits and cost forecast",
+          "visual": "Total spend chart. Per-user usage table. Budget alert. Cost forecast. Limits.",
+          "entities": [
+            "Usage",
+            "User"
+          ],
+          "actions": [
+            "View org usage",
+            "View per-user usage",
+            "Set per-user limits",
+            "Set budget alert",
+            "View cost forecast",
+            "Export billing report"
+          ]
+        },
+        {
+          "id": "team_management",
+          "name": "Team Management",
+          "purpose": "Manage org members, roles, and workspace access",
+          "visual": "Member table. Role badge. Usage per member. Invite. Deactivate.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Invite member",
+            "Assign role",
+            "View member usage",
+            "Set per-member limits",
+            "Deactivate member"
+          ]
+        },
+        {
+          "id": "compliance",
+          "name": "Compliance & Audit",
+          "purpose": "Conversation logs, data export, and compliance reporting",
+          "visual": "Log table. Filter by user, date, model. Export CTA. Retention policy.",
+          "entities": [
+            "Conversation",
+            "Message",
+            "User"
+          ],
+          "actions": [
+            "View conversation logs",
+            "Filter logs",
+            "Export logs",
+            "Set retention policy",
+            "Download compliance report"
+          ]
+        },
+        {
+          "id": "sso_settings",
+          "name": "SSO & Security Settings",
+          "purpose": "Configure enterprise SSO and security policies",
+          "visual": "SSO provider setup. Policy settings. Session length. IP restrictions.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Configure SSO provider",
+            "Set session length",
+            "Set IP allowlist",
+            "Enable MFA requirement",
+            "View active sessions"
+          ]
+        },
+        {
+          "id": "history",
+          "name": "Conversation History",
+          "purpose": "Full history with team filter and compliance view",
+          "visual": "History. Team filter. Compliance mode toggle. Export.",
+          "entities": [
+            "Conversation",
+            "User",
+            "Project"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Filter by team member",
+            "Toggle compliance view"
+          ]
+        },
+        {
+          "id": "saved_outputs",
+          "name": "Saved Outputs",
+          "purpose": "Org and personal saved outputs with sharing controls",
+          "visual": "Tabs \u2014 mine, team, org. Sharing badge. Export.",
+          "entities": [
+            "Output",
+            "Generation"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Share to team",
+            "Share to org",
+            "Set sharing permissions"
+          ]
+        },
+        {
+          "id": "usage_personal",
+          "name": "Usage & Credits",
+          "purpose": "Personal usage within org limits",
+          "visual": "Personal credits bar. Org limit vs personal used. Usage history.",
+          "entities": [
+            "Usage",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View org limit",
+            "View remaining personal allocation"
+          ]
+        },
+        {
+          "id": "settings_model",
+          "name": "Model & Org Settings",
+          "purpose": "Org-level model defaults and policy settings",
+          "visual": "Org default model. Allowed models list. Policy toggles.",
+          "entities": [
+            "Model",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Set org default model",
+            "Restrict available models",
+            "Set org-level system prompt"
+          ]
+        },
+        {
+          "id": "integrations",
+          "name": "Integrations",
+          "purpose": "Connect enterprise tools \u2014 Slack, Teams, Notion, CRM",
+          "visual": "Integration cards. Connected badge. Channel or workspace config.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Browse integrations",
+            "Connect integration",
+            "Configure channels",
+            "Test integration",
+            "Disconnect"
+          ]
+        },
+        {
+          "id": "admin_dashboard",
+          "name": "Admin Dashboard",
+          "purpose": "Org-level KPIs \u2014 usage, cost, active users, models used",
+          "visual": "KPI cards. Usage trend chart. Cost breakdown. Top users. Model usage.",
+          "entities": [
+            "User",
+            "Usage",
+            "Conversation"
+          ],
+          "actions": [
+            "View usage KPIs",
+            "View cost breakdown",
+            "View top users",
+            "View model usage distribution",
+            "Export report"
+          ]
+        },
+        {
+          "id": "white_label",
+          "name": "White-Label Settings",
+          "purpose": "Custom branding for embedded or white-label deployments",
+          "visual": "Logo upload. Colour settings. Custom name. Domain. Preview.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Upload logo",
+            "Set brand colours",
+            "Set custom product name",
+            "Configure custom domain",
+            "Preview white-label"
+          ]
+        },
+        {
+          "id": "share_export",
+          "name": "Share & Export",
+          "purpose": "Enterprise sharing with access control and audit",
+          "visual": "Share link. Access control. Expiry date. View who accessed.",
+          "entities": [
+            "Conversation",
+            "Output"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Set link expiry",
+            "Restrict to org only",
+            "View link access log"
+          ]
+        },
+        {
+          "id": "profile",
+          "name": "Profile",
+          "purpose": "Enterprise user profile with org context",
+          "visual": "Avatar. Name. Role. Org. Usage. Settings link.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "View profile",
+            "Edit name",
+            "View org role",
+            "View usage summary"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "Full enterprise settings",
+          "visual": "Settings. Security. Integrations. Data. Privacy. SSO. White-label.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "SSO settings",
+            "White-label settings",
+            "Data residency",
+            "Privacy controls"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP and Startup interaction patterns",
+        "Workspace switcher \u2014 org name at top of sidebar \u2014 dropdown to switch",
+        "Per-user usage bar \u2014 fills as user approaches limit \u2014 amber at 80%, red at 95%",
+        "Custom model status badge \u2014 training spinner, deployed green, archived grey",
+        "Org template approval chip \u2014 pending yellow, approved green, rejected red",
+        "API key \u2014 partially masked by default, tap to reveal with biometric confirm",
+        "Fine-tuning progress step bar \u2014 data upload, training, evaluation, deploy",
+        "Compliance mode \u2014 conversation view with user identity redacted",
+        "Budget alert banner on admin dashboard when org spend approaches limit"
+      ]
+    }
+  }
+}

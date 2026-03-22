@@ -1,11 +1,11 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- 004_style_packs.sql  –  17 industries · 85 themes · 1 global token set
+-- 004_style_packs.sql  –  17 industries · 85 themes · 1 global theme
 -- Run in Supabase Dashboard → SQL Editor
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- ── Tables ───────────────────────────────────────────────────────────────────
 
-CREATE TABLE IF NOT EXISTS public.style_packs (
+CREATE TABLE IF NOT EXISTS public.themes (
   id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
   industry    text        NOT NULL,
   name        text        NOT NULL,
@@ -15,19 +15,19 @@ CREATE TABLE IF NOT EXISTS public.style_packs (
   UNIQUE (industry, name)
 );
 
-ALTER TABLE public.style_packs ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "style_packs_read_all" ON public.style_packs FOR SELECT USING (true);
+ALTER TABLE public.themes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "themes_read_all" ON public.themes FOR SELECT USING (true);
 
-CREATE TABLE IF NOT EXISTS public.global_tokens (
+CREATE TABLE IF NOT EXISTS public.global_theme (
   id         uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
   tokens     jsonb       NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
-ALTER TABLE public.global_tokens ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "global_tokens_read_all" ON public.global_tokens FOR SELECT USING (true);
+ALTER TABLE public.global_theme ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "global_theme_read_all" ON public.global_theme FOR SELECT USING (true);
 
--- ── Global tokens ─────────────────────────────────────────────────────────────
+-- ── Global theme ──────────────────────────────────────────────────────────────
 
 INSERT INTO public.global_tokens (tokens) VALUES ('{
   "radius":      {"sm":"8px","md":"12px","lg":"16px","xl":"20px","xxl":"24px","pill":"999px"},
@@ -39,10 +39,10 @@ INSERT INTO public.global_tokens (tokens) VALUES ('{
   "breakpoints": {"iphone":"390px","iphone_max":"430px","ipad_mini":"744px","ipad":"820px","ipad_pro":"1024px"}
 }');
 
--- ── Style pack seed ───────────────────────────────────────────────────────────
+-- ── Themes seed ───────────────────────────────────────────────────────────────
 -- ON CONFLICT: re-running the migration safely updates tokens
 
-INSERT INTO public.style_packs (industry, name, tokens, sort_order) VALUES
+INSERT INTO public.themes (industry, name, tokens, sort_order) VALUES
 
 -- ── BEAUTY & WELLNESS ─────────────────────────────────────────────────────────
 ('Beauty & Wellness','Sakura','{"primary":"#ec4899","primary_light":"#fce7f3","primary_dark":"#be185d","secondary":"#f9a8d4","accent":"#db2777","background":"#fff5f7","surface":"#ffffff","surface2":"#fdf2f8","border":"#fce7f3","text":"#1e1b1e","text_muted":"#9d8fa0","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Playfair Display","body_font":"DM Sans","icon_weight":"rounded"}',1),
@@ -51,12 +51,12 @@ INSERT INTO public.style_packs (industry, name, tokens, sort_order) VALUES
 ('Beauty & Wellness','Glow','{"primary":"#c0956f","primary_light":"#fdf6f0","primary_dark":"#a07050","secondary":"#e8c9a8","accent":"#d4a574","background":"#fdf8f4","surface":"#ffffff","surface2":"#fdf0e8","border":"#f5e0cc","text":"#2c1810","text_muted":"#9c7c6a","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Lora","body_font":"DM Sans","icon_weight":"rounded"}',4),
 ('Beauty & Wellness','Petal','{"primary":"#a78bfa","primary_light":"#f5f3ff","primary_dark":"#7c3aed","secondary":"#ddd6fe","accent":"#8b5cf6","background":"#faf5ff","surface":"#ffffff","surface2":"#f5f3ff","border":"#ede9fe","text":"#1e1b2e","text_muted":"#8b80a0","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Nunito","body_font":"Nunito","icon_weight":"rounded"}',5),
 
--- ── FOOD & DELIVERY ───────────────────────────────────────────────────────────
-('Food & Delivery','Appetite','{"primary":"#dc2626","primary_light":"#fef2f2","primary_dark":"#b91c1c","secondary":"#fca5a5","accent":"#f97316","background":"#fffbf5","surface":"#ffffff","surface2":"#fff7ed","border":"#fed7aa","text":"#1c0a00","text_muted":"#9a6a50","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Syne","body_font":"DM Sans","icon_weight":"rounded"}',1),
-('Food & Delivery','Street Food','{"primary":"#facc15","primary_light":"#fefce8","primary_dark":"#ca8a04","secondary":"#fde68a","accent":"#f97316","background":"#0f0f0f","surface":"#1a1a1a","surface2":"#242424","border":"#333333","text":"#f5f5f5","text_muted":"#a0a0a0","text_inverse":"#0f0f0f","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Space Grotesk","body_font":"Space Grotesk","icon_weight":"sharp"}',2),
-('Food & Delivery','Fresh Market','{"primary":"#65a30d","primary_light":"#f7fee7","primary_dark":"#4d7c0f","secondary":"#bef264","accent":"#84cc16","background":"#f9fdf5","surface":"#ffffff","surface2":"#f1f8e9","border":"#d9f0b0","text":"#1a2e05","text_muted":"#6b8a3e","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"DM Sans","body_font":"DM Sans","icon_weight":"rounded"}',3),
-('Food & Delivery','Bistro','{"primary":"#92400e","primary_light":"#fffbeb","primary_dark":"#78350f","secondary":"#d97706","accent":"#b45309","background":"#fdfaf6","surface":"#ffffff","surface2":"#fef9f0","border":"#fde8c8","text":"#1c1008","text_muted":"#8c6a48","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Lora","body_font":"DM Sans","icon_weight":"rounded"}',4),
-('Food & Delivery','Dark Kitchen','{"primary":"#f59e0b","primary_light":"#fffbeb","primary_dark":"#d97706","secondary":"#fcd34d","accent":"#fb923c","background":"#0a0a0a","surface":"#141414","surface2":"#1e1e1e","border":"#2a2a2a","text":"#f0f0f0","text_muted":"#808080","text_inverse":"#0a0a0a","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Geist","body_font":"Geist","icon_weight":"sharp"}',5),
+-- ── FOOD & BEVERAGE ───────────────────────────────────────────────────────────
+('Food & Beverage','Appetite','{"primary":"#dc2626","primary_light":"#fef2f2","primary_dark":"#b91c1c","secondary":"#fca5a5","accent":"#f97316","background":"#fffbf5","surface":"#ffffff","surface2":"#fff7ed","border":"#fed7aa","text":"#1c0a00","text_muted":"#9a6a50","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Syne","body_font":"DM Sans","icon_weight":"rounded"}',1),
+('Food & Beverage','Street Food','{"primary":"#facc15","primary_light":"#fefce8","primary_dark":"#ca8a04","secondary":"#fde68a","accent":"#f97316","background":"#0f0f0f","surface":"#1a1a1a","surface2":"#242424","border":"#333333","text":"#f5f5f5","text_muted":"#a0a0a0","text_inverse":"#0f0f0f","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Space Grotesk","body_font":"Space Grotesk","icon_weight":"sharp"}',2),
+('Food & Beverage','Fresh Market','{"primary":"#65a30d","primary_light":"#f7fee7","primary_dark":"#4d7c0f","secondary":"#bef264","accent":"#84cc16","background":"#f9fdf5","surface":"#ffffff","surface2":"#f1f8e9","border":"#d9f0b0","text":"#1a2e05","text_muted":"#6b8a3e","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"DM Sans","body_font":"DM Sans","icon_weight":"rounded"}',3),
+('Food & Beverage','Bistro','{"primary":"#92400e","primary_light":"#fffbeb","primary_dark":"#78350f","secondary":"#d97706","accent":"#b45309","background":"#fdfaf6","surface":"#ffffff","surface2":"#fef9f0","border":"#fde8c8","text":"#1c1008","text_muted":"#8c6a48","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Lora","body_font":"DM Sans","icon_weight":"rounded"}',4),
+('Food & Beverage','Dark Kitchen','{"primary":"#f59e0b","primary_light":"#fffbeb","primary_dark":"#d97706","secondary":"#fcd34d","accent":"#fb923c","background":"#0a0a0a","surface":"#141414","surface2":"#1e1e1e","border":"#2a2a2a","text":"#f0f0f0","text_muted":"#808080","text_inverse":"#0a0a0a","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Geist","body_font":"Geist","icon_weight":"sharp"}',5),
 
 -- ── HEALTHCARE & MEDICAL ──────────────────────────────────────────────────────
 ('Healthcare','Clinical','{"primary":"#2563eb","primary_light":"#eff6ff","primary_dark":"#1d4ed8","secondary":"#93c5fd","accent":"#3b82f6","background":"#f8faff","surface":"#ffffff","surface2":"#f0f5ff","border":"#e0eaff","text":"#0f172a","text_muted":"#64748b","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Inter","body_font":"Inter","icon_weight":"outlined"}',1),
@@ -73,11 +73,11 @@ INSERT INTO public.style_packs (industry, name, tokens, sort_order) VALUES
 ('Finance & Banking','Mint','{"primary":"#059669","primary_light":"#ecfdf5","primary_dark":"#047857","secondary":"#6ee7b7","accent":"#10b981","background":"#f5fffb","surface":"#ffffff","surface2":"#f0fdf8","border":"#d1fae5","text":"#052e20","text_muted":"#4a7c6a","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"DM Sans","body_font":"DM Sans","icon_weight":"rounded"}',5),
 
 -- ── EDUCATION & LEARNING ──────────────────────────────────────────────────────
-('Education','Campus','{"primary":"#2563eb","primary_light":"#eff6ff","primary_dark":"#1d4ed8","secondary":"#93c5fd","accent":"#60a5fa","background":"#f8faff","surface":"#ffffff","surface2":"#f0f5ff","border":"#dbeafe","text":"#0f172a","text_muted":"#64748b","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Nunito","body_font":"Nunito","icon_weight":"rounded"}',1),
-('Education','Scholar','{"primary":"#0f766e","primary_light":"#f0fdfa","primary_dark":"#0d5e57","secondary":"#5eead4","accent":"#14b8a6","background":"#f8fcfb","surface":"#ffffff","surface2":"#f0faf8","border":"#ccebe7","text":"#0a2420","text_muted":"#4d7872","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Lora","body_font":"DM Sans","icon_weight":"outlined"}',2),
-('Education','Kids','{"primary":"#f97316","primary_light":"#fff7ed","primary_dark":"#ea580c","secondary":"#fbbf24","accent":"#a855f7","background":"#fffef5","surface":"#ffffff","surface2":"#fffae8","border":"#fde68a","text":"#1c0a00","text_muted":"#8c6a3a","text_inverse":"#ffffff","success":"#22c55e","error":"#ef4444","warning":"#f59e0b","heading_font":"Nunito","body_font":"Nunito","icon_weight":"rounded"}',3),
-('Education','Focus','{"primary":"#18181b","primary_light":"#f4f4f5","primary_dark":"#09090b","secondary":"#71717a","accent":"#3f3f46","background":"#ffffff","surface":"#ffffff","surface2":"#fafafa","border":"#e4e4e7","text":"#09090b","text_muted":"#71717a","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Inter","body_font":"Inter","icon_weight":"outlined"}',4),
-('Education','Academy','{"primary":"#d4af37","primary_light":"#fefce8","primary_dark":"#a88c2c","secondary":"#fde68a","accent":"#f5d060","background":"#0d0d14","surface":"#141420","surface2":"#1c1c2c","border":"#282838","text":"#f0eefc","text_muted":"#8888aa","text_inverse":"#0d0d14","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Cormorant","body_font":"DM Sans","icon_weight":"outlined"}',5),
+('Education & Learning','Campus','{"primary":"#2563eb","primary_light":"#eff6ff","primary_dark":"#1d4ed8","secondary":"#93c5fd","accent":"#60a5fa","background":"#f8faff","surface":"#ffffff","surface2":"#f0f5ff","border":"#dbeafe","text":"#0f172a","text_muted":"#64748b","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Nunito","body_font":"Nunito","icon_weight":"rounded"}',1),
+('Education & Learning','Scholar','{"primary":"#0f766e","primary_light":"#f0fdfa","primary_dark":"#0d5e57","secondary":"#5eead4","accent":"#14b8a6","background":"#f8fcfb","surface":"#ffffff","surface2":"#f0faf8","border":"#ccebe7","text":"#0a2420","text_muted":"#4d7872","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Lora","body_font":"DM Sans","icon_weight":"outlined"}',2),
+('Education & Learning','Kids','{"primary":"#f97316","primary_light":"#fff7ed","primary_dark":"#ea580c","secondary":"#fbbf24","accent":"#a855f7","background":"#fffef5","surface":"#ffffff","surface2":"#fffae8","border":"#fde68a","text":"#1c0a00","text_muted":"#8c6a3a","text_inverse":"#ffffff","success":"#22c55e","error":"#ef4444","warning":"#f59e0b","heading_font":"Nunito","body_font":"Nunito","icon_weight":"rounded"}',3),
+('Education & Learning','Focus','{"primary":"#18181b","primary_light":"#f4f4f5","primary_dark":"#09090b","secondary":"#71717a","accent":"#3f3f46","background":"#ffffff","surface":"#ffffff","surface2":"#fafafa","border":"#e4e4e7","text":"#09090b","text_muted":"#71717a","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Inter","body_font":"Inter","icon_weight":"outlined"}',4),
+('Education & Learning','Academy','{"primary":"#d4af37","primary_light":"#fefce8","primary_dark":"#a88c2c","secondary":"#fde68a","accent":"#f5d060","background":"#0d0d14","surface":"#141420","surface2":"#1c1c2c","border":"#282838","text":"#f0eefc","text_muted":"#8888aa","text_inverse":"#0d0d14","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Cormorant","body_font":"DM Sans","icon_weight":"outlined"}',5),
 
 -- ── TRAVEL & LIFESTYLE ────────────────────────────────────────────────────────
 ('Travel & Lifestyle','Wanderlust','{"primary":"#f97316","primary_light":"#fff7ed","primary_dark":"#ea580c","secondary":"#fb923c","accent":"#f59e0b","background":"#0a0a0a","surface":"#141414","surface2":"#1e1e1e","border":"#2a2a2a","text":"#f5f5f5","text_muted":"#a0a0a0","text_inverse":"#0a0a0a","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Syne","body_font":"DM Sans","icon_weight":"rounded"}',1),
@@ -86,12 +86,12 @@ INSERT INTO public.style_packs (industry, name, tokens, sort_order) VALUES
 ('Travel & Lifestyle','City Guide','{"primary":"#1e293b","primary_light":"#f8fafc","primary_dark":"#0f172a","secondary":"#475569","accent":"#f97316","background":"#ffffff","surface":"#ffffff","surface2":"#f8fafc","border":"#e2e8f0","text":"#0f172a","text_muted":"#64748b","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Lora","body_font":"Inter","icon_weight":"outlined"}',4),
 ('Travel & Lifestyle','Nomad','{"primary":"#a08060","primary_light":"#fdf8f4","primary_dark":"#806040","secondary":"#c8a888","accent":"#b89070","background":"#faf8f5","surface":"#ffffff","surface2":"#f5f0ea","border":"#e8e0d5","text":"#2a1e14","text_muted":"#8a7060","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"DM Sans","body_font":"DM Sans","icon_weight":"rounded"}',5),
 
--- ── E-COMMERCE & RETAIL ───────────────────────────────────────────────────────
-('E-commerce & Retail','Shopify Clean','{"primary":"#5c6ac4","primary_light":"#f4f5fa","primary_dark":"#4959bd","secondary":"#9da5d4","accent":"#47c1bf","background":"#f9fafb","surface":"#ffffff","surface2":"#f4f6f8","border":"#e1e3e5","text":"#212b36","text_muted":"#637381","text_inverse":"#ffffff","success":"#50b83c","error":"#de3618","warning":"#f49342","heading_font":"Inter","body_font":"Inter","icon_weight":"outlined"}',1),
-('E-commerce & Retail','Luxe Retail','{"primary":"#000000","primary_light":"#f5f5f5","primary_dark":"#000000","secondary":"#333333","accent":"#c0a060","background":"#ffffff","surface":"#ffffff","surface2":"#f9f9f9","border":"#e0e0e0","text":"#000000","text_muted":"#666666","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Cormorant","body_font":"Inter","icon_weight":"sharp"}',2),
-('E-commerce & Retail','Warm Market','{"primary":"#b45309","primary_light":"#fffbeb","primary_dark":"#92400e","secondary":"#d97706","accent":"#f59e0b","background":"#fdfaf5","surface":"#ffffff","surface2":"#fef8ee","border":"#fde8c0","text":"#1c0f00","text_muted":"#8c6a3a","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Lora","body_font":"DM Sans","icon_weight":"rounded"}',3),
-('E-commerce & Retail','Flash Sale','{"primary":"#dc2626","primary_light":"#fef2f2","primary_dark":"#b91c1c","secondary":"#fca5a5","accent":"#facc15","background":"#ffffff","surface":"#ffffff","surface2":"#fef2f2","border":"#fecaca","text":"#0a0a0a","text_muted":"#555555","text_inverse":"#ffffff","success":"#10b981","error":"#dc2626","warning":"#f59e0b","heading_font":"Syne","body_font":"Inter","icon_weight":"sharp"}',4),
-('E-commerce & Retail','Boutique','{"primary":"#be8a9d","primary_light":"#fdf4f6","primary_dark":"#9e6a7d","secondary":"#e8c4ce","accent":"#d4a0b0","background":"#fdf8f9","surface":"#ffffff","surface2":"#faf0f3","border":"#f5e0e5","text":"#2a1018","text_muted":"#9a7080","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Playfair Display","body_font":"DM Sans","icon_weight":"rounded"}',5),
+-- ── RETAIL & FASHION ──────────────────────────────────────────────────────────
+('Retail & Fashion','Shopify Clean','{"primary":"#5c6ac4","primary_light":"#f4f5fa","primary_dark":"#4959bd","secondary":"#9da5d4","accent":"#47c1bf","background":"#f9fafb","surface":"#ffffff","surface2":"#f4f6f8","border":"#e1e3e5","text":"#212b36","text_muted":"#637381","text_inverse":"#ffffff","success":"#50b83c","error":"#de3618","warning":"#f49342","heading_font":"Inter","body_font":"Inter","icon_weight":"outlined"}',1),
+('Retail & Fashion','Luxe Retail','{"primary":"#000000","primary_light":"#f5f5f5","primary_dark":"#000000","secondary":"#333333","accent":"#c0a060","background":"#ffffff","surface":"#ffffff","surface2":"#f9f9f9","border":"#e0e0e0","text":"#000000","text_muted":"#666666","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Cormorant","body_font":"Inter","icon_weight":"sharp"}',2),
+('Retail & Fashion','Warm Market','{"primary":"#b45309","primary_light":"#fffbeb","primary_dark":"#92400e","secondary":"#d97706","accent":"#f59e0b","background":"#fdfaf5","surface":"#ffffff","surface2":"#fef8ee","border":"#fde8c0","text":"#1c0f00","text_muted":"#8c6a3a","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Lora","body_font":"DM Sans","icon_weight":"rounded"}',3),
+('Retail & Fashion','Flash Sale','{"primary":"#dc2626","primary_light":"#fef2f2","primary_dark":"#b91c1c","secondary":"#fca5a5","accent":"#facc15","background":"#ffffff","surface":"#ffffff","surface2":"#fef2f2","border":"#fecaca","text":"#0a0a0a","text_muted":"#555555","text_inverse":"#ffffff","success":"#10b981","error":"#dc2626","warning":"#f59e0b","heading_font":"Syne","body_font":"Inter","icon_weight":"sharp"}',4),
+('Retail & Fashion','Boutique','{"primary":"#be8a9d","primary_light":"#fdf4f6","primary_dark":"#9e6a7d","secondary":"#e8c4ce","accent":"#d4a0b0","background":"#fdf8f9","surface":"#ffffff","surface2":"#faf0f3","border":"#f5e0e5","text":"#2a1018","text_muted":"#9a7080","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Playfair Display","body_font":"DM Sans","icon_weight":"rounded"}',5),
 
 -- ── SOCIAL & COMMUNITY ────────────────────────────────────────────────────────
 ('Social & Community','Connect','{"primary":"#2563eb","primary_light":"#eff6ff","primary_dark":"#1d4ed8","secondary":"#93c5fd","accent":"#06b6d4","background":"#f8faff","surface":"#ffffff","surface2":"#f0f5ff","border":"#dbeafe","text":"#0f172a","text_muted":"#64748b","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Nunito","body_font":"Nunito","icon_weight":"rounded"}',1),
@@ -136,11 +136,11 @@ INSERT INTO public.style_packs (industry, name, tokens, sort_order) VALUES
 ('Events & Ticketing','Intimate','{"primary":"#92400e","primary_light":"#fffbeb","primary_dark":"#78350f","secondary":"#d97706","accent":"#b45309","background":"#fdfaf6","surface":"#ffffff","surface2":"#fef9f0","border":"#fde8c8","text":"#1c1008","text_muted":"#8c6a48","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Lora","body_font":"DM Sans","icon_weight":"rounded"}',5),
 
 -- ── REAL ESTATE & PROPERTY ────────────────────────────────────────────────────
-('Real Estate','Estate','{"primary":"#b8860b","primary_light":"#fef9ee","primary_dark":"#92680a","secondary":"#d4af37","accent":"#c8a040","background":"#0c1018","surface":"#141c28","surface2":"#1c2838","border":"#243048","text":"#f0eefc","text_muted":"#8088a8","text_inverse":"#0c1018","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Cormorant","body_font":"DM Sans","icon_weight":"outlined"}',1),
-('Real Estate','Modern Property','{"primary":"#334155","primary_light":"#f8fafc","primary_dark":"#1e293b","secondary":"#64748b","accent":"#0ea5e9","background":"#f8fafc","surface":"#ffffff","surface2":"#f1f5f9","border":"#e2e8f0","text":"#0f172a","text_muted":"#64748b","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Inter","body_font":"Inter","icon_weight":"outlined"}',2),
-('Real Estate','Warm Home','{"primary":"#c2714f","primary_light":"#fdf4f0","primary_dark":"#a05030","secondary":"#e8a888","accent":"#d4845e","background":"#fdf8f4","surface":"#ffffff","surface2":"#faf2ec","border":"#f0ddd0","text":"#2c1408","text_muted":"#9c7060","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Lora","body_font":"DM Sans","icon_weight":"rounded"}',3),
-('Real Estate','Urban','{"primary":"#475569","primary_light":"#f8fafc","primary_dark":"#334155","secondary":"#94a3b8","accent":"#f97316","background":"#0f0f0f","surface":"#1a1a1a","surface2":"#242424","border":"#333333","text":"#f5f5f5","text_muted":"#888888","text_inverse":"#0f0f0f","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Space Grotesk","body_font":"Inter","icon_weight":"sharp"}',4),
-('Real Estate','Luxury','{"primary":"#c0c0c0","primary_light":"#f8f8f8","primary_dark":"#a0a0a0","secondary":"#e0e0e0","accent":"#d4af37","background":"#000000","surface":"#080808","surface2":"#101010","border":"#181818","text":"#f8f8f8","text_muted":"#888888","text_inverse":"#000000","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Geist","body_font":"Geist","icon_weight":"sharp"}',5),
+('Real Estate & Property','Estate','{"primary":"#b8860b","primary_light":"#fef9ee","primary_dark":"#92680a","secondary":"#d4af37","accent":"#c8a040","background":"#0c1018","surface":"#141c28","surface2":"#1c2838","border":"#243048","text":"#f0eefc","text_muted":"#8088a8","text_inverse":"#0c1018","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Cormorant","body_font":"DM Sans","icon_weight":"outlined"}',1),
+('Real Estate & Property','Modern Property','{"primary":"#334155","primary_light":"#f8fafc","primary_dark":"#1e293b","secondary":"#64748b","accent":"#0ea5e9","background":"#f8fafc","surface":"#ffffff","surface2":"#f1f5f9","border":"#e2e8f0","text":"#0f172a","text_muted":"#64748b","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Inter","body_font":"Inter","icon_weight":"outlined"}',2),
+('Real Estate & Property','Warm Home','{"primary":"#c2714f","primary_light":"#fdf4f0","primary_dark":"#a05030","secondary":"#e8a888","accent":"#d4845e","background":"#fdf8f4","surface":"#ffffff","surface2":"#faf2ec","border":"#f0ddd0","text":"#2c1408","text_muted":"#9c7060","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Lora","body_font":"DM Sans","icon_weight":"rounded"}',3),
+('Real Estate & Property','Urban','{"primary":"#475569","primary_light":"#f8fafc","primary_dark":"#334155","secondary":"#94a3b8","accent":"#f97316","background":"#0f0f0f","surface":"#1a1a1a","surface2":"#242424","border":"#333333","text":"#f5f5f5","text_muted":"#888888","text_inverse":"#0f0f0f","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Space Grotesk","body_font":"Inter","icon_weight":"sharp"}',4),
+('Real Estate & Property','Luxury','{"primary":"#c0c0c0","primary_light":"#f8f8f8","primary_dark":"#a0a0a0","secondary":"#e0e0e0","accent":"#d4af37","background":"#000000","surface":"#080808","surface2":"#101010","border":"#181818","text":"#f8f8f8","text_muted":"#888888","text_inverse":"#000000","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Geist","body_font":"Geist","icon_weight":"sharp"}',5),
 
 -- ── TRANSPORT & LOGISTICS ─────────────────────────────────────────────────────
 ('Transport & Logistics','Drive','{"primary":"#000000","primary_light":"#f5f5f5","primary_dark":"#000000","secondary":"#333333","accent":"#2563eb","background":"#ffffff","surface":"#ffffff","surface2":"#f5f5f5","border":"#e0e0e0","text":"#000000","text_muted":"#666666","text_inverse":"#ffffff","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Inter","body_font":"Inter","icon_weight":"sharp"}',1),
@@ -171,3 +171,8 @@ INSERT INTO public.style_packs (industry, name, tokens, sort_order) VALUES
 ('Marketplace','Neo Market','{"primary":"#6366f1","primary_light":"#eef2ff","primary_dark":"#4f46e5","secondary":"#a5b4fc","accent":"#ec4899","background":"#0f0f14","surface":"#16161e","surface2":"#1e1e2e","border":"#282838","text":"#f0eeff","text_muted":"#8888bb","text_inverse":"#0f0f14","success":"#10b981","error":"#ef4444","warning":"#f59e0b","heading_font":"Syne","body_font":"DM Sans","icon_weight":"rounded"}',5)
 
 ON CONFLICT (industry, name) DO UPDATE SET tokens = EXCLUDED.tokens, sort_order = EXCLUDED.sort_order;
+
+-- ── Rename note ───────────────────────────────────────────────────────────────
+-- If upgrading from a previous version, run these renames in Supabase SQL Editor:
+--   ALTER TABLE public.style_packs RENAME TO themes;
+--   ALTER TABLE public.global_tokens RENAME TO global_theme;

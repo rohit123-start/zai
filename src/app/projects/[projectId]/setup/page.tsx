@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
-  getProject, getStylePacks, getGlobalTokens, saveVisualDirection,
-  type StylePack,
+  getProject, getThemes, getGlobalTheme, saveVisualDirection,
+  type Theme,
 } from "@/lib/db";
 import { generateBrain } from "@/lib/brain-generator";
 import { createClient } from "@/lib/supabase/client";
@@ -148,7 +148,7 @@ function DropZone({
   );
 }
 
-function StylePackCard({ pack, selected, onClick }: { pack: StylePack; selected: boolean; onClick: () => void }) {
+function StylePackCard({ pack, selected, onClick }: { pack: Theme; selected: boolean; onClick: () => void }) {
   const t = pack.tokens;
   return (
     <button
@@ -233,8 +233,8 @@ export default function VisualDirectionPage() {
   const { projectId } = useParams<{ projectId: string }>();
 
   const [project, setProject] = useState<Awaited<ReturnType<typeof getProject>>>(null);
-  const [packs, setPacks] = useState<StylePack[]>([]);
-  const [globalTokens, setGlobalTokens] = useState<Awaited<ReturnType<typeof getGlobalTokens>>>(null);
+  const [packs, setPacks] = useState<Theme[]>([]);
+  const [globalTokens, setGlobalTokens] = useState<Awaited<ReturnType<typeof getGlobalTheme>>>(null);
   const [packsLoading, setPacksLoading] = useState(true);
 
   // uploads
@@ -263,14 +263,14 @@ export default function VisualDirectionPage() {
 
   useEffect(() => {
     getProject(projectId).then(setProject);
-    getGlobalTokens().then(setGlobalTokens);
+    getGlobalTheme().then(setGlobalTokens);
   }, [projectId]);
 
   // Load style packs for this project's industry
   useEffect(() => {
     if (!project) return;
     setPacksLoading(true);
-    getStylePacks(project.industry ?? undefined)
+    getThemes(project.industry ?? undefined)
       .then(setPacks)
       .catch(() => setPacks([]))
       .finally(() => setPacksLoading(false));
@@ -482,7 +482,7 @@ export default function VisualDirectionPage() {
                 ))}
               </div>
             ) : packs.length === 0 ? (
-              <p style={{ fontSize: 13, color: "#71717a" }}>No packs found. Run migration 004_style_packs.sql in Supabase first.</p>
+              <p style={{ fontSize: 13, color: "#71717a" }}>No themes found. Run migration 004_style_packs.sql in Supabase first.</p>
             ) : (
               <div className="grid grid-cols-2 gap-2.5">
                 {packs.map((pack) => (

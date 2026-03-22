@@ -1,0 +1,113 @@
+{
+  "industry_id": "fitness_sport",
+  "industry_name": "Fitness & Sport",
+  "tone": {
+    "primary": "energetic, motivating, direct",
+    "secondary": "empowering, disciplined, results-focused",
+    "voice": "a great coach who pushes you but believes in you \u2014 no fluff, real results",
+    "avoid": "passive, overly gentle, vague, corporate"
+  },
+  "trust_signals": [
+    "coach credentials and certifications",
+    "before/after transformation results",
+    "member count and active community",
+    "streak and achievement system",
+    "workout completion stats",
+    "verified trainer profiles",
+    "equipment and safety guidance"
+  ],
+  "ux_norms": [
+    "active workout mode is full screen \u2014 zero distractions",
+    "timer is always the most prominent element during workouts",
+    "progress and streaks drive daily engagement",
+    "quick start \u2014 minimum taps to begin a workout",
+    "rest timer automatic between sets",
+    "personal records (PRs) always celebrated",
+    "social proof through community leaderboards",
+    "wearable integration expected at startup and scale"
+  ],
+  "icons": {
+    "style": "bold line, energetic, dynamic",
+    "weight": "bold",
+    "mood": "energetic, motivating, bold",
+    "library": {
+      "name": "Tabler Icons",
+      "variant": "Bold line",
+      "url": "https://tabler.io/icons"
+    },
+    "domain_icons": [
+      "dumbbell",
+      "run",
+      "flame",
+      "heart-rate",
+      "calendar",
+      "clock",
+      "trophy",
+      "barbell",
+      "yoga",
+      "stopwatch",
+      "medal",
+      "mountain"
+    ],
+    "nav_icons": [
+      "home",
+      "search",
+      "plus-circle",
+      "heart",
+      "user",
+      "bell",
+      "activity",
+      "compass",
+      "arrow-left",
+      "check"
+    ]
+  },
+  "visual_language": {
+    "primary_type": "real photography",
+    "style": "high energy action photography \u2014 powerful, aspirational, diverse",
+    "photography_rules": [
+      "action shots preferred over static poses",
+      "diverse body types and ages \u2014 fitness is for everyone",
+      "high contrast, dramatic lighting",
+      "authentic gym and outdoor settings",
+      "never use overly airbrushed or unrealistic imagery"
+    ],
+    "background_treatment": "dark and powerful OR high contrast light \u2014 never pastel or soft",
+    "empty_state_style": "bold SVG \u2014 dumbbell, fire, or trophy with motivating copy",
+    "onboarding_visual": "bold flat vector or energetic photography \u2014 powerful theme",
+    "illustration_style": "when used: bold geometric vector \u2014 strong shapes, high contrast"
+  },
+  "themes": {
+    "pack": [
+      "Power",
+      "Athletic",
+      "Zen",
+      "Gains",
+      "Track"
+    ]
+  },
+  "fonts": {
+    "ai_pick_heading": "Space Grotesk",
+    "ai_pick_body": "Inter"
+  },
+  "valid_app_types": [
+    "Health & Fitness",
+    "Booking & Appointments",
+    "Social & Community"
+  ],
+  "monetization_models": [
+    "monthly subscription",
+    "per class or session booking",
+    "personal training packages",
+    "equipment or supplement affiliate",
+    "corporate wellness contracts",
+    "freemium with premium plans"
+  ],
+  "compliance_notes": [
+    "medical disclaimer required for fitness advice",
+    "injury risk warnings on high intensity content",
+    "data handling for health metrics (HIPAA adjacent)",
+    "age restrictions for certain training programmes",
+    "GDPR for biometric and health data"
+  ]
+}

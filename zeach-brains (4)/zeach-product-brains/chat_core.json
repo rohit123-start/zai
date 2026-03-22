@@ -1,0 +1,946 @@
+{
+  "archetype_id": "chat_core",
+  "archetype_name": "Chat / Messaging",
+  "description": "Real-time communication platform. Industry brain defines the context and purpose of communication. This core defines how messaging, channels, and real-time interaction work.",
+  "valid_industries": [
+    "Healthcare"
+  ],
+  "icon_pack": {
+    "default_library": {
+      "name": "Lucide",
+      "variant": "Rounded line",
+      "url": "https://lucide.dev"
+    },
+    "industry_overrides": {
+      "Healthcare": {
+        "name": "Material Symbols",
+        "variant": "Rounded",
+        "url": "https://fonts.google.com/icons"
+      }
+    },
+    "core_nav_icons": [
+      "home",
+      "message-circle",
+      "phone",
+      "user",
+      "bell",
+      "settings",
+      "search",
+      "plus",
+      "arrow-back",
+      "dots"
+    ],
+    "core_domain_icons": [
+      "message-circle",
+      "phone",
+      "video",
+      "mic",
+      "mic-off",
+      "camera-off",
+      "paperclip",
+      "smile",
+      "send",
+      "check-check"
+    ]
+  },
+  "landing_page": {
+    "sections": [
+      {
+        "id": "hero",
+        "generates_images": false
+      },
+      {
+        "id": "security_section",
+        "generates_images": false
+      },
+      {
+        "id": "pricing",
+        "generates_images": false
+      },
+      {
+        "id": "cta_footer",
+        "generates_images": false
+      }
+    ]
+  },
+  "core_entities": {
+    "entities": [
+      "User",
+      "Conversation",
+      "Message",
+      "Channel",
+      "Attachment",
+      "Reaction",
+      "Notification",
+      "Contact",
+      "Group",
+      "Call",
+      "Status",
+      "Bot"
+    ],
+    "relationships": [
+      "User has many Conversations",
+      "Conversation is between two or more Users",
+      "Message belongs to Conversation, sent by User",
+      "Channel is a group Conversation with a topic",
+      "Attachment belongs to Message \u2014 file, image, video",
+      "Reaction belongs to Message, sent by User",
+      "Notification belongs to User, triggered by new Message or mention",
+      "Contact is a User saved by another User",
+      "Group is a named Conversation with many Users",
+      "Call is initiated between Users, can be voice or video",
+      "Status belongs to User \u2014 online, away, busy, offline",
+      "Bot is a special User type that sends automated Messages"
+    ]
+  },
+  "tiers": {
+    "mvp": {
+      "tier": "MVP",
+      "description": "Core messaging \u2014 1-1 chat, group chat, media sharing, notifications.",
+      "screen_count": 8,
+      "primary_flows": [
+        "Sign up \u2192 set up profile \u2192 find contact \u2192 start conversation \u2192 send message \u2192 receive reply",
+        "Create group \u2192 add members \u2192 send message to group \u2192 members reply",
+        "Receive notification \u2192 open message \u2192 reply \u2192 continue conversation"
+      ],
+      "secondary_flows": [
+        "Share image or file",
+        "Search messages",
+        "Mute conversation",
+        "Block contact"
+      ],
+      "screens": [
+        {
+          "id": "conversations",
+          "name": "Conversations / Inbox",
+          "purpose": "All conversations \u2014 recent, unread, sorted by last activity",
+          "visual": "Conversation list. Avatar. Name. Last message preview. Timestamp. Unread count badge.",
+          "entities": [
+            "Conversation",
+            "Message",
+            "User"
+          ],
+          "actions": [
+            "View all conversations",
+            "Tap conversation to open",
+            "Search conversations",
+            "Start new conversation",
+            "Mark as unread"
+          ]
+        },
+        {
+          "id": "chat",
+          "name": "Chat / Message Thread",
+          "purpose": "Full conversation thread with message input",
+          "visual": "Message bubbles. Sender avatar. Timestamp. Media inline. Input bar at bottom.",
+          "entities": [
+            "Message",
+            "Conversation",
+            "User",
+            "Attachment"
+          ],
+          "actions": [
+            "Send text message",
+            "Send emoji",
+            "Attach image or file",
+            "Record voice message",
+            "Long press message for options",
+            "React to message",
+            "Reply to message"
+          ]
+        },
+        {
+          "id": "new_conversation",
+          "name": "New Conversation",
+          "purpose": "Start a new 1-1 or group conversation",
+          "visual": "Contact list. Search bar. Select multiple for group. Next CTA.",
+          "entities": [
+            "User",
+            "Contact",
+            "Conversation"
+          ],
+          "actions": [
+            "Search contacts",
+            "Select contact for 1-1",
+            "Select multiple for group",
+            "Create conversation"
+          ]
+        },
+        {
+          "id": "group_info",
+          "name": "Group Info",
+          "purpose": "Group details \u2014 members, media, settings",
+          "visual": "Group avatar. Name. Member list. Shared media grid. Settings.",
+          "entities": [
+            "Group",
+            "User",
+            "Attachment"
+          ],
+          "actions": [
+            "View members",
+            "Add member",
+            "View shared media",
+            "Mute group",
+            "Leave group",
+            "Edit group name or avatar"
+          ]
+        },
+        {
+          "id": "contact_profile",
+          "name": "Contact Profile",
+          "purpose": "Contact details \u2014 status, shared media, actions",
+          "visual": "Avatar. Status. Shared media. Action buttons \u2014 message, call.",
+          "entities": [
+            "User",
+            "Contact",
+            "Attachment"
+          ],
+          "actions": [
+            "Send message",
+            "Start call",
+            "View shared media",
+            "Block contact",
+            "Mute notifications"
+          ]
+        },
+        {
+          "id": "search",
+          "name": "Search",
+          "purpose": "Search messages, contacts, and conversations",
+          "visual": "Search bar. Tabs \u2014 messages, contacts, files. Results list.",
+          "entities": [
+            "Message",
+            "User",
+            "Attachment"
+          ],
+          "actions": [
+            "Search messages",
+            "Search contacts",
+            "Search files",
+            "Tap result to navigate"
+          ]
+        },
+        {
+          "id": "profile",
+          "name": "Own Profile",
+          "purpose": "Set own profile \u2014 avatar, name, status",
+          "visual": "Avatar upload. Name. Status selector. Bio.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Edit avatar",
+            "Edit name",
+            "Set status",
+            "Edit bio"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "App settings \u2014 notifications, privacy, account",
+          "visual": "Settings list. Notification settings. Privacy. Storage. Account.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Notification settings",
+            "Privacy settings",
+            "Storage management",
+            "Account settings",
+            "Log out"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "Message bubbles \u2014 sent messages right aligned, received left aligned",
+        "Typing indicator \u2014 animated dots in conversation",
+        "Read receipts \u2014 single tick sent, double tick delivered, filled double tick read",
+        "Long press message \u2014 context menu with react, reply, copy, delete",
+        "Swipe right on message to reply \u2014 quoted message appears in input",
+        "Emoji reaction picker \u2014 long press or double tap to react",
+        "Unread badge on conversation \u2014 bold conversation name",
+        "Online status dot on avatar \u2014 green online, grey offline"
+      ]
+    },
+    "startup": {
+      "tier": "Startup",
+      "description": "Full messaging app with voice and video calls, channels, file sharing, and reactions.",
+      "screen_count": 14,
+      "primary_flows": [
+        "All MVP flows",
+        "Start voice or video call \u2192 ring \u2192 recipient answers \u2192 talk \u2192 end call \u2192 view call history",
+        "Join channel \u2192 browse messages \u2192 participate \u2192 receive channel notifications",
+        "Share file \u2192 recipient previews \u2192 downloads file"
+      ],
+      "secondary_flows": [
+        "All MVP secondary flows",
+        "Pin important message",
+        "Forward message",
+        "Set custom notification per conversation",
+        "View contact's status story",
+        "Schedule message"
+      ],
+      "screens": [
+        {
+          "id": "conversations",
+          "name": "Conversations / Inbox",
+          "purpose": "Full inbox with starred, archived, and call history tabs",
+          "visual": "Tabs \u2014 chats, calls, channels. Starred conversations pinned. Unread count.",
+          "entities": [
+            "Conversation",
+            "Message",
+            "User",
+            "Call"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View calls tab",
+            "View channels tab",
+            "Star conversation",
+            "Archive conversation"
+          ]
+        },
+        {
+          "id": "chat",
+          "name": "Chat / Message Thread",
+          "purpose": "Rich chat with pinned messages, reactions, and scheduling",
+          "visual": "Thread. Pinned message banner. Rich reactions. Reply thread. Schedule icon in input.",
+          "entities": [
+            "Message",
+            "Conversation",
+            "User",
+            "Attachment"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Pin message",
+            "React with emoji",
+            "Open reply thread",
+            "Schedule message",
+            "Forward message"
+          ]
+        },
+        {
+          "id": "reply_thread",
+          "name": "Reply Thread",
+          "purpose": "Threaded replies on a specific message",
+          "visual": "Original message at top. Thread replies below. Reply input.",
+          "entities": [
+            "Message",
+            "User"
+          ],
+          "actions": [
+            "View thread replies",
+            "Add reply to thread",
+            "React in thread",
+            "Navigate back to main chat"
+          ]
+        },
+        {
+          "id": "calls",
+          "name": "Calls",
+          "purpose": "Initiate and view call history",
+          "visual": "Call history list. Incoming, outgoing, missed badges. Call back CTA.",
+          "entities": [
+            "Call",
+            "User"
+          ],
+          "actions": [
+            "View call history",
+            "Call back",
+            "Start new voice call",
+            "Start new video call",
+            "Filter by missed"
+          ]
+        },
+        {
+          "id": "voice_video_call",
+          "name": "Voice / Video Call",
+          "purpose": "Active call screen with controls",
+          "visual": "Full-screen video or audio call. Controls \u2014 mute, camera, speaker, end. Timer.",
+          "entities": [
+            "Call",
+            "User"
+          ],
+          "actions": [
+            "Mute or unmute",
+            "Toggle camera",
+            "Speaker toggle",
+            "Switch to video from voice",
+            "Add participant",
+            "End call"
+          ]
+        },
+        {
+          "id": "channels",
+          "name": "Channels",
+          "purpose": "Browse and join topic-based channels",
+          "visual": "Channel list. Member count. Last activity. Join CTA.",
+          "entities": [
+            "Channel",
+            "Message",
+            "User"
+          ],
+          "actions": [
+            "Browse channels",
+            "Join channel",
+            "Search channels",
+            "View channel info",
+            "Pin channel"
+          ]
+        },
+        {
+          "id": "channel_detail",
+          "name": "Channel / Group Thread",
+          "purpose": "Channel messages \u2014 organised topic communication",
+          "visual": "Channel header with topic. Message feed. Pinned messages. Member count.",
+          "entities": [
+            "Channel",
+            "Message",
+            "User",
+            "Attachment"
+          ],
+          "actions": [
+            "Read messages",
+            "Send message",
+            "React",
+            "Reply in thread",
+            "View pinned messages",
+            "View members",
+            "Leave channel"
+          ]
+        },
+        {
+          "id": "media_files",
+          "name": "Media & Files",
+          "purpose": "All shared media and files in a conversation",
+          "visual": "Tabs \u2014 media, files, links. Media grid. File list with download.",
+          "entities": [
+            "Attachment",
+            "Conversation"
+          ],
+          "actions": [
+            "View all media",
+            "View all files",
+            "Download file",
+            "Share file",
+            "View links shared"
+          ]
+        },
+        {
+          "id": "new_conversation",
+          "name": "New Conversation",
+          "purpose": "Start 1-1, group, or channel",
+          "visual": "Tabs \u2014 new chat, new group, new channel. Contact search.",
+          "entities": [
+            "User",
+            "Contact",
+            "Conversation"
+          ],
+          "actions": [
+            "New 1-1 chat",
+            "New group",
+            "Create channel"
+          ]
+        },
+        {
+          "id": "group_info",
+          "name": "Group / Channel Info",
+          "purpose": "Full info with media, admin controls, and notifications",
+          "visual": "Avatar. Name. Members. Media. Admin controls. Notification toggle.",
+          "entities": [
+            "Group",
+            "User",
+            "Attachment"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Promote to admin",
+            "Remove member",
+            "Custom notifications"
+          ]
+        },
+        {
+          "id": "contact_profile",
+          "name": "Contact Profile",
+          "purpose": "Full contact with call options and mutual groups",
+          "visual": "Avatar. Status. Online time. Mutual groups. Media. Actions.",
+          "entities": [
+            "User",
+            "Contact",
+            "Attachment"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View mutual groups",
+            "Video call"
+          ]
+        },
+        {
+          "id": "status",
+          "name": "Status / Stories",
+          "purpose": "24-hour status updates from contacts",
+          "visual": "Status circles row. Full-screen status view. Reactions.",
+          "entities": [
+            "Status",
+            "User"
+          ],
+          "actions": [
+            "View contact status",
+            "React to status",
+            "Post own status",
+            "View who saw status"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "purpose": "All message, call, and channel notifications",
+          "visual": "Notification list. Message preview. Call missed. Channel mention.",
+          "entities": [
+            "Notification",
+            "Message",
+            "Call"
+          ],
+          "actions": [
+            "View all",
+            "Tap to navigate",
+            "Mark read",
+            "Manage per-conversation notifications"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "Full settings with call quality, storage, and privacy",
+          "visual": "Settings list. Call quality. Storage. Privacy. Notification. Account.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Call quality settings",
+            "Storage usage and clear",
+            "Privacy \u2014 last seen, read receipts"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP interaction patterns",
+        "Pinned message banner at top of chat \u2014 tap to jump to message",
+        "Incoming call screen \u2014 full-screen overlay with accept and decline",
+        "Video call \u2014 tap to show or hide controls",
+        "Thread badge \u2014 shows reply count on message in main thread",
+        "Channel mention @name \u2014 highlighted in accent colour",
+        "Status ring on avatar \u2014 colour indicates status or story available",
+        "Forward message \u2014 contact picker slides up"
+      ]
+    },
+    "scale": {
+      "tier": "Scale",
+      "description": "Enterprise messaging platform with workspaces, bots, integrations, compliance, and admin.",
+      "screen_count": 22,
+      "primary_flows": [
+        "All MVP and Startup flows",
+        "Enterprise admin creates workspace \u2192 adds teams \u2192 sets permissions \u2192 members onboard via SSO",
+        "Set up bot \u2192 configure commands \u2192 bot responds to triggers in channels",
+        "Connect integration \u2192 app posts updates to channel automatically \u2192 team notified",
+        "Compliance admin exports message history \u2192 satisfies audit requirement",
+        "Group video call with 50+ participants \u2014 breakout rooms, screen share, recording"
+      ],
+      "secondary_flows": [
+        "All previous secondary flows",
+        "Screen sharing in calls",
+        "Call recording with consent",
+        "Message retention policies",
+        "Custom emoji and reactions",
+        "Workflow automation from messages"
+      ],
+      "screens": [
+        {
+          "id": "conversations",
+          "name": "Conversations / Inbox",
+          "purpose": "Workspace-aware inbox with team channels and DMs",
+          "visual": "Workspace sidebar. Channels section. DMs section. Threads. Activity.",
+          "entities": [
+            "Conversation",
+            "Message",
+            "User",
+            "Call",
+            "Channel"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Switch workspace",
+            "View activity feed",
+            "View threads view"
+          ]
+        },
+        {
+          "id": "chat",
+          "name": "Chat / Message Thread",
+          "purpose": "Rich enterprise chat with workflow triggers and bookmarks",
+          "visual": "Thread. Bookmark icon. Workflow trigger from message. Slash commands.",
+          "entities": [
+            "Message",
+            "Conversation",
+            "User",
+            "Attachment"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Bookmark message",
+            "Trigger workflow from message",
+            "Use slash commands"
+          ]
+        },
+        {
+          "id": "reply_thread",
+          "name": "Reply Thread",
+          "purpose": "Threaded discussion with follow thread option",
+          "visual": "Original message. Replies. Follow thread toggle. Reply input.",
+          "entities": [
+            "Message",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Follow thread \u2014 get notifications"
+          ]
+        },
+        {
+          "id": "calls",
+          "name": "Calls & Meetings",
+          "purpose": "Full call history with scheduled meetings",
+          "visual": "Call history. Scheduled meetings section. Join meeting CTA.",
+          "entities": [
+            "Call",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View scheduled meetings",
+            "Join upcoming meeting"
+          ]
+        },
+        {
+          "id": "voice_video_call",
+          "name": "Voice / Video Call / Meeting",
+          "purpose": "Enterprise meeting with screen share, recording, breakout rooms",
+          "visual": "Grid view of participants. Controls \u2014 mute, camera, share, record, rooms. Timer.",
+          "entities": [
+            "Call",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Share screen",
+            "Record meeting with consent",
+            "Create breakout rooms",
+            "Raise hand",
+            "Meeting transcription"
+          ]
+        },
+        {
+          "id": "channels",
+          "name": "Channels / Workspaces",
+          "purpose": "Channel browser with public, private, and archived",
+          "visual": "Tabs \u2014 all, public, private, archived. Create channel CTA.",
+          "entities": [
+            "Channel",
+            "Message",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Filter by type",
+            "View archived channels",
+            "Create channel with permissions"
+          ]
+        },
+        {
+          "id": "channel_detail",
+          "name": "Channel Thread",
+          "purpose": "Full channel with bookmarks, integrations, and canvas",
+          "visual": "Channel header. Integration activity posts. Canvas tab. Bookmarks tab.",
+          "entities": [
+            "Channel",
+            "Message",
+            "User",
+            "Attachment"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View integration posts",
+            "Open canvas",
+            "View bookmarks"
+          ]
+        },
+        {
+          "id": "canvas",
+          "name": "Canvas / Shared Doc",
+          "purpose": "Collaborative document inside a channel or DM",
+          "visual": "Rich text editor. Embed content. Share. Version history.",
+          "entities": [
+            "Message",
+            "Channel",
+            "User"
+          ],
+          "actions": [
+            "Write in canvas",
+            "Embed image or file",
+            "Mention user",
+            "Share canvas",
+            "View version history"
+          ]
+        },
+        {
+          "id": "media_files",
+          "name": "Media & Files",
+          "purpose": "Organisation-wide file management",
+          "visual": "Files from all channels. Filter by type. Storage meter.",
+          "entities": [
+            "Attachment",
+            "Conversation"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Browse organisation files",
+            "View storage usage"
+          ]
+        },
+        {
+          "id": "bots",
+          "name": "Bots & Apps",
+          "purpose": "Install and configure bots and app integrations in channels",
+          "visual": "Bot and app directory. Installed list. Configure CTA. Bot activity log.",
+          "entities": [
+            "Bot",
+            "Channel"
+          ],
+          "actions": [
+            "Browse bot directory",
+            "Install bot",
+            "Configure bot",
+            "Add bot to channel",
+            "View bot activity"
+          ]
+        },
+        {
+          "id": "integrations",
+          "name": "Integrations",
+          "purpose": "Connect external apps \u2014 post to channels, trigger workflows",
+          "visual": "Integration cards. Connected status. Channel assignment. Configure.",
+          "entities": [
+            "Channel",
+            "Organisation"
+          ],
+          "actions": [
+            "Browse integrations",
+            "Connect integration",
+            "Assign to channel",
+            "Configure triggers",
+            "Disconnect"
+          ]
+        },
+        {
+          "id": "automations",
+          "name": "Workflow Automations",
+          "purpose": "Set trigger-action automations from messages or events",
+          "visual": "Workflow list. Builder. Trigger selector. Action chain.",
+          "entities": [
+            "Message",
+            "Channel",
+            "User"
+          ],
+          "actions": [
+            "Create workflow",
+            "Set message trigger",
+            "Add actions",
+            "Test workflow",
+            "Enable or disable"
+          ]
+        },
+        {
+          "id": "admin_workspace",
+          "name": "Admin \u2014 Workspace Settings",
+          "purpose": "Workspace configuration \u2014 SSO, permissions, retention",
+          "visual": "Admin sidebar. General. Members. Permissions. Retention. Security.",
+          "entities": [
+            "Organisation",
+            "User"
+          ],
+          "actions": [
+            "Configure SSO",
+            "Set member permissions",
+            "Set message retention policy",
+            "View workspace usage stats"
+          ]
+        },
+        {
+          "id": "admin_members",
+          "name": "Admin \u2014 Member Management",
+          "purpose": "Manage all workspace members and roles",
+          "visual": "Member table. Role badge. Deactivate CTA. Guest member indicator.",
+          "entities": [
+            "User",
+            "Organisation"
+          ],
+          "actions": [
+            "View all members",
+            "Change role",
+            "Deactivate member",
+            "Invite member",
+            "Manage guest access"
+          ]
+        },
+        {
+          "id": "compliance_export",
+          "name": "Compliance & Export",
+          "purpose": "Export message history for audit and compliance",
+          "visual": "Export form. Date range. Channel selector. Format selector. Download.",
+          "entities": [
+            "Message",
+            "Organisation"
+          ],
+          "actions": [
+            "Select date range",
+            "Select channels",
+            "Select export format",
+            "Start export",
+            "Download export"
+          ]
+        },
+        {
+          "id": "analytics_admin",
+          "name": "Admin \u2014 Analytics",
+          "purpose": "Workspace usage \u2014 active users, messages, channels, calls",
+          "visual": "DAU chart. Message volume. Channel activity. Call usage. Export.",
+          "entities": [
+            "User",
+            "Message",
+            "Channel"
+          ],
+          "actions": [
+            "View DAU",
+            "View message volume",
+            "View channel activity",
+            "View call usage",
+            "Export report"
+          ]
+        },
+        {
+          "id": "search",
+          "name": "Search",
+          "purpose": "Enterprise-wide search across all channels and files",
+          "visual": "Search bar. Filters \u2014 from, in, date. Results with context.",
+          "entities": [
+            "Message",
+            "User",
+            "Attachment"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Filter by sender",
+            "Filter by channel",
+            "Filter by date range",
+            "Search in files"
+          ]
+        },
+        {
+          "id": "activity",
+          "name": "Activity Feed",
+          "purpose": "All mentions, replies, and reactions directed at the user",
+          "visual": "Activity list. Mentions tab. Threads tab. Reactions tab.",
+          "entities": [
+            "Notification",
+            "Message",
+            "User"
+          ],
+          "actions": [
+            "View all activity",
+            "Filter by type",
+            "Mark all read",
+            "Navigate to message"
+          ]
+        },
+        {
+          "id": "bookmarks",
+          "name": "Bookmarks",
+          "purpose": "Saved messages and files across all conversations",
+          "visual": "Bookmarks list. Conversation source. Jump to message.",
+          "entities": [
+            "Message",
+            "User"
+          ],
+          "actions": [
+            "View all bookmarks",
+            "Jump to message",
+            "Remove bookmark",
+            "Organise by folder"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "purpose": "Priority notifications with do not disturb schedule",
+          "visual": "Notification list. DND schedule. Priority senders. Per-channel settings.",
+          "entities": [
+            "Notification",
+            "Message",
+            "Call"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Set DND schedule",
+            "Add priority senders",
+            "Per-channel notification settings"
+          ]
+        },
+        {
+          "id": "profile",
+          "name": "Own Profile",
+          "purpose": "Enterprise profile with status, timezone, and pronouns",
+          "visual": "Avatar. Status with expiry. Timezone. Pronouns. Contact info.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Set custom status with expiry",
+            "Set timezone",
+            "Add pronouns",
+            "Edit contact info"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "Enterprise settings with accessibility, theme, and security",
+          "visual": "Full settings sidebar. Theme. Accessibility. Two-factor. Devices. Privacy.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Theme settings",
+            "Accessibility settings",
+            "Manage trusted devices",
+            "Two-factor settings"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP and Startup interaction patterns",
+        "Slash command autocomplete \u2014 / triggers command list in input",
+        "Breakout room assignment \u2014 drag and drop members into rooms",
+        "Screen share request \u2014 permission overlay on recipient screen",
+        "Meeting transcription indicator \u2014 live text scrolls during call",
+        "Integration post \u2014 distinct visual style in channel \u2014 app icon + formatted message",
+        "Retention policy banner on channel \u2014 messages delete after X days indicator",
+        "Workflow trigger button on message \u2014 action button below message",
+        "Custom status \u2014 emoji + text + expiry time \u2014 shows next to name everywhere"
+      ]
+    }
+  }
+}

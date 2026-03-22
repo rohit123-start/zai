@@ -4,63 +4,12 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import {
   getMessages,
   saveMessage,
-  saveArtifacts,
-  getDesignGuideline,
   deleteMessages,
-  upsertProjectPage,
-  deleteProjectPages,
   upsertProjectFile,
   deleteProjectFiles,
-  type ProjectPage,
   type ProjectFile,
 } from "@/lib/db";
 import { parseFilesFromText, isMultiFileResponse } from "@/utils/parseFiles";
-import { parseArtifactsFromMessages } from "@/utils/parseArtifacts";
-
-// ─── DG helpers ───────────────────────────────────────────────────────────────
-
-function hasCodeBlock(text: string): boolean {
-  return /```\w+/.test(text);
-}
-
-async function callDgExtract(
-  artifactHtml: string,
-  projectId: string,
-  userId: string
-): Promise<string | null> {
-  try {
-    const res = await fetch("/api/dg/extract", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ artifactHtml, projectId, userId }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.dg ?? null;
-  } catch {
-    return null;
-  }
-}
-
-async function callDgSync(
-  artifactHtml: string,
-  currentDg: string,
-  projectId: string,
-  userId: string
-): Promise<string | null> {
-  try {
-    const res = await fetch("/api/dg/sync", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ artifactHtml, currentDg, projectId, userId }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.changed ? data.dg : null;
-  } catch {
-    return null;
-  }
-}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -82,24 +31,22 @@ export type Message = {
 export type PersistConfig = {
   projectId: string;
   userId: string;
-  pages?: ProjectPage[];
   files?: ProjectFile[];
-  onPagesUpdate?: (pages: ProjectPage[]) => void;
   onFilesUpdate?: (files: ProjectFile[]) => void;
 };
 
 // ─── Context compression ──────────────────────────────────────────────────────
 
-// Produces a compact summary of an assistant message that contained code.
-// Full HTML is stripped; only intent + metadata kept.
+function hasCodeBlock(text: string): boolean {
+  return /```\w+/.test(text);
+}
+
 function summariseAssistantMessage(content: string): string {
-  // Extract any explanatory prose (non-code lines)
   const prose = content
-    .replace(/```[\s\S]*?```/g, "")         // remove fenced blocks
-    .replace(/---\s*FILE:[\s\S]*$/m, "")    // remove --- FILE: blocks
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/---\s*FILE:[\s\S]*$/m, "")
     .trim();
 
-  // Count artifacts / files
   const fenceMatches = [...content.matchAll(/```(\w+)(?::([^\n`]+))?/g)];
   const fileMatches  = [...content.matchAll(/---\s*FILE:\s*([^\n-]+)/g)];
 
@@ -120,9 +67,6 @@ function summariseAssistantMessage(content: string): string {
   return parts.join("\n") || "[Code output]";
 }
 
-// Compresses the messages array before sending to the API:
-// - Assistant messages containing code → summary only
-// - All other messages → unchanged
 type ApiMessage = { role: string; content: ReturnType<typeof buildContent> };
 function compressForAPI(messages: Message[]): ApiMessage[] {
   return messages.map((m) => {
@@ -168,11 +112,7 @@ export function useChat(persist?: PersistConfig) {
   const persistRef = useRef(persist);
   persistRef.current = persist;
 
-  const [projectDG, setProjectDG] = useState<string | null>(null);
-  const projectDGRef = useRef<string | null>(null);
-  projectDGRef.current = projectDG;
-
-  // Load messages + DG for this project
+  // Load messages for this project
   useEffect(() => {
     if (!persist?.projectId) {
       setMessages([]);
@@ -182,16 +122,11 @@ export function useChat(persist?: PersistConfig) {
     setIsLoading(true);
     setMessages([]);
 
-    Promise.all([
-      getMessages(persist.projectId).then((rows) =>
+    getMessages(persist.projectId)
+      .then((rows) =>
         rows.map((r) => ({ id: r.id, role: r.role as Role, content: r.content }))
-      ),
-      getDesignGuideline(persist.projectId),
-    ])
-      .then(([msgs, dg]) => {
-        setMessages(msgs);
-        setProjectDG(dg?.dg ?? null);
-      })
+      )
+      .then(setMessages)
       .catch(console.error)
       .finally(() => setIsLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -218,7 +153,6 @@ export function useChat(persist?: PersistConfig) {
       setMessages(updatedMessages);
       setIsStreaming(true);
 
-      // Persist user message (fire-and-forget)
       if (p) {
         saveMessage(
           p.projectId,
@@ -236,29 +170,19 @@ export function useChat(persist?: PersistConfig) {
       ]);
 
       const finalContentRef = { current: "" };
-      const dgContext: string | null = projectDGRef.current ?? null;
 
       try {
         const controller = new AbortController();
         abortControllerRef.current = controller;
 
-        // Keep last 20 messages max; always preserve the first (original brief).
         const HISTORY_LIMIT = 20;
         const trimmed =
           updatedMessages.length > HISTORY_LIMIT
             ? [updatedMessages[0], ...updatedMessages.slice(-(HISTORY_LIMIT - 1))]
             : updatedMessages;
 
-        // Compress: replace HTML/code in assistant messages with summaries.
-        // Full code is injected once via currentPages/currentFiles below.
         const compressed = compressForAPI(trimmed);
 
-        // Current page state from DB — injected into system prompt server-side
-        const p = persistRef.current;
-        const currentPages = (p?.pages ?? []).map((pg) => ({
-          name: pg.page_name,
-          html: pg.html_content,
-        }));
         const currentFiles = (p?.files ?? []).map((f) => ({
           path: f.file_path,
           content: f.content,
@@ -269,8 +193,6 @@ export function useChat(persist?: PersistConfig) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             messages: compressed,
-            dgContext,
-            currentPages: currentPages.length > 0 ? currentPages : undefined,
             currentFiles: currentFiles.length > 0 ? currentFiles : undefined,
             projectId: p?.projectId,
             userId: p?.userId,
@@ -322,80 +244,21 @@ export function useChat(persist?: PersistConfig) {
           }
         }
 
-        // Persist assistant message + artifacts + pages + DG sync
+        // Persist assistant message + project files
         if (p && finalContentRef.current) {
           try {
-            const dbMsg = await saveMessage(
-              p.projectId,
-              p.userId,
-              "assistant",
-              finalContentRef.current
-            );
+            await saveMessage(p.projectId, p.userId, "assistant", finalContentRef.current);
 
-            const artifacts = parseArtifactsFromMessages([
-              { role: "assistant", content: finalContentRef.current },
-            ]).filter((a) => !a.partial);
-
-            if (artifacts.length > 0) {
-              await saveArtifacts(
-                artifacts.map(({ title, language, content }) => ({ title, language, content })),
-                p.projectId,
-                p.userId,
-                dbMsg.id
-              );
-
-              // ── Multi-file format (--- FILE: path ---) ────────────────────
-              if (isMultiFileResponse(finalContentRef.current)) {
-                const parsedFiles = parseFilesFromText(finalContentRef.current);
-                const completeFiles = parsedFiles.filter((f) => !f.partial);
-                if (completeFiles.length > 0) {
-                  const upserted: ProjectFile[] = await Promise.all(
-                    completeFiles.map((f) =>
-                      upsertProjectFile(p.projectId, p.userId, f.path, f.content)
-                    )
-                  );
-                  p.onFilesUpdate?.(upserted);
-                }
-              } else {
-                // ── html:PageName or plain html format ─────────────────────
-                const htmlArtifacts = artifacts.filter((a) => a.language === "html");
-                if (htmlArtifacts.length > 0 && p.onPagesUpdate) {
-                  const upserted: ProjectPage[] = await Promise.all(
-                    htmlArtifacts.map((a) =>
-                      upsertProjectPage(
-                        p.projectId,
-                        p.userId,
-                        a.pageName ?? "Home",
-                        a.content
-                      )
-                    )
-                  );
-                  p.onPagesUpdate(upserted);
-                } else if (htmlArtifacts.length > 0) {
-                  htmlArtifacts.forEach((a) =>
-                    upsertProjectPage(
-                      p.projectId,
-                      p.userId,
-                      a.pageName ?? "Home",
-                      a.content
-                    ).catch(console.error)
-                  );
-                }
-              }
-
-              // Only run DG extract/sync for HTML artifacts with meaningful content (>500 chars)
-              const htmlArtifact = artifacts.find((a) => a.language === "html");
-              if (htmlArtifact && htmlArtifact.content.length > 500) {
-                const currentDG = projectDGRef.current;
-                if (!currentDG) {
-                  const dg = await callDgExtract(htmlArtifact.content, p.projectId, p.userId);
-                  if (dg) setProjectDG(dg);
-                } else {
-                  const updated = await callDgSync(
-                    htmlArtifact.content, currentDG, p.projectId, p.userId
-                  );
-                  if (updated) setProjectDG(updated);
-                }
+            if (isMultiFileResponse(finalContentRef.current)) {
+              const parsedFiles = parseFilesFromText(finalContentRef.current);
+              const completeFiles = parsedFiles.filter((f) => !f.partial);
+              if (completeFiles.length > 0) {
+                const upserted: ProjectFile[] = await Promise.all(
+                  completeFiles.map((f) =>
+                    upsertProjectFile(p.projectId, p.userId, f.path, f.content)
+                  )
+                );
+                p.onFilesUpdate?.(upserted);
               }
             }
           } catch (err) {
@@ -424,26 +287,17 @@ export function useChat(persist?: PersistConfig) {
     [messages, isStreaming]
   );
 
-  // Clears chat messages from memory and DB
   const clearMessages = useCallback(() => {
     setMessages([]);
-    setProjectDG(null);
     const p = persistRef.current;
     if (p) deleteMessages(p.projectId).catch(console.error);
   }, []);
 
-  // Deletes all project pages + files from DB and notifies parent
   const deletePages = useCallback(() => {
     const p = persistRef.current;
     if (!p) return;
-    Promise.all([
-      deleteProjectPages(p.projectId),
-      deleteProjectFiles(p.projectId),
-    ])
-      .then(() => {
-        p.onPagesUpdate?.([]);
-        p.onFilesUpdate?.([]);
-      })
+    deleteProjectFiles(p.projectId)
+      .then(() => p.onFilesUpdate?.([]))
       .catch(console.error);
   }, []);
 

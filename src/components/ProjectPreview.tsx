@@ -3,9 +3,8 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { type ProjectPage, type ProjectFile } from "@/lib/db";
+import { type ProjectFile } from "@/lib/db";
 import { type Message } from "@/hooks/useChat";
-import { useArtifacts } from "@/hooks/useArtifacts";
 import {
   parseFilesFromText,
   isMultiFileResponse,
@@ -13,7 +12,7 @@ import {
   getDisplayName,
   type ParsedFile,
 } from "@/utils/parseFiles";
-import { buildFileMap, stitchPage, stitchLegacyPage, fileLanguage, resolveNavigationTarget } from "@/utils/stitcher";
+import { buildFileMap, stitchPage, fileLanguage, resolveNavigationTarget } from "@/utils/stitcher";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -21,7 +20,6 @@ type ViewMode = "preview" | "code" | "files";
 type ViewportSize = "mobile" | "tablet" | "desktop";
 
 type Props = {
-  pages: ProjectPage[];
   files: ProjectFile[];
   pagesLoading: boolean;
   messages: Message[];
@@ -261,7 +259,6 @@ function FileTree({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function ProjectPreview({
-  pages,
   files,
   pagesLoading,
   messages,
@@ -276,10 +273,7 @@ export default function ProjectPreview({
   const [copied, setCopied] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
 
-  // ── Streaming artifacts (live during stream) ───────────────────────────────
-  const streamingArtifacts = useArtifacts(messages);
-
-  // Detect if current stream is using multi-file format
+  // Detect streaming multi-file format
   const lastAssistantContent = messages.findLast?.((m) => m.role === "assistant")?.content ?? "";
   const streamIsMultiFile = isStreaming && isMultiFileResponse(lastAssistantContent);
 
@@ -294,41 +288,18 @@ export default function ProjectPreview({
 
   // ── Determine pages to show ────────────────────────────────────────────────
 
-  // Multi-file mode: get page paths from project_files
   const dbFilePaths = files.map((f) => f.file_path);
   const dbPagePaths = dbFilePaths.filter((p) => p.startsWith("pages/") && p.endsWith(".html"));
 
-  // Legacy mode: page names from project_pages
-  const dbPageNames = pages.map((p) => p.page_name);
-
-  // Streaming page paths (for multi-file stream)
   const streamingPagePaths = [...streamingPaths].filter((p) => p.startsWith("pages/") && p.endsWith(".html"));
   const newStreamingPagePaths = streamingPagePaths.filter((p) => !dbPagePaths.includes(p));
 
-  // Streaming legacy pages (html:PageName format)
-  const streamingLegacyMap = new Map(
-    streamingArtifacts
-      .filter((a) => a.language === "html" && a.pageName && !streamIsMultiFile)
-      .map((a) => [a.pageName!, a])
-  );
-  const unnamedLegacyArtifact = !streamIsMultiFile
-    ? streamingArtifacts.find((a) => a.language === "html" && !a.pageName)
-    : undefined;
+  const allPageTabs: string[] = [
+    ...dbPagePaths,
+    ...newStreamingPagePaths,
+  ];
 
-  // Combined list of tabs (either file paths or page names)
-  const isFileMode = dbFilePaths.length > 0 || streamIsMultiFile;
-  const allPageTabs: string[] = isFileMode
-    ? [
-        ...dbPagePaths,
-        ...newStreamingPagePaths,
-      ]
-    : [
-        ...dbPageNames,
-        ...[...streamingLegacyMap.keys()].filter((n) => !dbPageNames.includes(n)),
-        ...(unnamedLegacyArtifact && dbPageNames.length === 0 && streamingLegacyMap.size === 0 ? ["Home"] : []),
-      ];
-
-  const hasAnyStreaming = isStreaming && (streamIsMultiFile || streamingLegacyMap.size > 0 || !!unnamedLegacyArtifact);
+  const hasAnyStreaming = isStreaming && streamIsMultiFile;
 
   // Resolve active page tab
   const activeTab =
@@ -340,7 +311,6 @@ export default function ProjectPreview({
 
   function resolveContent(): { html: string; isPartial: boolean; lang: string } | null {
     if (viewMode === "files" && selectedFilePath) {
-      // Show raw file content
       const streamFile = streamingFileMap.get(selectedFilePath);
       if (streamFile) return { html: streamFile.content, isPartial: !!streamFile.partial, lang: fileLanguage(selectedFilePath) };
       const dbFile = files.find((f) => f.file_path === selectedFilePath);
@@ -350,57 +320,27 @@ export default function ProjectPreview({
 
     if (!activeTab) return null;
 
-    if (isFileMode) {
-      // ── Multi-file mode ─────────────────────────────────────────────────
-      if (viewMode === "code") {
-        // Show raw page HTML
-        const streaming = streamingFileMap.get(activeTab);
-        if (streaming) return { html: streaming.content, isPartial: !!streaming.partial, lang: "html" };
-        const dbFile = files.find((f) => f.file_path === activeTab);
-        if (dbFile) return { html: dbFile.content, isPartial: false, lang: "html" };
-        return null;
-      }
-
-      // Preview mode: stitch the page
-      const allAvailableFiles = [
-        ...files,
-        ...streamingFiles.map((f) => ({ file_path: f.path, content: f.content })),
-      ];
-      // Streaming files override DB files
-      const mergedMap = buildFileMap([
-        ...allAvailableFiles,
-        ...streamingFiles.map((f) => ({ file_path: f.path, content: f.content })),
-      ]);
-
-      const streamingPage = streamingFileMap.get(activeTab);
-      if (streamingPage?.partial) {
-        // Still writing this page
-        return { html: streamingPage.content, isPartial: true, lang: "html" };
-      }
-
-      const stitched = stitchPage(activeTab, mergedMap);
-      return stitched ? { html: stitched, isPartial: false, lang: "html" } : null;
-    } else {
-      // ── Legacy page mode (html:PageName or plain html) ─────────────────
-      const streaming = streamingLegacyMap.get(activeTab);
-      if (streaming) return {
-        html: streaming.partial ? streaming.content : stitchLegacyPage(streaming.content),
-        isPartial: !!streaming.partial,
-        lang: "html",
-      };
-
-      if (unnamedLegacyArtifact && activeTab === "Home" && dbPageNames.length === 0) {
-        return {
-          html: unnamedLegacyArtifact.partial ? unnamedLegacyArtifact.content : stitchLegacyPage(unnamedLegacyArtifact.content),
-          isPartial: !!unnamedLegacyArtifact.partial,
-          lang: "html",
-        };
-      }
-
-      const dbPage = pages.find((p) => p.page_name === activeTab);
-      if (dbPage) return { html: stitchLegacyPage(dbPage.html_content), isPartial: false, lang: "html" };
+    if (viewMode === "code") {
+      const streaming = streamingFileMap.get(activeTab);
+      if (streaming) return { html: streaming.content, isPartial: !!streaming.partial, lang: "html" };
+      const dbFile = files.find((f) => f.file_path === activeTab);
+      if (dbFile) return { html: dbFile.content, isPartial: false, lang: "html" };
       return null;
     }
+
+    // Preview mode: stitch the page
+    const mergedMap = buildFileMap([
+      ...files.map((f) => ({ file_path: f.file_path, content: f.content })),
+      ...streamingFiles.map((f) => ({ file_path: f.path, content: f.content })),
+    ]);
+
+    const streamingPage = streamingFileMap.get(activeTab);
+    if (streamingPage?.partial) {
+      return { html: streamingPage.content, isPartial: true, lang: "html" };
+    }
+
+    const stitched = stitchPage(activeTab, mergedMap);
+    return stitched ? { html: stitched, isPartial: false, lang: "html" } : null;
   }
 
   const activeContent = resolveContent();
@@ -469,7 +409,7 @@ export default function ProjectPreview({
               {totalPageCount} {totalPageCount === 1 ? "page" : "pages"}
             </span>
           )}
-          {isFileMode && allFilesForTree.length > 0 && (
+          {allFilesForTree.length > 0 && (
             <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: "#252525", color: "#6b7280" }}>
               {allFilesForTree.length} files
             </span>
@@ -498,7 +438,7 @@ export default function ProjectPreview({
         <div className="flex items-center gap-0.5 px-3 shrink-0 overflow-x-auto" style={{ height: "38px", borderBottom: "1px solid #252525", background: "#111" }}>
           {allPageTabs.map((tab) => {
             const isActive = tab === activeTab;
-            const label = isFileMode ? getDisplayName(tab) : tab;
+            const label = getDisplayName(tab);
             const isTabStreaming = streamingPaths.has(tab) && streamingFileMap.get(tab)?.partial;
             return (
               <button
@@ -514,7 +454,7 @@ export default function ProjectPreview({
                 onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.color = "#d1d5db"; }}
                 onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.color = "#6b7280"; }}
               >
-                <FileIcon path={isFileMode ? tab : `pages/${tab}.html`} />
+                <FileIcon path={tab} />
                 <span>{label}</span>
                 {isTabStreaming && (
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#d97706", animation: "streamingGlow 0.8s ease-in-out infinite" }} />
@@ -529,7 +469,7 @@ export default function ProjectPreview({
       <div className="flex items-center justify-between px-3 shrink-0" style={{ height: "36px", borderBottom: "1px solid #252525", background: "#111" }}>
         {/* View mode */}
         <div className="flex items-center gap-0.5">
-          {(["preview", "code", ...(isFileMode ? ["files"] : [])] as ViewMode[]).map((mode) => (
+          {(["preview", "code", "files"] as ViewMode[]).map((mode) => (
             <button
               key={mode}
               onClick={() => setViewMode(mode)}

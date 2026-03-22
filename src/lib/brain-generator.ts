@@ -1,4 +1,4 @@
-import type { Project, StylePack, StylePackTokens, GlobalTokens, ProjectBrain } from "./db";
+import type { Project, Theme, ThemeTokens, GlobalTheme, ProjectBrain } from "./db";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -175,8 +175,8 @@ const DEFAULT_AESTHETIC: Aesthetic = {
 
 export function generateBrain(
   project: Project,
-  stylePack: StylePack,
-  globalTokens: GlobalTokens | null,
+  stylePack: Theme,
+  globalTokens: GlobalTheme | null,
   inputs: {
     screenshots: string[];
     inspiration_images: string[];
@@ -191,7 +191,7 @@ export function generateBrain(
     credits_reset?: string;
   }
 ): ProjectBrain {
-  const t: StylePackTokens = stylePack.tokens;
+  const t: ThemeTokens = stylePack.tokens;
   const now = new Date().toISOString();
   const today = now.slice(0, 10);
   const packName = stylePack.name;

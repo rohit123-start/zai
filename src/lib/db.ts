@@ -2,18 +2,9 @@ import { createClient } from "@/lib/supabase/client";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type DesignGuideline = {
-  id: string;
-  project_id: string;
-  user_id: string;
-  dg: string;
-  created_at: string;
-  updated_at: string;
-};
+// ─── Themes (formerly style_packs) ───────────────────────────────────────────
 
-// ─── Style packs ──────────────────────────────────────────────────────────────
-
-export type StylePackTokens = {
+export type ThemeTokens = {
   primary: string;
   primary_light: string;
   primary_dark: string;
@@ -36,15 +27,17 @@ export type StylePackTokens = {
   gradient_end?: string;
 };
 
-export type StylePack = {
+export type Theme = {
   id: string;
   industry: string;
   name: string;
-  tokens: StylePackTokens;
+  tokens: ThemeTokens;
   sort_order: number;
 };
 
-export type GlobalTokens = {
+// ─── Global theme (formerly global_tokens) ────────────────────────────────────
+
+export type GlobalTheme = {
   radius: Record<string, string>;
   spacing: Record<string, string>;
   font_sizes: Record<string, string>;
@@ -54,10 +47,10 @@ export type GlobalTokens = {
   breakpoints: Record<string, string>;
 };
 
-export async function getStylePacks(industry?: string): Promise<StylePack[]> {
+export async function getThemes(industry?: string): Promise<Theme[]> {
   const supabase = createClient();
   let query = supabase
-    .from("style_packs")
+    .from("themes")
     .select("*")
     .order("sort_order", { ascending: true });
   if (industry) query = query.eq("industry", industry);
@@ -66,15 +59,15 @@ export async function getStylePacks(industry?: string): Promise<StylePack[]> {
   return data ?? [];
 }
 
-export async function getStylePacksByIndustry(): Promise<Record<string, StylePack[]>> {
+export async function getThemesByIndustry(): Promise<Record<string, Theme[]>> {
   const supabase = createClient();
   const { data, error } = await supabase
-    .from("style_packs")
+    .from("themes")
     .select("*")
     .order("industry")
     .order("sort_order");
   if (error) throw error;
-  const grouped: Record<string, StylePack[]> = {};
+  const grouped: Record<string, Theme[]> = {};
   for (const pack of data ?? []) {
     if (!grouped[pack.industry]) grouped[pack.industry] = [];
     grouped[pack.industry].push(pack);
@@ -82,13 +75,13 @@ export async function getStylePacksByIndustry(): Promise<Record<string, StylePac
   return grouped;
 }
 
-export async function getGlobalTokens(): Promise<GlobalTokens | null> {
+export async function getGlobalTheme(): Promise<GlobalTheme | null> {
   const supabase = createClient();
   const { data } = await supabase
-    .from("global_tokens")
+    .from("global_theme")
     .select("tokens")
     .single();
-  return (data?.tokens as GlobalTokens) ?? null;
+  return (data?.tokens as GlobalTheme) ?? null;
 }
 
 export type ProjectBrain = {
@@ -211,7 +204,6 @@ export type ProjectBrain = {
     total_prompts: number;
     total_screens_generated: number;
   };
-  // Raw inputs preserved for re-generation
   _inputs: {
     screenshots: string[];
     inspiration_images: string[];
@@ -225,7 +217,6 @@ export type Project = {
   user_id: string;
   name: string;
   description: string | null;
-  // onboarding — step 1
   project_type: "existing_app" | "new_idea" | null;
   app_type: string | null;
   industry: string | null;
@@ -234,8 +225,9 @@ export type Project = {
   platform: string[] | null;
   core_features: string | null;
   setup_notes: string | null;
+  complexity: string | null;
+  features: string[] | null;
   setup_complete: boolean;
-  // onboarding — step 2
   style_pack: string | null;
   font_pairing: string | null;
   inspiration_images: string[] | null;
@@ -247,13 +239,12 @@ export type Project = {
 
 export type ProjectSetupStep1 = {
   name: string;
+  description: string;
   project_type: "existing_app" | "new_idea";
   app_type: string;
   industry: string;
-  primary_action: string;
-  target_user: string;
-  platform: string[];
-  core_features: string;
+  complexity: string;
+  features: string[];
   setup_notes?: string;
 };
 
@@ -265,18 +256,6 @@ export type DBMessage = {
   content: string;
   images: { mimeType: string }[] | null;
   created_at: string;
-};
-
-export type DBArtifact = {
-  id: string;
-  project_id: string;
-  user_id: string;
-  message_id: string | null;
-  title: string;
-  language: string;
-  content: string;
-  created_at: string;
-  updated_at: string;
 };
 
 // ─── Projects ─────────────────────────────────────────────────────────────────
@@ -317,14 +296,12 @@ export async function createProjectWithSetup(
     .insert({
       user_id: userId,
       name: setup.name,
-      description: null,
+      description: setup.description,
       project_type: setup.project_type,
       app_type: setup.app_type,
       industry: setup.industry,
-      primary_action: setup.primary_action,
-      target_user: setup.target_user,
-      platform: setup.platform,
-      core_features: setup.core_features,
+      complexity: setup.complexity,
+      features: setup.features,
       setup_notes: setup.setup_notes ?? null,
       setup_complete: false,
     })
@@ -445,98 +422,7 @@ export async function saveMessage(
   return data;
 }
 
-// ─── Artifacts (per project) ──────────────────────────────────────────────────
-
-export async function saveArtifacts(
-  artifacts: Array<{ title: string; language: string; content: string }>,
-  projectId: string,
-  userId: string,
-  messageId: string
-): Promise<void> {
-  if (!artifacts.length) return;
-  const supabase = createClient();
-  const { error } = await supabase.from("artifacts").insert(
-    artifacts.map((a) => ({
-      project_id: projectId,
-      user_id: userId,
-      message_id: messageId,
-      title: a.title,
-      language: a.language,
-      content: a.content,
-    }))
-  );
-  if (error) throw error;
-}
-
-export async function getArtifacts(projectId: string): Promise<DBArtifact[]> {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("artifacts")
-    .select("*")
-    .eq("project_id", projectId)
-    .order("created_at", { ascending: true });
-  if (error) throw error;
-  return data ?? [];
-}
-
-// ─── Project Pages (multi-page preview, one per page per project) ────────────
-
-export type ProjectPage = {
-  id: string;
-  project_id: string;
-  user_id: string;
-  page_name: string;
-  html_content: string;
-  created_at: string;
-  updated_at: string;
-};
-
-export async function getProjectPages(projectId: string): Promise<ProjectPage[]> {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("project_pages")
-    .select("*")
-    .eq("project_id", projectId)
-    .order("created_at", { ascending: true });
-  if (error) throw error;
-  return data ?? [];
-}
-
-export async function deleteProjectPages(projectId: string): Promise<void> {
-  const supabase = createClient();
-  const { error } = await supabase
-    .from("project_pages")
-    .delete()
-    .eq("project_id", projectId);
-  if (error) throw error;
-}
-
-export async function upsertProjectPage(
-  projectId: string,
-  userId: string,
-  pageName: string,
-  htmlContent: string
-): Promise<ProjectPage> {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("project_pages")
-    .upsert(
-      {
-        project_id: projectId,
-        user_id: userId,
-        page_name: pageName,
-        html_content: htmlContent,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "project_id,page_name" }
-    )
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
-}
-
-// ─── Project Files (file-based multi-page system) ────────────────────────────
+// ─── Project Files (single storage model) ────────────────────────────────────
 
 export type ProjectFile = {
   id: string;
@@ -592,8 +478,6 @@ export async function deleteProjectFiles(projectId: string): Promise<void> {
     .eq("project_id", projectId);
   if (error) throw error;
 }
-
-// ─── Design Guidelines (one per project) ─────────────────────────────────────
 
 // ─── Token Usage ─────────────────────────────────────────────────────────────
 
@@ -669,6 +553,73 @@ export async function getUserTokenSummary(
   };
 }
 
+// ─── Industries ───────────────────────────────────────────────────────────────
+
+export type Industry = {
+  id: string;
+  slug: string;
+  name: string;
+  valid_app_types: string[];
+  brain: Record<string, unknown>;
+  sort_order: number;
+  created_at: string;
+};
+
+export async function getIndustries(): Promise<Industry[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("industries")
+    .select("id, slug, name, valid_app_types, sort_order, created_at")
+    .order("sort_order", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as Industry[];
+}
+
+export async function getIndustry(slug: string): Promise<Industry | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("industries")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+  if (error) return null;
+  return data as Industry;
+}
+
+// ─── Products (archetypes / app types) ────────────────────────────────────────
+
+export type Product = {
+  id: string;
+  archetype_id: string;
+  name: string;
+  description: string | null;
+  valid_industries: string[];
+  brain: Record<string, unknown>;
+  sort_order: number;
+  created_at: string;
+};
+
+export async function getProducts(): Promise<Product[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select("id, archetype_id, name, description, valid_industries, sort_order, created_at")
+    .order("sort_order", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as Product[];
+}
+
+export async function getProductsForIndustry(industryName: string): Promise<Product[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select("id, archetype_id, name, description, valid_industries, sort_order, created_at")
+    .contains("valid_industries", [industryName])
+    .order("sort_order", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as Product[];
+}
+
 // ─── Project Collaborators ────────────────────────────────────────────────────
 
 export type CollaboratorRole = "owner" | "editor" | "viewer";
@@ -680,7 +631,6 @@ export type ProjectCollaborator = {
   role: CollaboratorRole;
   invited_by: string | null;
   created_at: string;
-  // joined from auth.users via API
   email?: string;
   display_name?: string;
   avatar_url?: string;
@@ -695,19 +645,3 @@ export type ProjectInvitation = {
   status: "pending" | "accepted";
   created_at: string;
 };
-
-// ─── Design Guidelines (one per project) ─────────────────────────────────────
-
-export async function getDesignGuideline(
-  projectId: string
-): Promise<DesignGuideline | null> {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("design_guidelines")
-    .select("id, project_id, user_id, compressed_dg, created_at, updated_at")
-    .eq("project_id", projectId)
-    .maybeSingle();
-  if (error) throw error;
-  if (!data) return null;
-  return { ...data, dg: data.compressed_dg } as DesignGuideline;
-}

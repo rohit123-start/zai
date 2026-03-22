@@ -1,0 +1,948 @@
+{
+  "archetype_id": "streaming_core",
+  "archetype_name": "Content & Streaming",
+  "description": "On-demand content consumption platform. Industry brain defines what type of content is consumed. This core defines how content discovery, playback, and progression work.",
+  "valid_industries": [
+    "Education",
+    "Fitness & Sport",
+    "Entertainment & Media"
+  ],
+  "icon_pack": {
+    "default_library": {
+      "name": "Remix Icons",
+      "variant": "Bold filled",
+      "url": "https://remixicon.com"
+    },
+    "industry_overrides": {
+      "Education": {
+        "name": "Phosphor Icons",
+        "variant": "Rounded",
+        "url": "https://phosphoricons.com"
+      },
+      "Fitness & Sport": {
+        "name": "Tabler Icons",
+        "variant": "Bold line",
+        "url": "https://tabler.io/icons"
+      }
+    },
+    "core_nav_icons": [
+      "home",
+      "search",
+      "play",
+      "heart",
+      "user",
+      "bell",
+      "library",
+      "compass",
+      "arrow-back",
+      "more"
+    ],
+    "core_domain_icons": [
+      "play",
+      "pause",
+      "skip-forward",
+      "volume",
+      "download",
+      "bookmark",
+      "share",
+      "heart",
+      "star",
+      "fullscreen"
+    ]
+  },
+  "landing_page": {
+    "sections": [
+      {
+        "id": "hero",
+        "generates_images": true
+      },
+      {
+        "id": "content_preview",
+        "generates_images": true
+      },
+      {
+        "id": "pricing",
+        "generates_images": false
+      },
+      {
+        "id": "cta_footer",
+        "generates_images": false
+      }
+    ]
+  },
+  "core_entities": {
+    "entities": [
+      "User",
+      "Content",
+      "Series",
+      "Episode",
+      "Category",
+      "Playlist",
+      "Progress",
+      "Subscription",
+      "Download",
+      "Review",
+      "Creator",
+      "Notification"
+    ],
+    "relationships": [
+      "Content belongs to a Creator",
+      "Content belongs to one or more Categories",
+      "Series contains many Episodes",
+      "Episode belongs to a Series",
+      "Playlist belongs to User, contains Content",
+      "Progress belongs to User and Content \u2014 tracks position and completion",
+      "Subscription belongs to User \u2014 defines access level",
+      "Download belongs to User and Content \u2014 for offline access",
+      "Review belongs to User, written about Content",
+      "Notification belongs to User, triggered by new content or creator activity"
+    ]
+  },
+  "tiers": {
+    "mvp": {
+      "tier": "MVP",
+      "description": "Core streaming \u2014 browse, play, track progress, save.",
+      "screen_count": 8,
+      "primary_flows": [
+        "Browse home \u2192 discover content \u2192 content detail \u2192 play \u2192 track progress \u2192 resume later",
+        "Search content \u2192 filter by category \u2192 content detail \u2192 play",
+        "View continue watching \u2192 resume content"
+      ],
+      "secondary_flows": [
+        "Save to playlist",
+        "Rate content",
+        "Share content",
+        "Browse by category"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Home / Discover",
+          "purpose": "Personalised content discovery \u2014 featured, continue watching, categories",
+          "visual": "Industry brain visual. Hero banner. Continue watching row. Category rows.",
+          "entities": [
+            "Content",
+            "Category",
+            "Progress"
+          ],
+          "actions": [
+            "View featured content",
+            "Continue watching",
+            "Browse categories",
+            "Tap content card",
+            "Search"
+          ]
+        },
+        {
+          "id": "browse_category",
+          "name": "Browse / Category",
+          "purpose": "Browse all content within a category",
+          "visual": "Content grid or list. Filter chips. Sort options.",
+          "entities": [
+            "Content",
+            "Category"
+          ],
+          "actions": [
+            "Filter by type, rating, duration",
+            "Sort by newest, popular",
+            "Tap content",
+            "Save to playlist"
+          ]
+        },
+        {
+          "id": "content_detail",
+          "name": "Content Detail",
+          "purpose": "Full content info \u2014 description, episodes, reviews, related",
+          "visual": "Hero image or trailer. Title. Description. Play CTA. Episodes list for series.",
+          "entities": [
+            "Content",
+            "Series",
+            "Episode",
+            "Review",
+            "Creator"
+          ],
+          "actions": [
+            "Play content",
+            "Play from episode",
+            "Save to playlist",
+            "Download for offline",
+            "Read reviews",
+            "View creator profile",
+            "Share"
+          ]
+        },
+        {
+          "id": "player",
+          "name": "Player",
+          "purpose": "Full-screen playback with controls and progress tracking",
+          "visual": "Full-screen media. Playback controls. Progress bar. Next episode. Settings.",
+          "entities": [
+            "Content",
+            "Episode",
+            "Progress"
+          ],
+          "actions": [
+            "Play or pause",
+            "Seek",
+            "Volume control",
+            "Quality selection",
+            "Subtitles and captions",
+            "Next episode",
+            "10 second skip",
+            "Picture in picture",
+            "Chromecast or AirPlay"
+          ]
+        },
+        {
+          "id": "library",
+          "name": "My Library",
+          "purpose": "Saved content, playlists, and continue watching",
+          "visual": "Continue watching row. Saved content grid. Downloads section.",
+          "entities": [
+            "Playlist",
+            "Progress",
+            "Download"
+          ],
+          "actions": [
+            "View continue watching",
+            "View saved content",
+            "View downloads",
+            "Remove from library",
+            "View playlists"
+          ]
+        },
+        {
+          "id": "search",
+          "name": "Search",
+          "purpose": "Search content, creators, and categories",
+          "visual": "Search bar. Trending searches. Recent. Results grid.",
+          "entities": [
+            "Content",
+            "Category",
+            "Creator"
+          ],
+          "actions": [
+            "Search",
+            "View trending",
+            "Recent searches",
+            "Browse results",
+            "Filter results"
+          ]
+        },
+        {
+          "id": "profile",
+          "name": "Profile",
+          "purpose": "User profile with watch history and preferences",
+          "visual": "Avatar. Watch stats. Preferences. History.",
+          "entities": [
+            "User",
+            "Progress"
+          ],
+          "actions": [
+            "View watch history",
+            "Edit preferences",
+            "Manage profile",
+            "Switch profile (if multiple)"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "App settings \u2014 playback, downloads, notifications, account",
+          "visual": "Settings list. Playback quality. Download quality. Subtitles. Account.",
+          "entities": [
+            "User",
+            "Subscription"
+          ],
+          "actions": [
+            "Playback settings",
+            "Download quality",
+            "Subtitle language",
+            "Notification settings",
+            "Account settings",
+            "Log out"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "Continue watching row \u2014 thumbnail with progress bar overlay at bottom",
+        "Auto-play next episode countdown \u2014 5 second countdown with cancel",
+        "Progress bar on content cards \u2014 shows percentage watched",
+        "Player controls auto-hide after 3 seconds of inactivity",
+        "Double tap left or right to skip 10 seconds",
+        "Long press content card for quick actions \u2014 save, download, share",
+        "Scrub preview on player \u2014 thumbnail appears above progress bar on seek"
+      ]
+    },
+    "startup": {
+      "tier": "Startup",
+      "description": "Full streaming platform with subscriptions, downloads, ratings, creator profiles, and notifications.",
+      "screen_count": 14,
+      "primary_flows": [
+        "All MVP flows",
+        "Subscribe to plan \u2192 unlock premium content \u2192 access offline downloads",
+        "Follow creator \u2192 receive notification of new content \u2192 watch new content",
+        "Download content \u2192 go offline \u2192 watch downloaded content \u2192 sync progress on reconnect",
+        "Rate content \u2192 write review \u2192 review appears on content detail"
+      ],
+      "secondary_flows": [
+        "All MVP secondary flows",
+        "Create custom playlist",
+        "Add content to queue",
+        "Share playlist with friend",
+        "View playback history",
+        "Set parental controls"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Home / Discover",
+          "purpose": "Personalised home with new releases and followed creator activity",
+          "visual": "Personalised rows. New from creators. Premium badge on locked content. Continue watching.",
+          "entities": [
+            "Content",
+            "Category",
+            "Progress",
+            "Creator"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View new from followed creators",
+            "Identify premium content",
+            "View new releases"
+          ]
+        },
+        {
+          "id": "browse_category",
+          "name": "Browse / Category",
+          "purpose": "Full browse with premium filter and new releases",
+          "visual": "Content grid. Premium badge. New badge. Filters.",
+          "entities": [
+            "Content",
+            "Category"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Filter premium only",
+            "Filter new releases"
+          ]
+        },
+        {
+          "id": "content_detail",
+          "name": "Content Detail",
+          "purpose": "Full content with season selector, reviews, and download option",
+          "visual": "Hero. Play CTA. Season and episode selector. Reviews section. Download button.",
+          "entities": [
+            "Content",
+            "Series",
+            "Episode",
+            "Review",
+            "Creator"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Select season",
+            "Download episode",
+            "View all reviews",
+            "Follow creator"
+          ]
+        },
+        {
+          "id": "player",
+          "name": "Player",
+          "purpose": "Full player with speed control, subtitles, and offline mode",
+          "visual": "Full-screen. Controls. Speed selector. Subtitle selector. Offline indicator.",
+          "entities": [
+            "Content",
+            "Episode",
+            "Progress",
+            "Download"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Playback speed control",
+            "Select subtitle track",
+            "Play from download"
+          ]
+        },
+        {
+          "id": "library",
+          "name": "My Library",
+          "purpose": "Full library with playlists, downloads, and history",
+          "visual": "Tabs \u2014 Continue, Saved, Playlists, Downloads, History.",
+          "entities": [
+            "Playlist",
+            "Progress",
+            "Download"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View playlists",
+            "View history",
+            "Manage downloads"
+          ]
+        },
+        {
+          "id": "downloads",
+          "name": "Downloads",
+          "purpose": "Manage offline downloads \u2014 storage, expiry, delete",
+          "visual": "Downloaded content list. Storage meter. Expiry date. Delete CTA.",
+          "entities": [
+            "Download",
+            "Content"
+          ],
+          "actions": [
+            "View downloads",
+            "View expiry date",
+            "View storage used",
+            "Delete download",
+            "Download more"
+          ]
+        },
+        {
+          "id": "playlists",
+          "name": "Playlists",
+          "purpose": "Create and manage content playlists",
+          "visual": "Playlist grid. Create playlist CTA. Playlist detail with ordered content.",
+          "entities": [
+            "Playlist",
+            "Content"
+          ],
+          "actions": [
+            "Create playlist",
+            "Add content",
+            "Reorder content",
+            "Remove content",
+            "Share playlist",
+            "Delete playlist"
+          ]
+        },
+        {
+          "id": "creator_profile",
+          "name": "Creator Profile",
+          "purpose": "Creator page with all content and follow option",
+          "visual": "Creator avatar. Bio. Stats. Content grid. Follow button.",
+          "entities": [
+            "Creator",
+            "Content"
+          ],
+          "actions": [
+            "View all content",
+            "Follow creator",
+            "Share creator profile",
+            "View creator stats"
+          ]
+        },
+        {
+          "id": "subscription",
+          "name": "Subscription / Plans",
+          "purpose": "Plan comparison, upgrade, and management",
+          "visual": "Plan comparison table. Feature list. Upgrade CTA. Current plan indicator.",
+          "entities": [
+            "Subscription",
+            "User"
+          ],
+          "actions": [
+            "Compare plans",
+            "Upgrade plan",
+            "View current plan benefits",
+            "Cancel subscription",
+            "Manage payment method"
+          ]
+        },
+        {
+          "id": "search",
+          "name": "Search",
+          "purpose": "Advanced search with creator and playlist search",
+          "visual": "Search bar. Results tabs \u2014 content, creator, playlist.",
+          "entities": [
+            "Content",
+            "Category",
+            "Creator",
+            "Playlist"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Search creators",
+            "Search playlists"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "purpose": "New content alerts from followed creators and platform",
+          "visual": "Notification list. Creator new content. Platform updates. New season.",
+          "entities": [
+            "Notification",
+            "Content",
+            "Creator"
+          ],
+          "actions": [
+            "View all",
+            "Tap to navigate",
+            "Mark read",
+            "Follow from notification"
+          ]
+        },
+        {
+          "id": "profile",
+          "name": "Profile",
+          "purpose": "Full profile with multiple profiles and parental controls",
+          "visual": "Profile cards. Add profile. Parental control toggle. Watch stats.",
+          "entities": [
+            "User",
+            "Progress"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Add profile",
+            "Set parental controls",
+            "View watch time stats"
+          ]
+        },
+        {
+          "id": "ratings_reviews",
+          "name": "Ratings & Reviews",
+          "purpose": "Write and read reviews for content",
+          "visual": "Star rating. Review form. Review list. Helpful vote.",
+          "entities": [
+            "Review",
+            "Content",
+            "User"
+          ],
+          "actions": [
+            "Rate content",
+            "Write review",
+            "Read reviews",
+            "Vote review helpful",
+            "Report review"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "Full settings with parental controls and data usage",
+          "visual": "Settings list. Parental controls. Data saver. Subtitles. Account.",
+          "entities": [
+            "User",
+            "Subscription"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Parental control settings",
+            "Data saver mode",
+            "Manage profiles"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP interaction patterns",
+        "Premium lock icon on locked content \u2014 tapping prompts upgrade",
+        "Download progress ring on content card during download",
+        "Download expiry badge \u2014 expires in X days shown on download",
+        "Follow creator \u2014 bell fills on follow",
+        "Playback speed selector \u2014 0.5x to 2x \u2014 chip selector",
+        "Season selector tab row \u2014 season 1, 2, 3 \u2014 tap to switch",
+        "New episode badge \u2014 NEW badge on episode in series list"
+      ]
+    },
+    "scale": {
+      "tier": "Scale",
+      "description": "Full streaming platform with live streaming, creator tools, multi-tier subscriptions, and admin.",
+      "screen_count": 22,
+      "primary_flows": [
+        "All MVP and Startup flows",
+        "Creator uploads content \u2192 goes through review \u2192 published \u2192 notifies subscribers",
+        "Live event scheduled \u2192 users set reminder \u2192 join live \u2192 interact in real time",
+        "Multi-tier subscription \u2014 free, standard, premium \u2192 different content access per tier",
+        "Admin manages content library \u2192 approves uploads \u2192 sets featured \u2192 monitors engagement"
+      ],
+      "secondary_flows": [
+        "All previous secondary flows",
+        "Watch party \u2014 watch together remotely",
+        "Content chapters and timestamps",
+        "Transcript and closed captions download",
+        "Content recommendation engine",
+        "Regional content restrictions"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Home / Discover",
+          "purpose": "AI-personalised home with live events and watch party",
+          "visual": "Personalised rows. Live now badge. Watch party CTA. Premium row.",
+          "entities": [
+            "Content",
+            "Category",
+            "Progress",
+            "Creator"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Join live event",
+            "Start watch party"
+          ]
+        },
+        {
+          "id": "browse_category",
+          "name": "Browse / Category",
+          "purpose": "Browse with regional availability and tier access indicators",
+          "visual": "Content grid. Regional badge. Tier lock indicator. Filters.",
+          "entities": [
+            "Content",
+            "Category"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Filter by tier",
+            "View regional content"
+          ]
+        },
+        {
+          "id": "content_detail",
+          "name": "Content Detail",
+          "purpose": "Full content with chapters, transcript, and watch party",
+          "visual": "Hero. Chapters list. Transcript toggle. Watch party CTA. Reviews. Download.",
+          "entities": [
+            "Content",
+            "Series",
+            "Episode",
+            "Review",
+            "Creator"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View chapters",
+            "Read transcript",
+            "Start watch party"
+          ]
+        },
+        {
+          "id": "player",
+          "name": "Player",
+          "purpose": "Full player with chapters, watch party, and picture-in-picture",
+          "visual": "Full-screen. Chapter markers on progress bar. Watch party sidebar. PiP.",
+          "entities": [
+            "Content",
+            "Episode",
+            "Progress",
+            "Download"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Skip to chapter",
+            "Watch party sidebar",
+            "Picture in picture mode"
+          ]
+        },
+        {
+          "id": "live",
+          "name": "Live Streaming",
+          "purpose": "Watch live events with real-time interaction",
+          "visual": "Full-screen live player. Viewer count. Live chat. React overlay. Schedule badge.",
+          "entities": [
+            "Content",
+            "Creator",
+            "User"
+          ],
+          "actions": [
+            "Watch live",
+            "Send reaction",
+            "Live chat",
+            "Share live",
+            "Set reminder for next live"
+          ]
+        },
+        {
+          "id": "watch_party",
+          "name": "Watch Party",
+          "purpose": "Sync playback with friends for remote co-watching",
+          "visual": "Synced player. Friends sidebar. Chat. Emoji reactions.",
+          "entities": [
+            "Content",
+            "User"
+          ],
+          "actions": [
+            "Start watch party",
+            "Invite friends",
+            "Synced playback controls",
+            "Chat in watch party",
+            "React together"
+          ]
+        },
+        {
+          "id": "library",
+          "name": "My Library",
+          "purpose": "Full library with watch party history and chapters progress",
+          "visual": "All tabs. Chapter progress per content. Watch party history.",
+          "entities": [
+            "Playlist",
+            "Progress",
+            "Download"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View watch party history",
+            "Resume from chapter"
+          ]
+        },
+        {
+          "id": "downloads",
+          "name": "Downloads",
+          "purpose": "Full download management with quality selection",
+          "visual": "Downloads list. Quality badge per download. Storage meter. Expiry.",
+          "entities": [
+            "Download",
+            "Content"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Select download quality",
+            "View total storage"
+          ]
+        },
+        {
+          "id": "playlists",
+          "name": "Playlists",
+          "purpose": "Public and private playlists with collaborative option",
+          "visual": "Playlists grid. Public or private badge. Collaborative badge. Share.",
+          "entities": [
+            "Playlist",
+            "Content"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Set public or private",
+            "Enable collaborative",
+            "Share public playlist"
+          ]
+        },
+        {
+          "id": "creator_profile",
+          "name": "Creator Profile",
+          "purpose": "Full creator page with live schedule and subscription",
+          "visual": "Creator header. Subscribe to creator button. Live schedule. Content grid.",
+          "entities": [
+            "Creator",
+            "Content"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Subscribe to creator tier",
+            "View live schedule",
+            "Set live reminder"
+          ]
+        },
+        {
+          "id": "creator_studio",
+          "name": "Creator Studio",
+          "purpose": "Creator uploads, manages content, and views analytics",
+          "visual": "Upload CTA. Content list with status. Analytics preview. Live schedule.",
+          "entities": [
+            "Creator",
+            "Content"
+          ],
+          "actions": [
+            "Upload content",
+            "View upload status",
+            "Edit content details",
+            "Schedule live",
+            "View analytics",
+            "View earnings"
+          ]
+        },
+        {
+          "id": "creator_analytics",
+          "name": "Creator Analytics",
+          "purpose": "Deep analytics \u2014 views, watch time, retention, revenue",
+          "visual": "Views chart. Watch time. Retention curve. Revenue. Top content table.",
+          "entities": [
+            "Creator",
+            "Content"
+          ],
+          "actions": [
+            "View views",
+            "View watch time",
+            "View retention curve",
+            "View revenue",
+            "View top content",
+            "Export"
+          ]
+        },
+        {
+          "id": "subscription",
+          "name": "Subscription / Plans",
+          "purpose": "Multi-tier plans with per-creator subscriptions",
+          "visual": "Platform tier comparison. Creator subscription section. Manage all. Billing.",
+          "entities": [
+            "Subscription",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View creator subscriptions",
+            "Manage all subscriptions"
+          ]
+        },
+        {
+          "id": "search",
+          "name": "Search",
+          "purpose": "Full search with live events and chapter search",
+          "visual": "Search. Results tabs including live events. Chapter search.",
+          "entities": [
+            "Content",
+            "Category",
+            "Creator",
+            "Playlist"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Search live events",
+            "Search within chapters"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "purpose": "All alerts with live event reminders and creator uploads",
+          "visual": "All notifications. Live reminder alert. Creator upload. New season.",
+          "entities": [
+            "Notification",
+            "Content",
+            "Creator"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Live event reminder",
+            "New upload from creator"
+          ]
+        },
+        {
+          "id": "ratings_reviews",
+          "name": "Ratings & Reviews",
+          "purpose": "Reviews with verified viewer badge and spoiler tag",
+          "visual": "Reviews. Verified viewer badge. Spoiler toggle. Helpful votes.",
+          "entities": [
+            "Review",
+            "Content",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Tag review as spoiler",
+            "Filter no spoiler reviews"
+          ]
+        },
+        {
+          "id": "admin_content",
+          "name": "Admin \u2014 Content Management",
+          "purpose": "Review, approve, feature, and manage all content",
+          "visual": "Content table. Status tabs \u2014 pending, approved, featured. Review queue.",
+          "entities": [
+            "Content",
+            "Creator"
+          ],
+          "actions": [
+            "Review pending content",
+            "Approve or reject",
+            "Set featured",
+            "Remove content",
+            "Add regional restriction"
+          ]
+        },
+        {
+          "id": "admin_dashboard",
+          "name": "Admin Dashboard",
+          "purpose": "Platform KPIs \u2014 active users, streams, revenue, content volume",
+          "visual": "KPI cards. DAU chart. Revenue. Top content. Creator stats.",
+          "entities": [
+            "Content",
+            "User",
+            "Subscription"
+          ],
+          "actions": [
+            "View DAU",
+            "View revenue",
+            "View top content",
+            "View creator metrics",
+            "Export report"
+          ]
+        },
+        {
+          "id": "admin_creators",
+          "name": "Admin \u2014 Creator Management",
+          "purpose": "Manage creator accounts, verification, and payouts",
+          "visual": "Creator table. Verified badge. Payout status. Content count. Suspend CTA.",
+          "entities": [
+            "Creator"
+          ],
+          "actions": [
+            "View all creators",
+            "Verify creator",
+            "View creator analytics",
+            "Process payout",
+            "Suspend creator"
+          ]
+        },
+        {
+          "id": "profile",
+          "name": "Profile",
+          "purpose": "Full profile with content preferences and watch stats",
+          "visual": "Avatar. Watch time stat. Genre preferences. Manage profiles. Settings.",
+          "entities": [
+            "User",
+            "Progress"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View total watch time",
+            "Edit genre preferences"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "Enterprise settings with data usage, accessibility, and content filters",
+          "visual": "Full settings. Accessibility. Content filters. Data usage. Regional.",
+          "entities": [
+            "User",
+            "Subscription"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Accessibility settings",
+            "Content maturity filters",
+            "Data saver controls"
+          ]
+        },
+        {
+          "id": "help_centre",
+          "name": "Help Centre",
+          "purpose": "Self-serve help for viewers and creators",
+          "visual": "Search. Viewer and creator sections. Streaming quality troubleshoot.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Search",
+            "Browse",
+            "Creator help",
+            "Streaming troubleshoot",
+            "Contact support"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP and Startup interaction patterns",
+        "Live badge pulses red on live content cards",
+        "Watch party sync indicator \u2014 all avatars show pause or play state",
+        "Chapter markers on player progress bar \u2014 tap to jump",
+        "Creator upload progress bar in creator studio \u2014 percentage complete",
+        "Retention curve on creator analytics \u2014 drop-off points highlighted",
+        "Spoiler review blur \u2014 blurred until user taps to reveal",
+        "Admin content queue \u2014 swipe to approve or reject",
+        "Regional restriction badge \u2014 not available in your region \u2014 on locked content"
+      ]
+    }
+  }
+}

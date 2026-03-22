@@ -1,0 +1,109 @@
+{
+  "industry_id": "developer_tools",
+  "industry_name": "Developer Tools",
+  "tone": {
+    "primary": "precise, efficient, respectful of intelligence",
+    "secondary": "direct, no-nonsense, technically credible",
+    "voice": "a senior engineer writing docs \u2014 direct, complete, zero padding",
+    "avoid": "marketing speak, vague claims, hand-holding, over-explanation"
+  },
+  "trust_signals": [
+    "GitHub stars and open source credibility",
+    "API documentation quality and completeness",
+    "uptime SLA and status page",
+    "security audit results",
+    "company and developer count using the tool",
+    "version history and changelog transparency",
+    "response time and performance benchmarks"
+  ],
+  "ux_norms": [
+    "keyboard shortcuts are expected and documented",
+    "copy-to-clipboard on all code blocks",
+    "syntax highlighting throughout",
+    "dark mode is the primary mode \u2014 always",
+    "dense layouts acceptable \u2014 users are power users",
+    "search is a primary navigation method",
+    "version and environment selectors always visible",
+    "terminal and CLI feel is a feature not a flaw"
+  ],
+  "icons": {
+    "style": "sharp line, technical, IDE aesthetic",
+    "weight": "medium",
+    "mood": "precise, technical, developer-native",
+    "library": {
+      "name": "Tabler Icons",
+      "variant": "Sharp line",
+      "url": "https://tabler.io/icons"
+    },
+    "domain_icons": [
+      "code",
+      "terminal",
+      "git-branch",
+      "api",
+      "bug",
+      "package",
+      "rocket",
+      "shield",
+      "key",
+      "activity",
+      "database",
+      "server"
+    ],
+    "nav_icons": [
+      "home",
+      "code",
+      "git-branch",
+      "terminal",
+      "users",
+      "bell",
+      "settings",
+      "key",
+      "arrow-left",
+      "menu"
+    ]
+  },
+  "visual_language": {
+    "primary_type": "pure CSS \u2014 no photography, no illustration",
+    "style": "code editor aesthetic \u2014 syntax highlighting, monospace, dark theme",
+    "photography_rules": [
+      "no photography anywhere in the product",
+      "marketing pages only may use abstract tech imagery",
+      "never use generic developer stock photos"
+    ],
+    "background_treatment": "pure dark \u2014 editor-style background (#0d0d0d or similar). Colour only in syntax.",
+    "empty_state_style": "terminal-style message \u2014 monospace font, minimal, with actionable command",
+    "onboarding_visual": "code snippet or terminal animation \u2014 no illustration",
+    "illustration_style": "never use illustration \u2014 pure code and interface"
+  },
+  "themes": {
+    "pack": [
+      "Terminal",
+      "IDE",
+      "Docs",
+      "API",
+      "Debug"
+    ]
+  },
+  "fonts": {
+    "ai_pick_heading": "Geist",
+    "ai_pick_body": "Geist Mono"
+  },
+  "valid_app_types": [
+    "AI Developer Tool",
+    "SaaS & Productivity"
+  ],
+  "monetization_models": [
+    "per seat SaaS subscription",
+    "usage-based API pricing",
+    "open source with enterprise tier",
+    "one-time license fee",
+    "marketplace for extensions or plugins"
+  ],
+  "compliance_notes": [
+    "SOC2 Type II for enterprise sales",
+    "GDPR for code and data processed",
+    "open source license compliance",
+    "security vulnerability disclosure policy",
+    "data residency options for enterprise"
+  ]
+}

@@ -3,7 +3,7 @@
 import { use, useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
-import { getProjectPages, getProjectFiles, type ProjectPage, type ProjectFile } from "@/lib/db";
+import { getProjectFiles, type ProjectFile } from "@/lib/db";
 import { createClient } from "@/lib/supabase/client";
 import { useChat, PersistConfig, type TokenUsageSnapshot } from "@/hooks/useChat";
 import ChatPanel from "@/components/ChatPanel";
@@ -17,14 +17,12 @@ const DEFAULT_CHAT_PCT = 45;
 function ChatWorkspace({
   persist,
   projectName,
-  pages,
   files,
   pagesLoading,
   onBack,
 }: {
   persist: PersistConfig;
   projectName: string;
-  pages: ProjectPage[];
   files: ProjectFile[];
   pagesLoading: boolean;
   onBack: () => void;
@@ -130,7 +128,6 @@ function ChatWorkspace({
         }}
       >
         <ProjectPreview
-          pages={pages}
           files={files}
           pagesLoading={pagesLoading}
           messages={messages}
@@ -163,7 +160,6 @@ export default function ProjectPage({
   const router = useRouter();
 
   const [projectName, setProjectName] = useState("Project");
-  const [pages, setPages] = useState<ProjectPage[]>([]);
   const [files, setFiles] = useState<ProjectFile[]>([]);
   const [pagesLoading, setPagesLoading] = useState(false);
 
@@ -193,29 +189,15 @@ export default function ProjectPage({
     })();
   }, [projectId, user]);
 
-  // Load existing pages + files from DB when user is ready
+  // Load files from DB when user is ready
   useEffect(() => {
     if (!user) return;
-    setPagesLoading(true); // show spinner the moment we know the user
-    // Run independently so a missing project_files table never blocks pages
-    const pagesPromise = getProjectPages(projectId)
-      .then(setPages)
-      .catch((err) => console.error("[load pages]", err));
-    const filesPromise = getProjectFiles(projectId)
+    setPagesLoading(true);
+    getProjectFiles(projectId)
       .then(setFiles)
-      .catch((err) => console.error("[load files]", err));
-    Promise.allSettled([pagesPromise, filesPromise]).finally(() =>
-      setPagesLoading(false)
-    );
+      .catch((err) => console.error("[load files]", err))
+      .finally(() => setPagesLoading(false));
   }, [projectId, user]);
-
-  const handlePagesUpdate = useCallback((updatedPages: ProjectPage[]) => {
-    setPages((prev) => {
-      const map = new Map(prev.map((p) => [p.page_name, p]));
-      updatedPages.forEach((p) => map.set(p.page_name, p));
-      return Array.from(map.values());
-    });
-  }, []);
 
   const handleFilesUpdate = useCallback((updatedFiles: ProjectFile[]) => {
     setFiles((prev) => {
@@ -229,9 +211,7 @@ export default function ProjectPage({
     ? {
         projectId,
         userId: user.id,
-        pages,
         files,
-        onPagesUpdate: handlePagesUpdate,
         onFilesUpdate: handleFilesUpdate,
       }
     : undefined;
@@ -242,7 +222,6 @@ export default function ProjectPage({
         <ChatWorkspace
           persist={persistConfig}
           projectName={projectName}
-          pages={pages}
           files={files}
           pagesLoading={pagesLoading}
           onBack={() => router.push("/")}

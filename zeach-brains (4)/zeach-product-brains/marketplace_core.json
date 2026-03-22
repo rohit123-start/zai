@@ -1,0 +1,1106 @@
+{
+  "archetype_id": "marketplace_core",
+  "archetype_name": "Marketplace",
+  "description": "Two-sided platform connecting buyers and sellers. Industry brain provides the context \u2014 what is being bought and sold. This core defines how the marketplace works.",
+  "valid_industries": [
+    "Food & Beverage",
+    "Retail & Fashion",
+    "Beauty & Wellness",
+    "Travel & Lifestyle",
+    "Real Estate",
+    "Transport & Logistics",
+    "Events & Ticketing",
+    "Education",
+    "Entertainment & Media"
+  ],
+  "icon_pack": {
+    "default_library": {
+      "name": "Lucide",
+      "variant": "Rounded line",
+      "url": "https://lucide.dev"
+    },
+    "industry_overrides": {
+      "Retail & Fashion": {
+        "name": "Remix Icons",
+        "variant": "Ultra-thin line",
+        "url": "https://remixicon.com"
+      },
+      "Beauty & Wellness": {
+        "name": "Phosphor Icons",
+        "variant": "Duotone",
+        "url": "https://phosphoricons.com"
+      },
+      "Real Estate": {
+        "name": "Material Symbols",
+        "variant": "Outlined",
+        "url": "https://fonts.google.com/icons"
+      },
+      "Events & Ticketing": {
+        "name": "Phosphor Icons",
+        "variant": "Bold filled",
+        "url": "https://phosphoricons.com"
+      },
+      "Education": {
+        "name": "Phosphor Icons",
+        "variant": "Rounded",
+        "url": "https://phosphoricons.com"
+      }
+    },
+    "core_nav_icons": [
+      "home",
+      "search",
+      "cart",
+      "heart",
+      "user",
+      "bell",
+      "filter",
+      "list",
+      "arrow-back",
+      "menu"
+    ],
+    "core_domain_icons": [
+      "store",
+      "tag",
+      "star",
+      "package",
+      "share",
+      "bookmark",
+      "grid",
+      "sort",
+      "plus",
+      "check"
+    ]
+  },
+  "landing_page": {
+    "sections": [
+      {
+        "id": "hero",
+        "generates_images": true
+      },
+      {
+        "id": "how_it_works",
+        "generates_images": false
+      },
+      {
+        "id": "featured_listings_preview",
+        "generates_images": true
+      },
+      {
+        "id": "pricing",
+        "generates_images": false
+      },
+      {
+        "id": "cta_footer",
+        "generates_images": false
+      }
+    ]
+  },
+  "core_entities": {
+    "entities": [
+      "User",
+      "Seller",
+      "Listing",
+      "Category",
+      "Cart",
+      "Order",
+      "Review",
+      "Message",
+      "Payment",
+      "Promotion",
+      "Wishlist",
+      "Notification",
+      "Report"
+    ],
+    "relationships": [
+      "User can be a Buyer or a Seller (or both)",
+      "Seller owns many Listings",
+      "Listing belongs to one or more Categories",
+      "Cart belongs to User, contains Listings",
+      "Order is created from Cart, belongs to User and Seller",
+      "Review belongs to User, written about a Listing or Seller",
+      "Message belongs to a conversation between User and Seller",
+      "Payment belongs to Order",
+      "Promotion can apply to a Listing or Order",
+      "Wishlist belongs to User, contains Listings",
+      "Notification belongs to User, triggered by Order or Message events",
+      "Report belongs to User, filed against a Listing or Seller"
+    ]
+  },
+  "tiers": {
+    "mvp": {
+      "tier": "MVP",
+      "description": "Core two-sided marketplace \u2014 browse, list, buy, sell. Proves supply and demand.",
+      "screen_count": 10,
+      "primary_flows": [
+        "Browse listings \u2192 filter by category \u2192 view listing detail \u2192 add to cart \u2192 checkout \u2192 order confirmation",
+        "Seller onboard \u2192 create listing \u2192 publish \u2192 manage listings",
+        "Search \u2192 results \u2192 filter \u2192 listing detail \u2192 purchase",
+        "View order \u2192 track status \u2192 receive item \u2192 leave review"
+      ],
+      "secondary_flows": [
+        "Save listing to wishlist",
+        "Message seller before purchase",
+        "Report a listing",
+        "View seller profile",
+        "Apply promo code at checkout"
+      ],
+      "screens": [
+        {
+          "id": "home_browse",
+          "name": "Home / Browse",
+          "purpose": "Discovery \u2014 featured listings, categories, search entry",
+          "visual": "Industry brain visual type. Category chips. Featured listings grid or list.",
+          "entities": [
+            "Listing",
+            "Category",
+            "Promotion"
+          ],
+          "actions": [
+            "Search listings",
+            "Browse categories",
+            "Tap featured listing",
+            "View promotion banner",
+            "Toggle list or grid view"
+          ]
+        },
+        {
+          "id": "category",
+          "name": "Category / Browse Results",
+          "purpose": "Filtered listing results within a category",
+          "visual": "Listing cards grid or list. Filter and sort bar at top.",
+          "entities": [
+            "Listing",
+            "Category"
+          ],
+          "actions": [
+            "Filter by price, rating, distance, availability",
+            "Sort by relevance, price, newest",
+            "Tap listing for detail",
+            "Save to wishlist from card"
+          ]
+        },
+        {
+          "id": "listing_detail",
+          "name": "Listing Detail",
+          "purpose": "Full listing information \u2014 photos, description, seller, reviews",
+          "visual": "Full-bleed image gallery. Price prominent. Seller info card. Reviews below.",
+          "entities": [
+            "Listing",
+            "Seller",
+            "Review",
+            "Cart"
+          ],
+          "actions": [
+            "View photo gallery",
+            "Read full description",
+            "View seller profile",
+            "Read reviews",
+            "Save to wishlist",
+            "Add to cart or buy now",
+            "Message seller",
+            "Share listing",
+            "Report listing"
+          ]
+        },
+        {
+          "id": "seller_profile",
+          "name": "Seller Profile",
+          "purpose": "Seller credibility \u2014 ratings, listings, response rate",
+          "visual": "Seller avatar and stats. Listings grid below.",
+          "entities": [
+            "Seller",
+            "Listing",
+            "Review"
+          ],
+          "actions": [
+            "View seller stats and ratings",
+            "Browse all seller listings",
+            "Message seller",
+            "Follow seller",
+            "Report seller"
+          ]
+        },
+        {
+          "id": "cart",
+          "name": "Cart",
+          "purpose": "Review items before checkout",
+          "visual": "Item list with thumbnails. Price breakdown. Promo code field. Checkout CTA.",
+          "entities": [
+            "Cart",
+            "Listing",
+            "Promotion"
+          ],
+          "actions": [
+            "View cart items",
+            "Change quantity",
+            "Remove item",
+            "Apply promo code",
+            "View price breakdown",
+            "Proceed to checkout"
+          ]
+        },
+        {
+          "id": "checkout",
+          "name": "Checkout",
+          "purpose": "Complete purchase \u2014 address, payment, confirm",
+          "visual": "Step flow. Delivery address. Payment method. Order summary. Place order CTA.",
+          "entities": [
+            "Order",
+            "Payment",
+            "User"
+          ],
+          "actions": [
+            "Select or add delivery address",
+            "Select payment method",
+            "View order summary",
+            "Apply promo",
+            "Place order",
+            "View order confirmation"
+          ]
+        },
+        {
+          "id": "orders",
+          "name": "My Orders",
+          "purpose": "Buyer order history and status tracking",
+          "visual": "Order cards with status badges. Timeline per order.",
+          "entities": [
+            "Order",
+            "Listing"
+          ],
+          "actions": [
+            "View all orders",
+            "Filter by status",
+            "Tap order for detail",
+            "Track order",
+            "Leave review",
+            "Request return"
+          ]
+        },
+        {
+          "id": "seller_dashboard",
+          "name": "Seller Dashboard",
+          "purpose": "Seller home \u2014 listings, orders, earnings snapshot",
+          "visual": "Stats cards at top. Active listings. Pending orders. Earnings.",
+          "entities": [
+            "Seller",
+            "Listing",
+            "Order"
+          ],
+          "actions": [
+            "View earnings snapshot",
+            "View active listings",
+            "View pending orders",
+            "Create new listing",
+            "Navigate to listing management"
+          ]
+        },
+        {
+          "id": "create_listing",
+          "name": "Create / Edit Listing",
+          "purpose": "Seller creates or edits a listing",
+          "visual": "Step form. Photo upload prominent. Category selector. Price input. Publish CTA.",
+          "entities": [
+            "Listing",
+            "Seller",
+            "Category"
+          ],
+          "actions": [
+            "Upload photos",
+            "Write title and description",
+            "Select category",
+            "Set price",
+            "Set availability or stock",
+            "Preview listing",
+            "Publish or save draft"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "User account \u2014 buyer and seller profile, settings",
+          "visual": "Avatar, stats, settings list. Switch between buyer and seller mode.",
+          "entities": [
+            "User",
+            "Seller"
+          ],
+          "actions": [
+            "Edit profile",
+            "Switch buyer or seller mode",
+            "Manage addresses",
+            "Manage payment methods",
+            "Notification settings",
+            "Log out"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "Pull to refresh on home and orders",
+        "Swipe image gallery on listing detail",
+        "Heart icon tap to save to wishlist \u2014 animated fill",
+        "Sticky checkout CTA on listing detail",
+        "Order status badge colour coded \u2014 pending yellow, active blue, complete green",
+        "Search with live results as user types",
+        "Filter drawer slides up from bottom"
+      ]
+    },
+    "startup": {
+      "tier": "Startup",
+      "description": "Full marketplace with messaging, reviews, notifications, seller analytics, and promotions.",
+      "screen_count": 16,
+      "primary_flows": [
+        "All MVP flows",
+        "Buyer messages seller \u2192 negotiation \u2192 purchase",
+        "Seller creates promotion \u2192 applies to listings \u2192 buyer redeems",
+        "Seller views analytics \u2192 adjusts pricing \u2192 relists",
+        "User receives notification \u2192 taps \u2192 deep links to order or message"
+      ],
+      "secondary_flows": [
+        "All MVP secondary flows",
+        "Follow seller and get notified of new listings",
+        "Leave and respond to reviews",
+        "Seller withdraws earnings",
+        "Buyer requests refund or return",
+        "Refer a friend for credit"
+      ],
+      "screens": [
+        {
+          "id": "home_browse",
+          "name": "Home / Browse",
+          "purpose": "Personalised discovery with followed sellers and recommended listings",
+          "visual": "Personalised feed. Followed sellers row. Featured. Categories.",
+          "entities": [
+            "Listing",
+            "Category",
+            "Promotion",
+            "Seller"
+          ],
+          "actions": [
+            "Search",
+            "Browse categories",
+            "View followed sellers",
+            "Tap listing",
+            "View promotions"
+          ]
+        },
+        {
+          "id": "search",
+          "name": "Search & Discovery",
+          "purpose": "Advanced search with filters, map view, and saved searches",
+          "visual": "Search bar prominent. Recent searches. Filter chips. Map toggle.",
+          "entities": [
+            "Listing",
+            "Category"
+          ],
+          "actions": [
+            "Search",
+            "Apply filters",
+            "Toggle map view",
+            "Save search",
+            "View recent searches"
+          ]
+        },
+        {
+          "id": "category",
+          "name": "Category / Browse Results",
+          "purpose": "Filtered results with advanced sorting",
+          "visual": "Listing grid or list. Filter and sort. Map view option.",
+          "entities": [
+            "Listing",
+            "Category"
+          ],
+          "actions": [
+            "Filter",
+            "Sort",
+            "Map view",
+            "Tap listing",
+            "Save to wishlist"
+          ]
+        },
+        {
+          "id": "listing_detail",
+          "name": "Listing Detail",
+          "purpose": "Full listing with social proof and seller trust signals",
+          "visual": "Gallery. Price. Seller trust card with stats. Reviews with photos. Sticky CTA.",
+          "entities": [
+            "Listing",
+            "Seller",
+            "Review",
+            "Cart"
+          ],
+          "actions": [
+            "Gallery",
+            "View seller",
+            "Read reviews",
+            "Wishlist",
+            "Add to cart",
+            "Message seller",
+            "Share",
+            "Report"
+          ]
+        },
+        {
+          "id": "seller_profile",
+          "name": "Seller Profile",
+          "purpose": "Full seller page with follow, listings, and reviews",
+          "visual": "Seller header with follow button. Stats. Listings tabs. Reviews tab.",
+          "entities": [
+            "Seller",
+            "Listing",
+            "Review"
+          ],
+          "actions": [
+            "Follow seller",
+            "Browse listings",
+            "Read reviews",
+            "Message",
+            "Share profile",
+            "Report"
+          ]
+        },
+        {
+          "id": "messages",
+          "name": "Messages / Inbox",
+          "purpose": "Buyer-seller messaging for all conversations",
+          "visual": "Conversation list. Unread indicator. Chat thread with listing context card.",
+          "entities": [
+            "Message",
+            "Listing",
+            "User",
+            "Seller"
+          ],
+          "actions": [
+            "View conversations",
+            "Send message",
+            "Attach listing",
+            "Make offer",
+            "View listing from chat"
+          ]
+        },
+        {
+          "id": "cart",
+          "name": "Cart",
+          "purpose": "Review items with multi-seller cart support",
+          "visual": "Items grouped by seller. Price breakdown. Promo field. Checkout CTA.",
+          "entities": [
+            "Cart",
+            "Listing",
+            "Seller",
+            "Promotion"
+          ],
+          "actions": [
+            "View items by seller",
+            "Change quantity",
+            "Remove item",
+            "Apply promo",
+            "Checkout"
+          ]
+        },
+        {
+          "id": "checkout",
+          "name": "Checkout",
+          "purpose": "Full checkout with delivery options and payment",
+          "visual": "Step flow. Address. Delivery options. Payment. Summary. Confirm.",
+          "entities": [
+            "Order",
+            "Payment",
+            "User"
+          ],
+          "actions": [
+            "Address",
+            "Delivery option",
+            "Payment method",
+            "Promo",
+            "Place order"
+          ]
+        },
+        {
+          "id": "orders",
+          "name": "My Orders",
+          "purpose": "Order history with tracking and returns",
+          "visual": "Order cards. Status timeline. Return request option.",
+          "entities": [
+            "Order",
+            "Listing"
+          ],
+          "actions": [
+            "View orders",
+            "Track",
+            "Leave review",
+            "Request return",
+            "Reorder"
+          ]
+        },
+        {
+          "id": "wishlist",
+          "name": "Wishlist",
+          "purpose": "Saved listings organised into collections",
+          "visual": "Listing grid. Collection tabs. Price change alerts.",
+          "entities": [
+            "Wishlist",
+            "Listing"
+          ],
+          "actions": [
+            "View saved listings",
+            "Organise into collections",
+            "Move to cart",
+            "Share collection",
+            "Remove"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "purpose": "All activity \u2014 orders, messages, promotions, price drops",
+          "visual": "Categorised list. Unread dot. Deep link on tap.",
+          "entities": [
+            "Notification",
+            "Order",
+            "Message"
+          ],
+          "actions": [
+            "View all",
+            "Filter by type",
+            "Mark read",
+            "Tap to navigate"
+          ]
+        },
+        {
+          "id": "seller_dashboard",
+          "name": "Seller Dashboard",
+          "purpose": "Full seller home with analytics snapshot",
+          "visual": "Revenue chart. Orders. Listings. Messages. Analytics preview.",
+          "entities": [
+            "Seller",
+            "Listing",
+            "Order"
+          ],
+          "actions": [
+            "View revenue",
+            "View orders",
+            "View listings",
+            "Create listing",
+            "View analytics"
+          ]
+        },
+        {
+          "id": "seller_analytics",
+          "name": "Seller Analytics",
+          "purpose": "Views, clicks, conversions, revenue over time",
+          "visual": "Line chart for revenue. Listing performance table. Conversion funnel.",
+          "entities": [
+            "Seller",
+            "Listing",
+            "Order"
+          ],
+          "actions": [
+            "View revenue chart",
+            "View listing performance",
+            "Filter by date",
+            "Export data"
+          ]
+        },
+        {
+          "id": "create_listing",
+          "name": "Create / Edit Listing",
+          "purpose": "Full listing creation with variants and promotions",
+          "visual": "Step form. Photo upload. Details. Variants. Pricing. Promotion. Publish.",
+          "entities": [
+            "Listing",
+            "Seller",
+            "Category",
+            "Promotion"
+          ],
+          "actions": [
+            "Upload photos",
+            "Details",
+            "Category",
+            "Variants",
+            "Price",
+            "Create promotion",
+            "Publish or draft"
+          ]
+        },
+        {
+          "id": "promotions",
+          "name": "Promotions",
+          "purpose": "Seller creates discount codes and featured listings",
+          "visual": "Active promotions list. Create promotion form. Stats per promotion.",
+          "entities": [
+            "Promotion",
+            "Listing",
+            "Seller"
+          ],
+          "actions": [
+            "Create discount code",
+            "Set featured listing",
+            "View promotion stats",
+            "End promotion"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Full profile, payment, and notification management",
+          "visual": "Buyer and seller profile sections. Settings list.",
+          "entities": [
+            "User",
+            "Seller"
+          ],
+          "actions": [
+            "Edit profile",
+            "Payment methods",
+            "Addresses",
+            "Seller settings",
+            "Notifications",
+            "Log out"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP interaction patterns",
+        "Make offer button in message thread \u2014 negotiation flow",
+        "Price drop notification with percentage badge",
+        "Follow seller bell icon \u2014 fills on follow",
+        "Review prompt after order completion \u2014 timed nudge",
+        "Listing performance sparkline on seller dashboard cards",
+        "Multi-seller cart grouped by seller with individual delivery estimates",
+        "Swipe to archive conversations in inbox"
+      ]
+    },
+    "scale": {
+      "tier": "Scale",
+      "description": "Platform-scale marketplace with admin, escrow, dispute resolution, subscription seller plans, and open API.",
+      "screen_count": 24,
+      "primary_flows": [
+        "All MVP and Startup flows",
+        "Escrow payment \u2014 buyer pays \u2192 held \u2192 seller ships \u2192 buyer confirms \u2192 released",
+        "Dispute raised \u2192 evidence submitted \u2192 admin mediates \u2192 resolution",
+        "Seller upgrades to pro plan \u2192 accesses advanced analytics and featured placement",
+        "Admin reviews flagged listings \u2192 approves or removes \u2192 notifies seller",
+        "Subscription buyer \u2014 unlocks free delivery, exclusive deals, early access"
+      ],
+      "secondary_flows": [
+        "All previous secondary flows",
+        "Bulk listing management for power sellers",
+        "Affiliate link generation for sellers",
+        "API access for enterprise sellers",
+        "Loyalty points earn and redeem",
+        "Seller verification and badging",
+        "Tax invoice generation"
+      ],
+      "screens": [
+        {
+          "id": "home_browse",
+          "name": "Home / Browse",
+          "purpose": "AI-personalised feed with subscription and loyalty integration",
+          "visual": "Personalised feed. Subscription perks banner. Loyalty points balance.",
+          "entities": [
+            "Listing",
+            "Category",
+            "Promotion",
+            "Seller"
+          ],
+          "actions": [
+            "Personalised browse",
+            "View subscription perks",
+            "Loyalty balance",
+            "All MVP and Startup actions"
+          ]
+        },
+        {
+          "id": "search",
+          "name": "Search & Discovery",
+          "purpose": "Advanced search with AI recommendations and saved alerts",
+          "visual": "AI-suggested results. Save search alert. Map and list toggle.",
+          "entities": [
+            "Listing",
+            "Category"
+          ],
+          "actions": [
+            "Search",
+            "AI recommendations",
+            "Save search alert",
+            "Map view",
+            "All filters"
+          ]
+        },
+        {
+          "id": "category",
+          "name": "Category / Browse Results",
+          "purpose": "Results with verified seller badges and escrow indicators",
+          "visual": "Verified badge on listings. Escrow protected indicator. Advanced filters.",
+          "entities": [
+            "Listing",
+            "Category"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Filter by verified seller",
+            "Filter escrow protected"
+          ]
+        },
+        {
+          "id": "listing_detail",
+          "name": "Listing Detail",
+          "purpose": "Full listing with escrow info, authenticity, and bulk pricing",
+          "visual": "Gallery. Escrow badge. Authenticity verified. Bulk pricing table. Reviews.",
+          "entities": [
+            "Listing",
+            "Seller",
+            "Review",
+            "Cart"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View bulk pricing",
+            "View escrow details",
+            "Authenticity report"
+          ]
+        },
+        {
+          "id": "seller_profile",
+          "name": "Seller Profile",
+          "purpose": "Pro seller page with verification badge and store analytics",
+          "visual": "Pro badge. Store stats. Featured listings. Reviews. Follow.",
+          "entities": [
+            "Seller",
+            "Listing",
+            "Review"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View seller verification",
+            "View store analytics"
+          ]
+        },
+        {
+          "id": "messages",
+          "name": "Messages / Inbox",
+          "purpose": "Full messaging with file attachments and dispute initiation",
+          "visual": "Conversation list. Attachment support. Dispute CTA on relevant threads.",
+          "entities": [
+            "Message",
+            "Listing",
+            "User",
+            "Seller"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Attach files",
+            "Initiate dispute from chat"
+          ]
+        },
+        {
+          "id": "cart",
+          "name": "Cart",
+          "purpose": "Multi-seller cart with escrow and subscription discount",
+          "visual": "Seller groups. Escrow indicator. Subscription discount applied. Checkout.",
+          "entities": [
+            "Cart",
+            "Listing",
+            "Seller",
+            "Promotion"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View escrow breakdown",
+            "Apply subscription discount"
+          ]
+        },
+        {
+          "id": "checkout",
+          "name": "Checkout",
+          "purpose": "Full checkout with escrow, insurance, and instalment options",
+          "visual": "Escrow toggle. Insurance add-on. Instalment option. Full summary.",
+          "entities": [
+            "Order",
+            "Payment",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Enable escrow",
+            "Add insurance",
+            "Pay in instalments"
+          ]
+        },
+        {
+          "id": "orders",
+          "name": "My Orders",
+          "purpose": "Full order management with escrow release and dispute",
+          "visual": "Order cards. Escrow status. Release funds CTA. Dispute CTA.",
+          "entities": [
+            "Order",
+            "Listing"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Release escrow funds",
+            "Raise dispute",
+            "Download invoice"
+          ]
+        },
+        {
+          "id": "disputes",
+          "name": "Disputes",
+          "purpose": "Raise, manage, and track disputes",
+          "visual": "Dispute cards with status. Evidence upload. Timeline.",
+          "entities": [
+            "Order",
+            "User",
+            "Seller"
+          ],
+          "actions": [
+            "Raise dispute",
+            "Submit evidence",
+            "View dispute status",
+            "Accept resolution",
+            "Escalate to admin"
+          ]
+        },
+        {
+          "id": "wishlist",
+          "name": "Wishlist",
+          "purpose": "Saved listings with price alerts and sharing",
+          "visual": "Collections. Price alert badges. Share collection.",
+          "entities": [
+            "Wishlist",
+            "Listing"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Set price alert",
+            "Share collection publicly"
+          ]
+        },
+        {
+          "id": "subscription",
+          "name": "Subscription / Membership",
+          "purpose": "Buyer subscription \u2014 free delivery, exclusive access, loyalty",
+          "visual": "Plan comparison. Perks list. Loyalty points balance. Upgrade CTA.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "View plans",
+            "Upgrade or downgrade",
+            "View perks",
+            "View loyalty points",
+            "Redeem rewards"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "purpose": "All activity with smart grouping and priority alerts",
+          "visual": "Grouped by type. Priority alerts at top. Price drop badges.",
+          "entities": [
+            "Notification",
+            "Order",
+            "Message"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Priority alert view",
+            "Batch mark read"
+          ]
+        },
+        {
+          "id": "seller_dashboard",
+          "name": "Seller Dashboard",
+          "purpose": "Pro seller home with revenue, orders, and growth metrics",
+          "visual": "Revenue trend. Orders. GMV. Growth vs last period. Quick actions.",
+          "entities": [
+            "Seller",
+            "Listing",
+            "Order"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View GMV",
+            "View growth metrics"
+          ]
+        },
+        {
+          "id": "seller_analytics",
+          "name": "Seller Analytics",
+          "purpose": "Deep analytics \u2014 funnel, cohorts, listing performance, revenue forecast",
+          "visual": "Funnel chart. Cohort table. Revenue forecast line. Export.",
+          "entities": [
+            "Seller",
+            "Listing",
+            "Order"
+          ],
+          "actions": [
+            "View funnel",
+            "View cohorts",
+            "Revenue forecast",
+            "Export CSV",
+            "Compare periods"
+          ]
+        },
+        {
+          "id": "seller_plans",
+          "name": "Seller Plans & Upgrade",
+          "purpose": "Seller subscription \u2014 pro features, lower fees, analytics",
+          "visual": "Plan comparison table. Feature list. Fee breakdown. Upgrade CTA.",
+          "entities": [
+            "Seller"
+          ],
+          "actions": [
+            "Compare plans",
+            "Upgrade to pro",
+            "View fee structure",
+            "Cancel plan"
+          ]
+        },
+        {
+          "id": "bulk_listing",
+          "name": "Bulk Listing Management",
+          "purpose": "Power sellers manage many listings at once",
+          "visual": "Data table. Bulk select. Batch edit. Import CSV.",
+          "entities": [
+            "Listing",
+            "Seller"
+          ],
+          "actions": [
+            "Bulk select",
+            "Batch price edit",
+            "Bulk publish or unpublish",
+            "Import via CSV",
+            "Export listings"
+          ]
+        },
+        {
+          "id": "create_listing",
+          "name": "Create / Edit Listing",
+          "purpose": "Full listing with variants, authenticity, and escrow settings",
+          "visual": "Step form. Photo upload. Variants. Authenticity toggle. Escrow setting. Publish.",
+          "entities": [
+            "Listing",
+            "Seller",
+            "Category",
+            "Promotion"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Enable authenticity verification",
+            "Set escrow requirement"
+          ]
+        },
+        {
+          "id": "promotions",
+          "name": "Promotions",
+          "purpose": "Advanced promotions \u2014 flash sales, bundles, affiliate links",
+          "visual": "Promotion types grid. Flash sale countdown. Affiliate link generator.",
+          "entities": [
+            "Promotion",
+            "Listing",
+            "Seller"
+          ],
+          "actions": [
+            "Create flash sale",
+            "Create bundle",
+            "Generate affiliate link",
+            "View promotion ROI"
+          ]
+        },
+        {
+          "id": "admin_dashboard",
+          "name": "Admin Dashboard",
+          "purpose": "Platform operator \u2014 KPIs, flagged content, seller verification, disputes",
+          "visual": "KPI cards. Flagged listings queue. Dispute queue. Seller verification queue.",
+          "entities": [
+            "User",
+            "Seller",
+            "Listing",
+            "Order"
+          ],
+          "actions": [
+            "View platform KPIs",
+            "Review flagged listings",
+            "Approve or reject sellers",
+            "Mediate disputes",
+            "Manage categories"
+          ]
+        },
+        {
+          "id": "admin_users",
+          "name": "Admin \u2014 User Management",
+          "purpose": "Search, view, suspend, or ban users and sellers",
+          "visual": "User data table. Search and filter. User detail panel.",
+          "entities": [
+            "User",
+            "Seller"
+          ],
+          "actions": [
+            "Search users",
+            "View user detail",
+            "Suspend account",
+            "Ban account",
+            "View transaction history"
+          ]
+        },
+        {
+          "id": "api_access",
+          "name": "API Access",
+          "purpose": "Enterprise seller API keys and webhook management",
+          "visual": "API key list. Usage stats. Webhook config. Docs link.",
+          "entities": [
+            "Seller"
+          ],
+          "actions": [
+            "Generate API key",
+            "View usage",
+            "Set up webhooks",
+            "View documentation",
+            "Revoke key"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Full account management with subscription and API settings",
+          "visual": "Comprehensive settings. Subscription section. API section.",
+          "entities": [
+            "User",
+            "Seller"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Manage subscription",
+            "API settings",
+            "Privacy controls"
+          ]
+        },
+        {
+          "id": "help_centre",
+          "name": "Help Centre",
+          "purpose": "Self-serve help articles, dispute guidance, and support contact",
+          "visual": "Search bar. Article categories. Featured articles. Contact CTA.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Search help articles",
+            "Browse categories",
+            "Read article",
+            "Contact support",
+            "Initiate dispute from help"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP and Startup interaction patterns",
+        "Escrow badge on protected listings \u2014 trust signal always visible",
+        "Flash sale countdown timer on relevant listings and home feed",
+        "Dispute step tracker \u2014 buyer always knows status",
+        "Admin queue cards \u2014 approve or reject with one tap",
+        "Bulk select checkbox appears on long press of listing card",
+        "API usage bar \u2014 fills as quota approaches limit",
+        "Loyalty points animate and increment on eligible purchase",
+        "Subscription perks tooltip on checkout \u2014 surfaces savings"
+      ]
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "industry_id": "retail_fashion",
+  "industry_name": "Retail & Fashion",
+  "tone": {
+    "primary": "aspirational, curated, confident",
+    "secondary": "trend-aware, inclusive, editorial",
+    "voice": "a trusted style editor \u2014 direct, tasteful, never pushy",
+    "avoid": "cluttered, discount-heavy language, overly casual"
+  },
+  "trust_signals": [
+    "verified purchase reviews",
+    "size guide and fit notes",
+    "return and exchange policy visibility",
+    "real customer photos in reviews",
+    "secure checkout badges",
+    "fast shipping indicators",
+    "authenticity guarantees for luxury"
+  ],
+  "ux_norms": [
+    "product photography is everything \u2014 full bleed images dominate",
+    "ultra minimal UI chrome \u2014 let the product breathe",
+    "wishlist / save to list is a primary action",
+    "size selection is a prominent, clear interaction",
+    "filter and sort are always accessible",
+    "quick view on hover/tap",
+    "outfit builder or complete the look sections",
+    "sticky add to cart on product detail"
+  ],
+  "icons": {
+    "style": "ultra-thin line, minimal",
+    "weight": "light",
+    "mood": "aesthetic, curated, fashion-forward",
+    "library": {
+      "name": "Remix Icons",
+      "variant": "Ultra-thin line",
+      "url": "https://remixicon.com"
+    },
+    "domain_icons": [
+      "shirt",
+      "hanger",
+      "gem",
+      "price-tag",
+      "ruler",
+      "palette",
+      "camera",
+      "bag",
+      "star",
+      "recycle",
+      "ribbon",
+      "crown"
+    ],
+    "nav_icons": [
+      "home",
+      "search",
+      "shopping-bag",
+      "heart",
+      "user",
+      "bell",
+      "filter",
+      "grid",
+      "arrow-left",
+      "more"
+    ]
+  },
+  "visual_language": {
+    "primary_type": "real photography",
+    "style": "editorial, high contrast, clean backgrounds \u2014 white or lifestyle",
+    "photography_rules": [
+      "product on white or clean background for listings",
+      "lifestyle photography for hero and editorial sections",
+      "model diversity expected",
+      "flat lay photography for accessories",
+      "never use low-res or stock-feeling imagery"
+    ],
+    "background_treatment": "pure white or off-white \u2014 maximum product focus",
+    "empty_state_style": "ultra minimal \u2014 thin line icon, single short line of copy",
+    "onboarding_visual": "editorial flat illustration or clean typographic layout",
+    "illustration_style": "when used: geometric minimal \u2014 never cute or cartoon"
+  },
+  "themes": {
+    "pack": [
+      "Shopify Clean",
+      "Luxe Retail",
+      "Warm Market",
+      "Flash Sale",
+      "Boutique"
+    ]
+  },
+  "fonts": {
+    "ai_pick_heading": "Inter",
+    "ai_pick_body": "Inter"
+  },
+  "valid_app_types": [
+    "E-commerce",
+    "Marketplace",
+    "Social & Community"
+  ],
+  "monetization_models": [
+    "product margin",
+    "marketplace commission",
+    "premium seller listings",
+    "subscription boxes",
+    "affiliate and influencer programs"
+  ],
+  "compliance_notes": [
+    "size and fit claims must be accurate",
+    "sustainability claims require substantiation",
+    "GDPR compliance for style preference tracking"
+  ]
+}

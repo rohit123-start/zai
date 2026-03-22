@@ -108,8 +108,7 @@ export function stitchPage(pagePath: string, files: FileMap): string {
 }
 
 /**
- * Builds a standalone HTML for legacy project_pages (html:PageName format).
- * Injects the same navigation interceptor so tab-switching works.
+ * Builds a standalone HTML string and injects the navigation interceptor.
  */
 export function stitchLegacyPage(html: string): string {
   if (html.includes("</body>")) {
