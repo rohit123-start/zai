@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { createProjectWithSetup, getIndustries, getProducts, type Industry, type Product } from "@/lib/db";
@@ -90,19 +90,25 @@ export default function NewProjectPage() {
       .finally(() => setLoadingOptions(false));
   }, []);
 
-  // Reset appType when industry changes and current appType no longer valid
+  const filteredProducts = useMemo(
+    () =>
+      industry
+        ? products.filter((p) => p.valid_industries.length === 0 || p.valid_industries.includes(industry))
+        : products,
+    [industry, products],
+  );
+
+  // Auto-select when exactly one app type is available; reset when the list changes
   useEffect(() => {
-    if (!industry || !appType) return;
-    const ind = industries.find((i) => i.name === industry);
-    if (!ind) return;
-    if (ind.valid_app_types.length > 0 && !ind.valid_app_types.includes(appType)) {
+    if (filteredProducts.length === 1) {
+      setAppType(filteredProducts[0].name);
+      setInvalidFields((prev) => { const next = new Set(prev); next.delete("appType"); return next; });
+    } else if (filteredProducts.length !== 1 && appType && !filteredProducts.some((p) => p.name === appType)) {
       setAppType("");
     }
-  }, [industry, industries, appType]);
-
-  const filteredProducts = industry
-    ? products.filter((p) => p.valid_industries.length === 0 || p.valid_industries.includes(industry))
-    : products;
+  // appType intentionally excluded — we only react to the list changing, not appType itself
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredProducts]);
 
   function toggleFeature(id: string) {
     setFeatures((prev) => prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]);

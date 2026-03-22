@@ -14,6 +14,7 @@ import MessageBubble from "./MessageBubble";
 type Props = {
   messages: Message[];
   isStreaming: boolean;
+  isThinking?: boolean;
   lastUsage?: TokenUsageSnapshot | null;
   onSend: (text: string, images?: ImageAttachment[]) => void;
   onStop: () => void;
@@ -118,7 +119,7 @@ function PanelBtn({
 }
 
 export default function ChatPanel({
-  messages, isStreaming, lastUsage, onSend, onStop, onClear, onDeletePages,
+  messages, isStreaming, isThinking = false, lastUsage, onSend, onStop, onClear, onDeletePages,
   projectName, onBack, onShare,
 }: Props) {
   const [input, setInput] = useState("");
@@ -366,8 +367,43 @@ export default function ChatPanel({
                 isStreaming={isStreaming && i === messages.length - 1 && msg.role === "assistant"}
               />
             ))}
+            {/* Thinking indicator — model is in extended thinking phase */}
+            {isThinking && (
+              <div className="flex flex-col gap-1">
+                <div
+                  className="flex items-center gap-1.5"
+                  style={{ fontFamily: "var(--font-dm-mono)", fontSize: 9, color: "#3f3f46" }}
+                >
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#a855f7" }} />
+                  Zeach
+                </div>
+                <div
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "8px 12px", borderRadius: 10,
+                    background: "rgba(168,85,247,0.06)",
+                    border: "1px solid rgba(168,85,247,0.15)",
+                  }}
+                >
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      style={{
+                        width: 5, height: 5, borderRadius: "50%", background: "#a855f7",
+                        opacity: 0.4,
+                        animation: "typingBounce 1.2s ease-in-out infinite",
+                        animationDelay: `${i * 0.2}s`,
+                      }}
+                    />
+                  ))}
+                  <span style={{ fontFamily: "var(--font-dm-mono)", fontSize: 10, color: "#a855f7" }}>
+                    Analyzing &amp; planning screens…
+                  </span>
+                </div>
+              </div>
+            )}
             {/* Typing indicator when AI hasn't started responding yet */}
-            {isStreaming && !lastMessageIsStreaming && (
+            {isStreaming && !isThinking && !lastMessageIsStreaming && (
               <div className="flex flex-col gap-1">
                 <div
                   className="flex items-center gap-1.5"
@@ -376,10 +412,7 @@ export default function ChatPanel({
                   <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#06b6d4" }} />
                   Zeach
                 </div>
-                <div
-                  className="flex items-center gap-1"
-                  style={{ padding: "8px 0" }}
-                >
+                <div className="flex items-center gap-1" style={{ padding: "8px 0" }}>
                   {[0, 1, 2].map((i) => (
                     <div
                       key={i}

@@ -148,96 +148,145 @@ CSS structure to use in EVERY page:
     .sidebar { display:flex; flex-direction:column; width:220px; }
     .container { max-width:${containerTablet}; margin:0 auto; padding:0 24px; }
     .card-grid { grid-template-columns:repeat(2,1fr); }
-    --fs-h1: ${gtVal(gtFontSizes.h1, "tablet") || "32px"};
-    --sp-screen: ${gtVal(gtSpacing.screen, "tablet") || "24px"};
   }
   @media (min-width: ${bpDesktop}) {
     .sidebar { width:260px; }
     .container { max-width:${containerDesktop}; padding:0 32px; }
     .card-grid { grid-template-columns:repeat(3,1fr); }
-    --fs-h1: ${gtVal(gtFontSizes.h1, "desktop") || "40px"};
-    --sp-screen: ${gtVal(gtSpacing.screen, "desktop") || "32px"};
   }` : `
-## Layout — Mobile app (${baseDevice}) — MUST work at ALL viewport widths
-- Mobile: 0 – ${bpTablet}  |  Tablet: ${bpTablet}  |  Desktop: ${bpDesktop}
+## Layout — Mobile app (${baseDevice}) — MUST produce THREE distinct layouts
+- Mobile (0 – ${bpTablet}): centered phone shell, max-width ${bpMobile}
+- Tablet (${bpTablet} – ${bpDesktop}): wider centered shell with border-radius + shadow
+- Desktop (≥ ${bpDesktop}): FULL WEB LAYOUT — sidebar navigation, no shell centering
 
-Use this EXACT CSS wrapper in every page:
-  body { margin:0; min-height:100vh; background:#dedede; display:flex; justify-content:center; align-items:flex-start; }
+Use this EXACT CSS in EVERY page (copy verbatim, then add your own styles):
+
+  /* ── Mobile ── */
+  body { margin:0; min-height:100vh; background:#e0e0e0; display:flex; justify-content:center; align-items:flex-start; }
   .app-shell { width:100%; max-width:${bpMobile}; min-height:100vh; background:var(--color-background); display:flex; flex-direction:column; position:relative; }
   .scroll-area { flex:1; overflow-y:auto; padding-bottom:80px; }
+  .desktop-sidebar { display:none; }
   .card-grid { display:grid; grid-template-columns:1fr; gap:12px; }
 
+  /* ── Tablet ── */
   @media (min-width: ${bpTablet}) {
-    body { align-items:center; padding:32px 0; background:#c8c8c8; }
-    .app-shell { max-width:768px; min-height:90vh; border-radius:24px; overflow:hidden; box-shadow:0 32px 80px rgba(0,0,0,0.25); }
+    body { padding:32px 0; align-items:center; background:#c8c8c8; }
+    .app-shell { max-width:768px; border-radius:24px; overflow:hidden; box-shadow:0 32px 80px rgba(0,0,0,0.25); }
     .card-grid { grid-template-columns:repeat(2,1fr); gap:16px; }
-    /* Responsive font sizes at tablet */
     h1 { font-size:${gtVal(gtFontSizes.h1, "tablet") || "32px"} !important; }
-    h2 { font-size:${gtVal(gtFontSizes.h2, "tablet") || "26px"} !important; }
   }
+
+  /* ── Desktop: transforms into a real web app ── */
   @media (min-width: ${bpDesktop}) {
-    .app-shell { max-width:1024px; }
+    body { padding:0; background:var(--color-background); align-items:stretch; justify-content:flex-start; }
+    .app-shell { max-width:none; border-radius:0; box-shadow:none; flex-direction:row; width:100vw; }
+    .scroll-area { padding-bottom:0; }
+    .app-header { display:none !important; }   /* hide mobile top bar */
+    .app-tabbar { display:none !important; }   /* hide mobile bottom tab bar */
+    .desktop-sidebar {
+      display:flex; flex-direction:column;
+      width:260px; min-height:100vh; flex-shrink:0;
+      background:var(--color-surface); border-right:1px solid var(--color-border);
+      padding:24px 0; position:sticky; top:0; overflow-y:auto;
+    }
+    .main-content { flex:1; min-width:0; overflow-y:auto; padding:${gtVal(gtSpacing.screen, "desktop") || "32px"}; }
     .card-grid { grid-template-columns:repeat(3,1fr); gap:20px; }
-    /* Responsive font sizes at desktop */
     h1 { font-size:${gtVal(gtFontSizes.h1, "desktop") || "40px"} !important; }
     h2 { font-size:${gtVal(gtFontSizes.h2, "desktop") || "32px"} !important; }
   }
 
-- Status bar (44px fixed top) + bottom tab bar (80px fixed bottom)
-- Scrollable content sits between them in .scroll-area`;
+EVERY screen MUST include BOTH navigation elements — they show at different breakpoints:
+1. Mobile chrome: <div class="app-header"> (56px top bar) + <div class="app-tabbar"> (80px bottom tabs) — hidden at desktop
+2. Desktop chrome: <div class="desktop-sidebar"> with logo + nav links — hidden on mobile/tablet, shown at desktop (${bpDesktop}+)
+Wrap the scrollable page body in <div class="scroll-area"><div class="main-content">…</div></div>`;
 
   // Final :root block includes both color tokens AND responsive font/spacing vars
   const rootBlock = `${cssTokens}${responsiveFontVars ? "\n" + responsiveFontVars : ""}${responsiveSpacingVars ? "\n" + responsiveSpacingVars : ""}`;
 
   return `Build the **${name}** app.
 
-## ── STEP 1: PLAN (write this first, NO files yet) ─────────────────────────────
-State what you will build in a brief plan:
-• App: ${name} (${appType}${industry ? `, ${industry}` : ""})
-• Complexity: ${complexity} → **${range.label}** (you MUST generate at least ${minScreens} files)
-• List every screen you will output, numbered, with one-line description
-• State the layout mode: ${layoutMode}
+## ── STEP 1: VALIDATE (write this first, NO files yet) ───────────────────────
+Before writing any code, run this analysis from "Describe your idea" and "Additional Notes" ONLY:
 
-## ── STEP 2: GENERATE (immediately after the plan) ───────────────────────────
-Output EVERY screen as a separate file — one right after the other.
-Use EXACTLY this format (no backtick fences, no extra text between files):
+**A. Core entities** (what objects/data does the app manage?): [extract from idea+notes]
+**B. Required features** (what can the user do?): [extract from idea+notes only — no extras]
+**C. Required flows** (what paths through the app are needed?): [extract from idea+notes only]
+**D. Required screens** (one per distinct view in the flows above — justify each):
+  - Screen name → "Required because: [quote from idea or notes]"
+  - (remove any screen you cannot justify this way)
 
---- FILE: pages/screen_name.html ---
+Then confirm:
+✓ Platform: ${platformStr} → layout mode: **${layoutMode}**
+✓ Complexity: **${complexity}** → target **${range.label}** screens (only if justified by the idea)
+✓ Dark mode: ${darkMode ? "YES — dark backgrounds" : "NO — light backgrounds"}
+✓ Primary colour: ${primary} | Background: ${background}
+✓ Fonts confirmed: heading=${headingFont}, body=${bodyFont}
+✓ Industry/App Type used for: VISUAL STYLE ONLY (not features, not screens)
+
+## ── STEP 2: GENERATE (immediately after the checklist) ──────────────────────
+Output files in this exact order — NO backtick fences, NO extra text between markers:
+
+1. styles/global.css — ALL shared CSS: :root tokens, reset, typography, layout, components, animations
+2. scripts/main.js  — ALL shared JS: navigation interception, active states, micro-interactions
+3. pages/*.html     — Every screen (${range.label}), each importing the above two files
+
+File format (copy exactly):
+--- FILE: styles/global.css ---
+/* all shared CSS here */
+
+--- FILE: scripts/main.js ---
+// all shared JS here
+
+--- FILE: pages/home.html ---
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Screen Name — ${name}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="${googleFontsUrl}">
-    <link rel="stylesheet" href="${iconsFontUrl}">
-    <style>
-      :root {
-${rootBlock}
-      }
-      /* mobile-first responsive layout + media queries here */
-    </style>
-  </head>
-  <body>...</body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home — ${name}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="${googleFontsUrl}">
+  <link rel="stylesheet" href="${iconsFontUrl}">
+  <link rel="stylesheet" href="../styles/global.css">
+</head>
+<body>
+  <!-- page-specific markup only — no repeated CSS -->
+  <script src="../scripts/main.js"></script>
+</body>
 </html>
 
-## Project context
-- App name: **${name}**
-- Type: **${appType}**${industry ? ` · ${industry}` : ""}
-- Description: ${description || "N/A"}
-- Platform: **${platformStr}** (base: ${baseDevice})
-- Complexity: **${complexity}** → must generate **at least ${minScreens} screens**, up to ${range.max}
-- Features: ${features.length ? features.join(", ") : "none specified"}
-${notes ? `- Notes: ${notes}` : ""}
+--- FILE: pages/next_screen.html ---
+...and so on for all screens
 
-## Design system — use EXACTLY
+## Project context — PRIORITY ORDER (highest first)
+
+### ① DESCRIBE YOUR IDEA — PRIMARY SOURCE (features, screens, flows come from HERE only)
+${description || "N/A"}
+
+### ② ADDITIONAL NOTES — SECONDARY SOURCE (extra constraints, additions, overrides)
+${notes || "None"}
+
+### ③ VISUAL STYLE ONLY (do NOT derive features from these)
+- App Type: **${appType}**${industry ? ` · Industry: ${industry}` : ""} → used for aesthetics, UX patterns, icons only
+- Platform: **${platformStr}** (base: ${baseDevice})
+- Complexity: **${complexity}** → target **${range.label}** screens — but only generate screens justified by ① and ②
+- Feature chips selected: ${features.length ? features.join(", ") : "none"} → only act on these if ① or ② also mention them
+
+## Design system — use EXACTLY these values
 - Style: **${packName}** — ${aesthetic}
 - Tone: ${tone}
-- Dark mode: **${darkMode ? "YES" : "NO"}** (bg: ${background}, primary: ${primary})
+- Dark mode: **${darkMode ? "YES — dark bg everywhere" : "NO — light bg everywhere"}** (bg: ${background}, primary: ${primary})
 - Heading font: **${headingFont}** | Body font: **${bodyFont}**
-- Icons: **Material Symbols ${iconWeight}** (fill=${iconFill}) — use: ${primaryIcons}
+- Icons: **Material Symbols ${iconWeight}** (fill=${iconFill}) — priority icons: ${primaryIcons}
 ${responsiveRules}
+
+## global.css must define (in :root)
+\`\`\`css
+:root {
+${rootBlock}
+}
+\`\`\`
+Plus: reset (*, body), typography classes (.h1–.h4, .body, .caption, .label), layout helpers (.app-shell, .scroll-area, .main-content, .desktop-sidebar, .app-header, .app-tabbar, .card-grid), animation keyframes (fade-in, slide-up, skeleton-pulse), and all button/card/chip hover states.
 
 ## Tab bar
 Tabs: **${tabBar.join(" | ")}**
@@ -245,18 +294,21 @@ Tabs: **${tabBar.join(" | ")}**
 ## Navigation flow
 ${navFlowLines || "  home → detail → profile"}
 
-## Screens to generate — MUST build ALL of these (${range.label})
+## Suggested screens (from project brain — only include if justified by ① and ②)
 ${screenList.map((s, i) => `${i + 1}. ${s}`).join("\n")}
+⚠ You may replace or skip any of these if they are not required by the idea/notes. You may add screens not listed here if the idea/notes require them.
 
-## Per-screen requirements (NON-NEGOTIABLE)
-1. **Standalone HTML** — all CSS inline in <style>, fonts from CDN only
-2. **CSS variables** — define :root{} with ALL tokens, use var(--color-*) everywhere
-3. **Material Symbols** — NEVER emoji, NEVER Unicode symbols; always <span class="material-symbols-outlined">name</span>
-4. **Realistic content** — real ${industry || appType} data (names, prices, ratings, descriptions); zero grey placeholder boxes
-5. **Interactions** — hover/active states on every button (scale 0.97), tab bar active colour, card hover lift
-6. **Navigation links** — tab bar items: <a href="/screen_name"> matching file names
-7. **Touch targets** — min 44px height on all interactive elements
-8. **No comments** between files — output --- FILE: --- markers back to back`.trim();
+## Per-screen rules (NON-NEGOTIABLE)
+1. **Import shared files** — link global.css + script main.js; NO inline :root or repeated CSS
+2. **Page-specific styles only** — only write <style> blocks for layout unique to that screen
+3. **Material Symbols** — NEVER emoji; always <span class="material-symbols-outlined">icon_name</span>
+4. **Realistic content** — real data matching the idea: names, prices, ratings, images via unsplash.com/photos
+5. **Interactions** — hover + active (scale 0.97) on every button; active tab highlighted; card hover lift
+6. **Navigation** — tab bar links: <a href="/screen_name"> matching filenames (no .html extension)
+7. **Touch targets** — min 44×44px on all interactive elements
+8. **Dual nav** — EVERY screen has BOTH .app-tabbar (mobile) AND .desktop-sidebar (desktop); shown via CSS breakpoints
+9. **No filler** — no grey boxes, no "TODO", no "Lorem ipsum" — real content only
+10. **No feature creep** — if a screen or feature is not in ① or ②, do NOT include it`.trim();
 }
 
 // ─── ChatWorkspace ─────────────────────────────────────────────────────────────
@@ -276,7 +328,7 @@ function ChatWorkspace({
   autoInit: boolean;
   onBack: () => void;
 }) {
-  const { messages, isStreaming, isLoading, lastUsage, sendMessage, stopStreaming, clearMessages, deletePages } =
+  const { messages, isStreaming, isThinking, isLoading, lastUsage, sendMessage, stopStreaming, clearMessages, deletePages } =
     useChat(persist);
   const [chatPct, setChatPct] = useState(DEFAULT_CHAT_PCT);
   const [previewFullscreen, setPreviewFullscreen] = useState(false);
@@ -285,15 +337,6 @@ function ChatWorkspace({
   const containerRef = useRef<HTMLDivElement>(null);
   const didAutoInit = useRef(false);
 
-  // ── Derive expected screen count from brain ───────────────────────────────────
-  const expectedScreenCount = useMemo(() => {
-    if (!persist.brain) return 0;
-    const brainScreens = (persist.brain.screens ?? {}) as Record<string, unknown>;
-    const inventory = Array.isArray(brainScreens.inventory) ? brainScreens.inventory.length : 0;
-    const c = ((persist.brain.project ?? {}) as Record<string, unknown>).complexity as string ?? "MVP";
-    const max = c === "MVP" ? 10 : c === "Startup" ? 15 : 30;
-    return Math.min(inventory, max);
-  }, [persist.brain]);
 
   // ── Auto-generate initial screens on first visit ──────────────────────────────
   useEffect(() => {
@@ -368,6 +411,7 @@ function ChatWorkspace({
         <ChatPanel
           messages={messages}
           isStreaming={isStreaming}
+          isThinking={isThinking}
           lastUsage={lastUsage}
           onSend={sendMessage}
           onStop={stopStreaming}
@@ -410,9 +454,9 @@ function ChatWorkspace({
           pagesLoading={pagesLoading}
           messages={messages}
           isStreaming={isStreaming}
+          isThinking={isThinking}
           fullscreen={previewFullscreen}
           onToggleFullscreen={() => setPreviewFullscreen((v) => !v)}
-          expectedScreenCount={autoInit ? expectedScreenCount : 0}
         />
       </div>
 

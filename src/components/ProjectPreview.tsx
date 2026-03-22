@@ -24,9 +24,9 @@ type Props = {
   pagesLoading: boolean;
   messages: Message[];
   isStreaming: boolean;
+  isThinking?: boolean;
   fullscreen: boolean;
   onToggleFullscreen: () => void;
-  expectedScreenCount?: number; // total screens expected during auto-generation
 };
 
 // ─── Viewport config ──────────────────────────────────────────────────────────
@@ -105,24 +105,55 @@ function FullscreenIcon({ exit }: { exit: boolean }) {
   );
 }
 
-// ─── Shimmer skeleton ─────────────────────────────────────────────────────────
+// ─── Zai loading state (matches chat panel design) ───────────────────────────
 
-function ShimmerSkeleton({ label }: { label: string }) {
+function ZaiLoading({ label, thinking }: { label?: string; thinking?: boolean }) {
   return (
-    <div className="w-full h-full relative overflow-hidden flex flex-col items-center justify-center gap-5" style={{ background: "#111" }}>
+    <div
+      className="w-full h-full flex flex-col items-center justify-center gap-5"
+      style={{ background: "#0d0d0d" }}
+    >
+      {/* Z logo */}
       <div
-        className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-black"
-        style={{ background: "rgba(217,119,6,0.12)", border: "1px solid rgba(217,119,6,0.25)", color: "#d97706", animation: "zaiPulse 2s ease-in-out infinite" }}
-      >Z</div>
-      <div className="text-center">
-        <p className="text-sm font-semibold" style={{ color: "#e5e5e5" }}>
-          Building <span style={{ color: "#d97706" }}>{label}</span>
-        </p>
-        <p className="text-xs mt-1" style={{ color: "#6b7280" }}>Zai is writing files…</p>
+        style={{
+          width: 48, height: 48, borderRadius: 14,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: thinking ? "rgba(168,85,247,0.1)" : "rgba(6,182,212,0.1)",
+          border: `1px solid ${thinking ? "rgba(168,85,247,0.25)" : "rgba(6,182,212,0.25)"}`,
+          color: thinking ? "#a855f7" : "#06b6d4",
+          fontFamily: "var(--font-space-grotesk)",
+          fontSize: 20, fontWeight: 900, letterSpacing: "-0.5px",
+          animation: "zaiPulse 2s ease-in-out infinite",
+          transition: "all 0.4s ease",
+        }}
+      >
+        Z
       </div>
-      <div className="flex gap-1.5">
+
+      {/* Label */}
+      <div className="text-center" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <p style={{ fontFamily: "var(--font-space-grotesk)", fontSize: 14, fontWeight: 600, color: "#fff", letterSpacing: "-0.2px" }}>
+          {thinking ? "Analyzing project…" : label ? `Building ${label}` : "Zai is loading…"}
+        </p>
+        <p style={{ fontFamily: "var(--font-dm-mono)", fontSize: 11, color: thinking ? "#a855f7" : "#3f3f46", transition: "color 0.4s" }}>
+          {thinking ? "validating design & planning screens" : "writing files"}
+        </p>
+      </div>
+
+      {/* Typing dots */}
+      <div style={{ display: "flex", gap: 5 }}>
         {[0, 1, 2].map((i) => (
-          <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: "#d97706", opacity: 0.7, animation: `typingBounce 1.2s ease-in-out infinite`, animationDelay: `${i * 0.2}s` }} />
+          <div
+            key={i}
+            style={{
+              width: 5, height: 5, borderRadius: "50%",
+              background: thinking ? "#a855f7" : "#06b6d4",
+              opacity: 0.4,
+              animation: "typingBounce 1.2s ease-in-out infinite",
+              animationDelay: `${i * 0.2}s`,
+              transition: "background 0.4s",
+            }}
+          />
         ))}
       </div>
     </div>
@@ -142,7 +173,7 @@ function EmptyState({ fullscreen, onToggleFullscreen, loading }: { fullscreen: b
       </div>
       <div className="flex-1 flex flex-col items-center justify-center gap-4">
         {loading ? (
-          <div className="w-7 h-7 rounded-full border-2 animate-spin" style={{ borderColor: "#d97706 transparent #d97706 transparent" }} />
+          <ZaiLoading />
         ) : (
           <>
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: "#1a1a1a", border: "1px solid #2a2a2a" }}>
@@ -259,80 +290,6 @@ function FileTree({
 
 // ─── Generation progress bar ─────────────────────────────────────────────────
 
-function GenerationProgress({
-  completed,
-  total,
-  pct,
-  currentLabel,
-  partialPage,
-}: {
-  completed: number;
-  total: number;
-  pct: number;
-  currentLabel: string;
-  partialPage: boolean;
-}) {
-  return (
-    <div
-      className="shrink-0 px-4 py-3 flex flex-col gap-2"
-      style={{ background: "rgba(217,119,6,0.05)", borderBottom: "1px solid rgba(217,119,6,0.15)" }}
-    >
-      {/* Top row: label + count */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {/* Animated spark */}
-          <span
-            className="w-2 h-2 rounded-full shrink-0"
-            style={{ background: "#d97706", animation: "streamingGlow 0.8s ease-in-out infinite" }}
-          />
-          <span className="text-xs font-semibold" style={{ color: "#e5e5e5" }}>
-            Generating screens
-          </span>
-          <span className="text-xs capitalize" style={{ color: "#d97706" }}>
-            — {currentLabel}
-          </span>
-        </div>
-        <span className="text-xs font-mono tabular-nums" style={{ color: "#9ca3af" }}>
-          {completed} / {total} &nbsp;·&nbsp; {pct}%
-        </span>
-      </div>
-
-      {/* Progress bar */}
-      <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "#252525" }}>
-        <div
-          className="h-full rounded-full transition-all duration-500"
-          style={{
-            width: `${pct}%`,
-            background: "linear-gradient(90deg, #d97706, #f59e0b)",
-            boxShadow: "0 0 8px rgba(217,119,6,0.5)",
-          }}
-        />
-      </div>
-
-      {/* Screen dots */}
-      <div className="flex gap-1 flex-wrap">
-        {Array.from({ length: total }).map((_, i) => {
-          const isDone = i < completed;
-          const isActive = i === completed && !!partialPage;
-          return (
-            <div
-              key={i}
-              className="rounded-full transition-all duration-300"
-              style={{
-                width: isDone ? "20px" : isActive ? "12px" : "6px",
-                height: "6px",
-                background: isDone || isActive ? "#d97706" : "#2a2a2a",
-                opacity: isDone ? 1 : isActive ? 0.8 : 0.25,
-                animation: isActive ? "streamingGlow 0.8s ease-in-out infinite" : undefined,
-              }}
-            />
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function ProjectPreview({
@@ -340,9 +297,9 @@ export default function ProjectPreview({
   pagesLoading,
   messages,
   isStreaming,
+  isThinking = false,
   fullscreen,
   onToggleFullscreen,
-  expectedScreenCount = 0,
 }: Props) {
   const [activePageName, setActivePageName] = useState<string | null>(null);
   const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
@@ -366,27 +323,8 @@ export default function ProjectPreview({
   const streamingFileMap = new Map(streamingFiles.map((f) => [f.path, f]));
   const streamingPaths = new Set(streamingFiles.map((f) => f.path));
 
-  // ── Generation progress tracking ───────────────────────────────────────────
-  // Count complete (non-partial) pages written so far during streaming
-  const completedStreamingPages = streamingFiles.filter(
-    (f) => !f.partial && f.path.startsWith("pages/")
-  ).length;
-  // The page currently being written (partial) counts as 0.5 so the bar moves smoothly
+  // Track partial page being written (for shimmer label)
   const partialPage = streamingFiles.find((f) => f.partial && f.path.startsWith("pages/"));
-  const progressNumerator = completedStreamingPages + (partialPage ? 0.5 : 0);
-  const totalExpected = expectedScreenCount > 0 ? expectedScreenCount : 0;
-  const showProgress = isStreaming && totalExpected > 0 && files.length === 0;
-  const progressPct = totalExpected > 0
-    ? Math.min(99, Math.round((progressNumerator / totalExpected) * 100))
-    : 0;
-  // Label: show page being written, or phase
-  const currentPageLabel = partialPage
-    ? partialPage.path.replace("pages/", "").replace(".html", "").replace(/_/g, " ")
-    : completedStreamingPages > 0
-      ? "saving…"
-      : streamIsMultiFile
-        ? "writing files…"
-        : "planning…";
 
   // ── Determine pages to show ────────────────────────────────────────────────
 
@@ -757,16 +695,6 @@ export default function ProjectPreview({
         </div>
       </div>
 
-      {/* ── Generation progress bar ── */}
-      {showProgress && (
-        <GenerationProgress
-          completed={completedStreamingPages}
-          total={totalExpected}
-          pct={progressPct}
-          currentLabel={currentPageLabel}
-          partialPage={!!partialPage}
-        />
-      )}
 
 
       {/* ── Content area ── */}
@@ -798,16 +726,11 @@ export default function ProjectPreview({
           style={{ background: viewMode === "preview" ? "#e5e7eb" : "#0d0d0d" }}
         >
           {!activeContent && !hasAnyStreaming ? (
-            <div className="flex items-center justify-center w-full h-full">
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-7 h-7 rounded-full border-2 animate-spin" style={{ borderColor: "#d97706 transparent #d97706 transparent" }} />
-                <span className="text-xs" style={{ color: "#6b7280" }}>Loading…</span>
-              </div>
-            </div>
+            <ZaiLoading thinking={isThinking} />
           ) : hasAnyStreaming && !activeContent ? (
-            <ShimmerSkeleton label="project files" />
+            <ZaiLoading label="project files" thinking={isThinking} />
           ) : activeContent?.isPartial ? (
-            <ShimmerSkeleton label={activeTab ? getDisplayName(activeTab) : "page"} />
+            <ZaiLoading label={activeTab ? getDisplayName(activeTab) : "page"} />
           ) : viewMode === "preview" ? (
             <div
               className="h-full shrink-0 overflow-hidden shadow-2xl fade-in"

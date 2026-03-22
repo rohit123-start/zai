@@ -107,6 +107,7 @@ export type TokenUsageSnapshot = {
 export function useChat(persist?: PersistConfig) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isThinking, setIsThinking] = useState(false); // model is in extended thinking phase
   const [isLoading, setIsLoading] = useState(!!persist);
   const [lastUsage, setLastUsage] = useState<TokenUsageSnapshot | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -239,6 +240,10 @@ export function useChat(persist?: PersistConfig) {
                       )
                     );
                   }
+                } else if (parsed.status === "thinking") {
+                  setIsThinking(true);
+                } else if (parsed.status === "generating") {
+                  setIsThinking(false);
                 } else if (parsed.usage) {
                   setLastUsage({
                     input: parsed.usage.input,
@@ -294,6 +299,7 @@ export function useChat(persist?: PersistConfig) {
         }
       } finally {
         setIsStreaming(false);
+        setIsThinking(false);
       }
     },
     [messages, isStreaming]
@@ -313,5 +319,5 @@ export function useChat(persist?: PersistConfig) {
       .catch(console.error);
   }, []);
 
-  return { messages, isStreaming, isLoading, lastUsage, sendMessage, stopStreaming, clearMessages, deletePages };
+  return { messages, isStreaming, isThinking, isLoading, lastUsage, sendMessage, stopStreaming, clearMessages, deletePages };
 }
