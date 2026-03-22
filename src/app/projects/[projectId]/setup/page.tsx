@@ -340,7 +340,7 @@ export default function VisualDirectionPage() {
         reference_urls: referenceUrls,
         brain,
       });
-      router.push(`/projects/${projectId}`);
+      router.push(`/projects/${projectId}?init=1`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save. Try again.");
       setSubmitting(false);

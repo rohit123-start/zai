@@ -32,6 +32,7 @@ export type PersistConfig = {
   projectId: string;
   userId: string;
   files?: ProjectFile[];
+  brain?: Record<string, unknown> | null;
   onFilesUpdate?: (files: ProjectFile[]) => void;
 };
 
@@ -137,9 +138,10 @@ export function useChat(persist?: PersistConfig) {
   }, []);
 
   const sendMessage = useCallback(
-    async (userInput: string, images?: ImageAttachment[]) => {
+    async (userInput: string, images?: ImageAttachment[], opts?: { silent?: boolean }) => {
       if (!userInput.trim() || isStreaming) return;
 
+      const silent = opts?.silent ?? false;
       const p = persistRef.current;
 
       const userMessage: Message = {
@@ -149,11 +151,13 @@ export function useChat(persist?: PersistConfig) {
         images,
       };
 
-      const updatedMessages = [...messages, userMessage];
-      setMessages(updatedMessages);
+      // Always include the user message for the API call.
+      // In silent mode we skip adding it to React state and the DB.
+      const messagesForApi = [...messages, userMessage];
+      if (!silent) setMessages(messagesForApi);
       setIsStreaming(true);
 
-      if (p) {
+      if (p && !silent) {
         saveMessage(
           p.projectId,
           p.userId,
@@ -164,10 +168,12 @@ export function useChat(persist?: PersistConfig) {
       }
 
       const assistantId = generateId();
-      setMessages((prev) => [
-        ...prev,
-        { id: assistantId, role: "assistant", content: "" },
-      ]);
+      if (!silent) {
+        setMessages((prev) => [
+          ...prev,
+          { id: assistantId, role: "assistant", content: "" },
+        ]);
+      }
 
       const finalContentRef = { current: "" };
 
@@ -177,9 +183,9 @@ export function useChat(persist?: PersistConfig) {
 
         const HISTORY_LIMIT = 20;
         const trimmed =
-          updatedMessages.length > HISTORY_LIMIT
-            ? [updatedMessages[0], ...updatedMessages.slice(-(HISTORY_LIMIT - 1))]
-            : updatedMessages;
+          messagesForApi.length > HISTORY_LIMIT
+            ? [messagesForApi[0], ...messagesForApi.slice(-(HISTORY_LIMIT - 1))]
+            : messagesForApi;
 
         const compressed = compressForAPI(trimmed);
 
@@ -194,6 +200,7 @@ export function useChat(persist?: PersistConfig) {
           body: JSON.stringify({
             messages: compressed,
             currentFiles: currentFiles.length > 0 ? currentFiles : undefined,
+            brain: p?.brain ?? undefined,
             projectId: p?.projectId,
             userId: p?.userId,
           }),
@@ -223,13 +230,15 @@ export function useChat(persist?: PersistConfig) {
                 const parsed = JSON.parse(raw);
                 if (parsed.text) {
                   finalContentRef.current += parsed.text;
-                  setMessages((prev) =>
-                    prev.map((m) =>
-                      m.id === assistantId
-                        ? { ...m, content: m.content + parsed.text }
-                        : m
-                    )
-                  );
+                  if (!silent) {
+                    setMessages((prev) =>
+                      prev.map((m) =>
+                        m.id === assistantId
+                          ? { ...m, content: m.content + parsed.text }
+                          : m
+                      )
+                    );
+                  }
                 } else if (parsed.usage) {
                   setLastUsage({
                     input: parsed.usage.input,
@@ -247,7 +256,10 @@ export function useChat(persist?: PersistConfig) {
         // Persist assistant message + project files
         if (p && finalContentRef.current) {
           try {
-            await saveMessage(p.projectId, p.userId, "assistant", finalContentRef.current);
+            // In silent mode only files are saved — no chat messages
+            if (!silent) {
+              await saveMessage(p.projectId, p.userId, "assistant", finalContentRef.current);
+            }
 
             if (isMultiFileResponse(finalContentRef.current)) {
               const parsedFiles = parseFilesFromText(finalContentRef.current);
@@ -267,11 +279,11 @@ export function useChat(persist?: PersistConfig) {
         }
       } catch (err) {
         if (err instanceof Error && err.name === "AbortError") {
-          if (p && finalContentRef.current) {
+          if (p && finalContentRef.current && !silent) {
             saveMessage(p.projectId, p.userId, "assistant", finalContentRef.current)
               .catch(console.error);
           }
-        } else {
+        } else if (!silent) {
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantId

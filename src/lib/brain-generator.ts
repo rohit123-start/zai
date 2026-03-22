@@ -72,6 +72,21 @@ const APP_SCREENS: Record<string, string[]> = {
 
 const DEFAULT_SCREENS = ["splash","onboarding","login","signup","home","search","detail","profile","settings"];
 
+// ─── Feature → extra screens ─────────────────────────────────────────────────
+// Screens added to the inventory when a user selects the corresponding feature chip
+
+const FEATURE_SCREENS: Record<string, string[]> = {
+  "Payments":             ["checkout","payment","payment_methods","payment_success"],
+  "Chat / Messaging":     ["messages","conversation","new_message"],
+  "Notifications":        ["notifications"],
+  "Search & Filters":     ["search","filters"],
+  "Maps / Location":      ["map","location_picker"],
+  "Analytics / Dashboard":["analytics","dashboard"],
+  "Authentication":       ["login","signup","forgot_password"],
+  "File Upload":          ["upload","media_picker"],
+  "Video / Calls":        ["video_call","calls","call_history"],
+};
+
 // ─── App type → nav flow ──────────────────────────────────────────────────────
 
 const NAV_FLOWS: Record<string, Record<string, string[]>> = {
@@ -206,7 +221,15 @@ export function generateBrain(
   const iconData = INDUSTRY_ICONS[industryKey] ?? INDUSTRY_ICONS[toKey(appType)] ?? DEFAULT_ICONS;
 
   // ── Screens ──────────────────────────────────────────────────────────────────
-  const inventory = APP_SCREENS[appType] ?? APP_SCREENS[industry] ?? DEFAULT_SCREENS;
+  const baseInventory = APP_SCREENS[appType] ?? APP_SCREENS[industry] ?? DEFAULT_SCREENS;
+  const selectedFeatures = project.features ?? [];
+
+  // Append feature-specific screens not already in the base inventory
+  const featureScreens = selectedFeatures.flatMap(
+    (f) => (FEATURE_SCREENS[f] ?? []).filter((s) => !baseInventory.includes(s))
+  );
+  const inventory = [...baseInventory, ...featureScreens];
+
   const navFlow = NAV_FLOWS[appType] ?? NAV_FLOWS[industry] ?? {};
   const tabBar = TAB_BARS[appType] ?? TAB_BARS[industry] ?? DEFAULT_TAB;
 
@@ -227,11 +250,57 @@ export function generateBrain(
   };
 
   // ── Global token fallbacks ────────────────────────────────────────────────────
-  const spacing = globalTokens?.spacing ?? { xs:"4px", sm:"8px", md:"16px", lg:"24px", xl:"32px", xxl:"48px" };
-  const radius  = globalTokens?.radius  ?? { sm:"8px", md:"12px", lg:"16px", xl:"20px", pill:"999px" };
-  const fontSizes = globalTokens?.font_sizes ?? { h1:"28px", h2:"22px", h3:"18px", h4:"16px", body:"15px", caption:"12px", label:"11px" };
-  const lineHeights = globalTokens?.line_heights ?? { heading:"1.2", body:"1.5", caption:"1.4" };
-  const breakpoints = globalTokens?.breakpoints ?? { iphone:"390px", iphone_max:"430px", ipad_mini:"744px", ipad:"820px", ipad_pro:"1024px" };
+  // Handles both flat ("8px") and responsive ({mobile:"8px", tablet:"10px"}) formats
+  function scalarVal(v: unknown, vp: "mobile" | "tablet" | "desktop" = "mobile"): string {
+    if (typeof v === "string") return v;
+    if (typeof v === "object" && v !== null) {
+      const o = v as Record<string, string>;
+      return o[vp] ?? o.mobile ?? String(Object.values(o)[0] ?? "");
+    }
+    return String(v ?? "");
+  }
+
+  const rawSpacing = (globalTokens?.spacing ?? {}) as Record<string, unknown>;
+  const spacing = {
+    xs:     scalarVal(rawSpacing.xs)    || "4px",
+    sm:     scalarVal(rawSpacing.sm)    || "8px",
+    md:     scalarVal(rawSpacing.md)    || "16px",
+    lg:     scalarVal(rawSpacing.lg)    || "24px",
+    xl:     scalarVal(rawSpacing.xl)    || "32px",
+    xxl:    scalarVal(rawSpacing.xxl)   || "48px",
+    screen: scalarVal(rawSpacing.screen) || "24px",
+    card:   scalarVal(rawSpacing.card)   || "16px",
+  };
+
+  const radius = (globalTokens?.radius ?? { sm:"8px", md:"12px", lg:"16px", xl:"20px", pill:"999px" }) as Record<string, string>;
+
+  const rawFontSizes = (globalTokens?.font_sizes ?? {}) as Record<string, unknown>;
+  const fontSizes = {
+    h1:      scalarVal(rawFontSizes.h1)      || "28px",
+    h2:      scalarVal(rawFontSizes.h2)      || "22px",
+    h3:      scalarVal(rawFontSizes.h3)      || "18px",
+    h4:      scalarVal(rawFontSizes.h4)      || "16px",
+    body:    scalarVal(rawFontSizes.body)    || "15px",
+    caption: scalarVal(rawFontSizes.caption) || "12px",
+    label:   scalarVal(rawFontSizes.label)   || "11px",
+  };
+
+  const rawLineHeights = (globalTokens?.line_heights ?? {}) as Record<string, unknown>;
+  const lineHeights = {
+    heading: scalarVal(rawLineHeights.heading) || "1.2",
+    body:    scalarVal(rawLineHeights.body)    || "1.5",
+    caption: scalarVal(rawLineHeights.caption) || "1.4",
+  };
+
+  // New breakpoint format uses tablet/desktop keys; old used iphone/ipad
+  const rawBp = (globalTokens?.breakpoints ?? {}) as Record<string, string>;
+  const breakpoints = {
+    iphone:     rawBp.mobile_max ?? rawBp.iphone     ?? "390px",
+    iphone_max: rawBp.mobile_max ?? rawBp.iphone_max ?? "430px",
+    ipad_mini:  rawBp.tablet     ?? rawBp.ipad_mini  ?? "744px",
+    ipad:       rawBp.tablet     ?? rawBp.ipad       ?? "820px",
+    ipad_pro:   rawBp.desktop    ?? rawBp.ipad_pro   ?? "1280px",
+  };
 
   // ── Component styles ──────────────────────────────────────────────────────────
   const isRounded = iconWeight === "rounded";
@@ -239,7 +308,10 @@ export function generateBrain(
 
   // ── System summary ────────────────────────────────────────────────────────────
   const platformStr = platform.join(" and ");
-  const systemSummary = `${industry} ${appType} called ${project.name}. ${packName} aesthetic — ${t.primary} primary, ${t.heading_font} headings, ${t.body_font} body, Material Symbols ${iconWeight} icons. ${aesthetic.tone}. Platform: ${platformStr}. Core action: ${project.primary_action ?? "main action"}. Target: ${project.target_user ?? "general users"}.`;
+  const complexity = project.complexity ?? "MVP";
+  const features = project.features ?? [];
+  const description = project.description ?? "";
+  const systemSummary = `${industry} ${appType} app called "${project.name}". ${complexity} complexity. ${packName} aesthetic — ${t.primary} primary colour, ${t.heading_font} headings, ${t.body_font} body, Material Symbols ${iconWeight} icons. Tone: ${aesthetic.tone}. Platform: ${platformStr}. Description: ${description || "(none)"}. Features: ${features.length ? features.join(", ") : "none specified"}.`;
 
   // ── Base device ───────────────────────────────────────────────────────────────
   const baseDevice = platform.includes("Android") && !platform.includes("iOS") ? "Android" : "iPhone";
@@ -250,6 +322,10 @@ export function generateBrain(
       name: project.name,
       type: toKey(appType),
       industry: industryKey,
+      app_type: appType,
+      description,
+      complexity,
+      features,
       primary_action: project.primary_action ?? "",
       target_user: project.target_user ?? "",
       platform,
@@ -451,11 +527,23 @@ export function generateBrain(
       total_screens_generated: inventory.length,
     },
 
+    // Full global theme tokens stored verbatim so any downstream consumer
+    // (LLM context builder, export tools) has access to the complete set.
+    global_theme: globalTokens ?? null,
+
     _inputs: {
+      project_name:       project.name,
+      description,
+      industry,
+      app_type:           appType,
+      project_type:       project.project_type ?? "new_idea",
+      complexity,
+      features,
+      style_pack:         packName,
+      font_pairing:       inputs.font_pairing,
       screenshots:        inputs.screenshots,
       inspiration_images: inputs.inspiration_images,
       reference_urls:     inputs.reference_urls,
-      font_pairing:       inputs.font_pairing,
     },
   };
 }

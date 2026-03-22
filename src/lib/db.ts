@@ -37,15 +37,18 @@ export type Theme = {
 
 // ─── Global theme (formerly global_tokens) ────────────────────────────────────
 
+// Known keys are typed precisely; any extra keys added to global_theme.tokens
+// (e.g. "desktop", "grid", "z_index") are preserved as unknown so nothing is dropped.
 export type GlobalTheme = {
-  radius: Record<string, string>;
-  spacing: Record<string, string>;
-  font_sizes: Record<string, string>;
-  line_heights: Record<string, string>;
-  shadows: Record<string, string>;
-  transitions: Record<string, string>;
-  breakpoints: Record<string, string>;
-};
+  radius?: Record<string, string>;
+  spacing?: Record<string, string>;
+  font_sizes?: Record<string, string>;
+  line_heights?: Record<string, string>;
+  shadows?: Record<string, string>;
+  transitions?: Record<string, string>;
+  breakpoints?: Record<string, string>;
+  desktop?: Record<string, unknown>;
+} & { [key: string]: unknown };
 
 export async function getThemes(industry?: string): Promise<Theme[]> {
   const supabase = createClient();
@@ -90,6 +93,10 @@ export type ProjectBrain = {
     name: string;
     type: string;
     industry: string;
+    app_type: string;
+    description: string;
+    complexity: string;
+    features: string[];
     primary_action: string;
     target_user: string;
     platform: string[];
@@ -176,6 +183,7 @@ export type ProjectBrain = {
     wireframe: boolean;
   };
   custom_additions: string[];
+  global_theme: GlobalTheme | null;
   prompt_context: {
     system_summary: string;
     last_prompt: string | null;
@@ -205,10 +213,20 @@ export type ProjectBrain = {
     total_screens_generated: number;
   };
   _inputs: {
+    // Screen 1 inputs
+    project_name: string;
+    description: string;
+    industry: string;
+    app_type: string;
+    project_type: string;
+    complexity: string;
+    features: string[];
+    // Screen 2 inputs
+    style_pack: string;
+    font_pairing: string;
     screenshots: string[];
     inspiration_images: string[];
     reference_urls: string[];
-    font_pairing: string;
   };
 };
 

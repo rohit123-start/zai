@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { SYSTEM_PROMPT } from "@/lib/systemPrompt";
+import { SYSTEM_PROMPT, buildBrainContext } from "@/lib/systemPrompt";
 import { createClient } from "@/lib/supabase/server";
 
 const anthropic = new Anthropic({
@@ -8,14 +8,22 @@ const anthropic = new Anthropic({
 
 export async function POST(request: Request) {
   try {
-    const { messages, dgContext, currentPages, currentFiles, projectId, userId } = await request.json();
+    const { messages, dgContext, currentPages, currentFiles, brain, projectId, userId } = await request.json();
 
     // ── Build system prompt ───────────────────────────────────────────────────
     let system = SYSTEM_PROMPT;
 
-    // Inject design guidelines
+    // Inject project brain (primary context — design tokens, icons, screens, etc.)
+    if (brain) {
+      const brainCtx = buildBrainContext(brain as Record<string, unknown>);
+      if (brainCtx) {
+        system += `\n\n${brainCtx}`;
+      }
+    }
+
+    // Inject design guidelines (legacy fallback)
     if (dgContext) {
-      system += `\n\n## Project Design Guidelines\nThis project has established design guidelines. Follow them precisely:\n\n${dgContext}`;
+      system += `\n\n## Additional Design Guidelines\n${dgContext}`;
     }
 
     // Inject current project state (pages/files from DB).

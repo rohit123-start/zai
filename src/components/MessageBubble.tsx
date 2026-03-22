@@ -27,34 +27,50 @@ export default function MessageBubble({ message, isStreaming }: Props) {
   const isUser = message.role === "user";
   const isEmpty = !message.content || message.content === "";
 
+  /* ── User message ──────────────────────────────────────────────────────── */
   if (isUser) {
     const hasImages = message.images && message.images.length > 0;
     return (
-      <div className="flex justify-end mb-4 message-in">
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3 }}>
         <div
-          className="max-w-[75%] text-sm leading-relaxed overflow-hidden"
           style={{
-            background: "#2a2a2a",
-            color: "#e5e5e5",
-            borderRadius: "12px 12px 2px 12px",
+            background: "#161616",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "12px 12px 3px 12px",
+            maxWidth: "90%",
+            overflow: "hidden",
           }}
         >
           {hasImages && (
-            <div className={`grid gap-1 p-1 ${message.images!.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: message.images!.length === 1 ? "1fr" : "1fr 1fr",
+                gap: 2,
+                padding: 4,
+              }}
+            >
               {message.images!.map((img, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   key={i}
                   src={img.preview}
                   alt={`uploaded image ${i + 1}`}
-                  className="w-full object-cover"
-                  style={{ maxHeight: "240px", borderRadius: "8px", display: "block" }}
+                  style={{ width: "100%", objectFit: "cover", maxHeight: 200, borderRadius: 6, display: "block" }}
                 />
               ))}
             </div>
           )}
           {message.content && message.content !== "(no text)" && (
-            <div className={hasImages ? "px-4 pb-2.5 pt-1" : "px-4 py-2.5"}>
+            <div
+              style={{
+                padding: hasImages ? "6px 12px 9px" : "9px 12px",
+                fontSize: 13,
+                color: "#fff",
+                lineHeight: 1.5,
+                fontFamily: "var(--font-dm-sans)",
+              }}
+            >
               {message.content}
             </div>
           )}
@@ -63,43 +79,66 @@ export default function MessageBubble({ message, isStreaming }: Props) {
     );
   }
 
+  /* ── Assistant message ─────────────────────────────────────────────────── */
   const strippedContent = message.content ? stripCodeBlocks(message.content) : "";
   const isThinking = isEmpty && isStreaming;
 
   return (
-    <div className="flex justify-start mb-4 message-in">
-      {/* Zai avatar */}
+    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      {/* "Zeach" label with cyan dot */}
       <div
-        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 mt-0.5 mr-2"
         style={{
-          background: "#d97706",
-          color: "#0f0f0f",
-          letterSpacing: "-0.5px",
-          boxShadow: isThinking ? "0 0 0 0 rgba(217,119,6,0.5)" : undefined,
-          animation: isThinking ? "zaiPulse 1.5s ease-in-out infinite" : undefined,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          fontFamily: "var(--font-dm-mono)",
+          fontSize: 9,
+          color: "#3f3f46",
         }}
       >
-        Z
+        <div
+          style={{
+            width: 6, height: 6, borderRadius: "50%", background: "#06b6d4",
+            animation: isThinking ? "zaiPulse 1.5s ease-in-out infinite" : undefined,
+          }}
+        />
+        Zeach
       </div>
 
+      {/* Bubble */}
       <div
-        className="max-w-[85%] px-4 py-2.5 text-sm prose-dark"
         style={{
-          background: "#1f1f1f",
-          color: "#e5e5e5",
-          borderRadius: "12px 12px 12px 2px",
-          border: "1px solid #2a2a2a",
+          background: "rgba(6,182,212,0.08)",
+          border: "1px solid rgba(6,182,212,0.12)",
+          borderRadius: "3px 12px 12px 12px",
+          padding: "9px 12px",
+          maxWidth: "95%",
         }}
       >
         {isThinking ? (
-          /* Thinking state — animated dots */
-          <div className="flex items-center gap-1.5 py-0.5">
-            <span className="typing-dot w-2 h-2 rounded-full inline-block" style={{ background: "#d97706" }} />
-            <span className="typing-dot w-2 h-2 rounded-full inline-block" style={{ background: "#d97706" }} />
-            <span className="typing-dot w-2 h-2 rounded-full inline-block" style={{ background: "#d97706" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "2px 0" }}>
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                style={{
+                  width: 5, height: 5, borderRadius: "50%", background: "#06b6d4",
+                  opacity: 0.3,
+                  animation: "typingBounce 1.2s ease-in-out infinite",
+                  animationDelay: `${i * 0.2}s`,
+                }}
+              />
+            ))}
           </div>
         ) : strippedContent ? (
-          <div className={isStreaming ? "streaming-cursor" : ""}>
+          <div
+            className={isStreaming ? "streaming-cursor" : ""}
+            style={{
+              fontSize: 13,
+              color: "#a1a1aa",
+              lineHeight: 1.55,
+              fontFamily: "var(--font-dm-sans)",
+            }}
+          >
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -109,12 +148,12 @@ export default function MessageBubble({ message, isStreaming }: Props) {
                     <code
                       className={className}
                       style={{
-                        background: inline ? "#2a2a2a" : "transparent",
-                        padding: inline ? "0.15em 0.4em" : undefined,
+                        background: inline ? "rgba(255,255,255,0.07)" : "transparent",
+                        padding: inline ? "0.1em 0.35em" : undefined,
                         borderRadius: "3px",
-                        fontFamily: "var(--font-mono)",
-                        fontSize: "0.875em",
-                        color: "#d97706",
+                        fontFamily: "var(--font-dm-mono)",
+                        fontSize: "0.88em",
+                        color: "#06b6d4",
                       }}
                       {...props}
                     >
@@ -122,13 +161,19 @@ export default function MessageBubble({ message, isStreaming }: Props) {
                     </code>
                   );
                 },
+                strong({ children }) {
+                  return <strong style={{ color: "#fff", fontWeight: 500 }}>{children}</strong>;
+                },
+                p({ children }) {
+                  return <p style={{ margin: "0 0 6px", color: "#a1a1aa" }}>{children}</p>;
+                },
               }}
             >
               {strippedContent}
             </ReactMarkdown>
           </div>
         ) : (
-          <span style={{ color: "#4b5563" }}>…</span>
+          <span style={{ color: "#3f3f46", fontSize: 13 }}>…</span>
         )}
       </div>
     </div>

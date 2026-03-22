@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { type ProjectFile } from "@/lib/db";
@@ -26,6 +26,7 @@ type Props = {
   isStreaming: boolean;
   fullscreen: boolean;
   onToggleFullscreen: () => void;
+  expectedScreenCount?: number; // total screens expected during auto-generation
 };
 
 // ─── Viewport config ──────────────────────────────────────────────────────────
@@ -256,6 +257,82 @@ function FileTree({
   );
 }
 
+// ─── Generation progress bar ─────────────────────────────────────────────────
+
+function GenerationProgress({
+  completed,
+  total,
+  pct,
+  currentLabel,
+  partialPage,
+}: {
+  completed: number;
+  total: number;
+  pct: number;
+  currentLabel: string;
+  partialPage: boolean;
+}) {
+  return (
+    <div
+      className="shrink-0 px-4 py-3 flex flex-col gap-2"
+      style={{ background: "rgba(217,119,6,0.05)", borderBottom: "1px solid rgba(217,119,6,0.15)" }}
+    >
+      {/* Top row: label + count */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {/* Animated spark */}
+          <span
+            className="w-2 h-2 rounded-full shrink-0"
+            style={{ background: "#d97706", animation: "streamingGlow 0.8s ease-in-out infinite" }}
+          />
+          <span className="text-xs font-semibold" style={{ color: "#e5e5e5" }}>
+            Generating screens
+          </span>
+          <span className="text-xs capitalize" style={{ color: "#d97706" }}>
+            — {currentLabel}
+          </span>
+        </div>
+        <span className="text-xs font-mono tabular-nums" style={{ color: "#9ca3af" }}>
+          {completed} / {total} &nbsp;·&nbsp; {pct}%
+        </span>
+      </div>
+
+      {/* Progress bar */}
+      <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "#252525" }}>
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{
+            width: `${pct}%`,
+            background: "linear-gradient(90deg, #d97706, #f59e0b)",
+            boxShadow: "0 0 8px rgba(217,119,6,0.5)",
+          }}
+        />
+      </div>
+
+      {/* Screen dots */}
+      <div className="flex gap-1 flex-wrap">
+        {Array.from({ length: total }).map((_, i) => {
+          const isDone = i < completed;
+          const isActive = i === completed && !!partialPage;
+          return (
+            <div
+              key={i}
+              className="rounded-full transition-all duration-300"
+              style={{
+                width: isDone ? "20px" : isActive ? "12px" : "6px",
+                height: "6px",
+                background: isDone || isActive ? "#d97706" : "#2a2a2a",
+                opacity: isDone ? 1 : isActive ? 0.8 : 0.25,
+                animation: isActive ? "streamingGlow 0.8s ease-in-out infinite" : undefined,
+              }}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function ProjectPreview({
@@ -265,12 +342,15 @@ export default function ProjectPreview({
   isStreaming,
   fullscreen,
   onToggleFullscreen,
+  expectedScreenCount = 0,
 }: Props) {
   const [activePageName, setActivePageName] = useState<string | null>(null);
   const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("preview");
   const [viewport, setViewport] = useState<ViewportSize>("desktop");
   const [copied, setCopied] = useState(false);
+  const [screensDdOpen, setScreensDdOpen] = useState(false);
+  const screensDdRef = useRef<HTMLDivElement>(null);
   const [iframeKey, setIframeKey] = useState(0);
 
   // Detect streaming multi-file format
@@ -286,6 +366,28 @@ export default function ProjectPreview({
   const streamingFileMap = new Map(streamingFiles.map((f) => [f.path, f]));
   const streamingPaths = new Set(streamingFiles.map((f) => f.path));
 
+  // ── Generation progress tracking ───────────────────────────────────────────
+  // Count complete (non-partial) pages written so far during streaming
+  const completedStreamingPages = streamingFiles.filter(
+    (f) => !f.partial && f.path.startsWith("pages/")
+  ).length;
+  // The page currently being written (partial) counts as 0.5 so the bar moves smoothly
+  const partialPage = streamingFiles.find((f) => f.partial && f.path.startsWith("pages/"));
+  const progressNumerator = completedStreamingPages + (partialPage ? 0.5 : 0);
+  const totalExpected = expectedScreenCount > 0 ? expectedScreenCount : 0;
+  const showProgress = isStreaming && totalExpected > 0 && files.length === 0;
+  const progressPct = totalExpected > 0
+    ? Math.min(99, Math.round((progressNumerator / totalExpected) * 100))
+    : 0;
+  // Label: show page being written, or phase
+  const currentPageLabel = partialPage
+    ? partialPage.path.replace("pages/", "").replace(".html", "").replace(/_/g, " ")
+    : completedStreamingPages > 0
+      ? "saving…"
+      : streamIsMultiFile
+        ? "writing files…"
+        : "planning…";
+
   // ── Determine pages to show ────────────────────────────────────────────────
 
   const dbFilePaths = files.map((f) => f.file_path);
@@ -299,7 +401,8 @@ export default function ProjectPreview({
     ...newStreamingPagePaths,
   ];
 
-  const hasAnyStreaming = isStreaming && streamIsMultiFile;
+  // Show generating state as soon as streaming starts (even before first FILE: marker appears)
+  const hasAnyStreaming = isStreaming && (streamIsMultiFile || files.length === 0);
 
   // Resolve active page tab
   const activeTab =
@@ -350,7 +453,16 @@ export default function ProjectPreview({
     setActivePageName(name);
   }, []);
 
-  const handleReload = useCallback(() => setIframeKey((k) => k + 1), []);
+  // ── Close screens dropdown on outside click ─────────────────────────────────
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (screensDdRef.current && !screensDdRef.current.contains(e.target as Node)) {
+        setScreensDdOpen(false);
+      }
+    }
+    if (screensDdOpen) document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [screensDdOpen]);
 
   // ── Listen for navigation messages from iframes ────────────────────────────
   useEffect(() => {
@@ -398,143 +510,264 @@ export default function ProjectPreview({
     <div className="flex flex-col h-full" style={{ background: "#141414" }}>
 
       {/* ── Top bar ── */}
-      <div className="flex items-center justify-between px-4 shrink-0" style={{ height: "44px", borderBottom: "1px solid #252525" }}>
-        <div className="flex items-center gap-2">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" />
-          </svg>
-          <span className="text-sm font-semibold" style={{ color: "#e5e5e5" }}>Preview</span>
-          {totalPageCount > 0 && (
-            <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: "#252525", color: "#9ca3af" }}>
-              {totalPageCount} {totalPageCount === 1 ? "page" : "pages"}
-            </span>
-          )}
-          {allFilesForTree.length > 0 && (
-            <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: "#252525", color: "#6b7280" }}>
-              {allFilesForTree.length} files
-            </span>
-          )}
-          {hasAnyStreaming && (
-            <span className="flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(217,119,6,0.1)", color: "#d97706", border: "1px solid rgba(217,119,6,0.2)" }}>
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#d97706", animation: "streamingGlow 0.8s ease-in-out infinite" }} />
-              Building…
-            </span>
-          )}
-        </div>
-        <button
-          onClick={onToggleFullscreen}
-          title={fullscreen ? "Exit fullscreen" : "Fullscreen"}
-          className="flex items-center justify-center w-7 h-7 rounded transition-all duration-150"
-          style={{ color: "#6b7280" }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = "#e5e5e5"; e.currentTarget.style.background = "#252525"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = "#6b7280"; e.currentTarget.style.background = "transparent"; }}
+      <div
+        className="flex items-stretch shrink-0"
+        style={{ height: 52, borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(0,0,0,0.96)" }}
+      >
+        {/* Left: view toggle */}
+        <div
+          className="flex items-center shrink-0"
+          style={{ padding: "0 12px", borderRight: "1px solid rgba(255,255,255,0.06)", gap: 2 }}
         >
-          <FullscreenIcon exit={fullscreen} />
-        </button>
-      </div>
-
-      {/* ── Page tabs ── */}
-      {allPageTabs.length > 0 && (
-        <div className="flex items-center gap-0.5 px-3 shrink-0 overflow-x-auto" style={{ height: "38px", borderBottom: "1px solid #252525", background: "#111" }}>
-          {allPageTabs.map((tab) => {
-            const isActive = tab === activeTab;
-            const label = getDisplayName(tab);
-            const isTabStreaming = streamingPaths.has(tab) && streamingFileMap.get(tab)?.partial;
-            return (
+          {/* View toggle pill */}
+          <div
+            style={{
+              display: "flex", alignItems: "center",
+              background: "#111", border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 8, padding: 2, gap: 1,
+            }}
+          >
+            {[
+              {
+                id: "preview" as ViewMode, title: "Preview",
+                icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+              },
+              {
+                id: "code" as ViewMode, title: "Code",
+                icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
+              },
+              {
+                id: "files" as ViewMode, title: "Files",
+                icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>,
+              },
+            ].map((v) => (
               <button
-                key={tab}
-                onClick={() => { switchPage(tab); if (viewMode === "files") setViewMode("preview"); }}
-                className="flex items-center gap-1.5 px-3 text-xs font-medium whitespace-nowrap transition-all duration-150 shrink-0"
+                key={v.id}
+                onClick={() => setViewMode(v.id)}
+                title={v.title}
                 style={{
-                  height: "38px",
-                  color: isActive ? "#e5e5e5" : "#6b7280",
-                  borderBottom: isActive ? "2px solid #d97706" : "2px solid transparent",
-                  background: isActive ? "rgba(217,119,6,0.06)" : "transparent",
+                  width: 28, height: 26, borderRadius: 6,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: viewMode === v.id ? "#1a1a1a" : "transparent",
+                  color: viewMode === v.id ? "#fff" : "#3f3f46",
+                  border: "none", cursor: "pointer",
+                  boxShadow: viewMode === v.id ? "0 1px 3px rgba(0,0,0,0.4)" : "none",
+                  transition: "all 0.15s",
                 }}
-                onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.color = "#d1d5db"; }}
-                onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.color = "#6b7280"; }}
+                onMouseEnter={(e) => { if (viewMode !== v.id) e.currentTarget.style.color = "#71717a"; }}
+                onMouseLeave={(e) => { if (viewMode !== v.id) e.currentTarget.style.color = "#3f3f46"; }}
               >
-                <FileIcon path={tab} />
-                <span>{label}</span>
-                {isTabStreaming && (
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#d97706", animation: "streamingGlow 0.8s ease-in-out infinite" }} />
-                )}
+                {v.icon}
               </button>
-            );
-          })}
+            ))}
+          </div>
         </div>
-      )}
 
-      {/* ── Toolbar ── */}
-      <div className="flex items-center justify-between px-3 shrink-0" style={{ height: "36px", borderBottom: "1px solid #252525", background: "#111" }}>
-        {/* View mode */}
-        <div className="flex items-center gap-0.5">
-          {(["preview", "code", "files"] as ViewMode[]).map((mode) => (
+        {/* Center: screens dropdown + separator + viewport icons */}
+        <div
+          className="flex-1 flex items-center justify-center"
+          style={{ gap: 0, minWidth: 0, padding: "0 4px" }}
+        >
+          {/* Screens dropdown */}
+          <div style={{ position: "relative", flexShrink: 0 }} ref={screensDdRef}>
             <button
-              key={mode}
-              onClick={() => setViewMode(mode)}
-              className="px-2.5 py-1 text-xs font-medium capitalize rounded transition-all duration-150"
+              onClick={() => { if (allPageTabs.length > 0) setScreensDdOpen((o) => !o); }}
+              title="Switch screen"
               style={{
-                color: viewMode === mode ? "#e5e5e5" : "#6b7280",
-                background: viewMode === mode ? "#252525" : "transparent",
+                display: "flex", alignItems: "center", gap: 6,
+                fontFamily: "var(--font-dm-mono)", fontSize: 10, fontWeight: 500,
+                color: allPageTabs.length > 0 ? "#e5e5e5" : "#3f3f46",
+                background: screensDdOpen ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: 8, padding: "4px 10px",
+                cursor: allPageTabs.length > 0 ? "pointer" : "default",
+                transition: "all 0.15s", minWidth: 110,
               }}
+              onMouseEnter={(e) => { if (allPageTabs.length > 0) e.currentTarget.style.background = "rgba(255,255,255,0.07)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = screensDdOpen ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.03)"; }}
             >
-              {mode}
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+              <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "left" }}>
+                {allPageTabs.length === 0
+                  ? "No screens"
+                  : activeTab
+                    ? getDisplayName(activeTab)
+                    : `${totalPageCount} screen${totalPageCount !== 1 ? "s" : ""}`}
+              </span>
+              {allPageTabs.length > 0 && (
+                <span style={{ color: "#06b6d4", background: "rgba(6,182,212,0.12)", borderRadius: 6, padding: "0 5px", fontSize: 9 }}>
+                  {totalPageCount}
+                </span>
+              )}
+              {hasAnyStreaming && (
+                <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#06b6d4", animation: "streamingGlow 0.8s ease-in-out infinite", display: "inline-block", flexShrink: 0 }} />
+              )}
+              {allPageTabs.length > 0 && (
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.5, transform: screensDdOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              )}
             </button>
-          ))}
+
+            {/* Dropdown list */}
+            {screensDdOpen && allPageTabs.length > 0 && (
+              <div
+                style={{
+                  position: "absolute", top: "calc(100% + 6px)", left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "#161616", border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 10, padding: "4px", zIndex: 200,
+                  minWidth: 180, maxHeight: 280, overflowY: "auto",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+                }}
+              >
+                {allPageTabs.map((tab) => {
+                  const isActive = tab === activeTab;
+                  const label = getDisplayName(tab);
+                  const isTabStreaming = streamingPaths.has(tab) && streamingFileMap.get(tab)?.partial;
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => {
+                        switchPage(tab);
+                        if (viewMode === "files") setViewMode("preview");
+                        setScreensDdOpen(false);
+                      }}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 8, width: "100%",
+                        padding: "7px 10px", borderRadius: 7, border: "none", cursor: "pointer",
+                        background: isActive ? "rgba(6,182,212,0.1)" : "transparent",
+                        color: isActive ? "#06b6d4" : "#a1a1aa",
+                        fontFamily: "var(--font-dm-mono)", fontSize: 11,
+                        textAlign: "left", transition: "all 0.1s",
+                      }}
+                      onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#e5e5e5"; } }}
+                      onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#a1a1aa"; } }}
+                    >
+                      <FileIcon path={tab} />
+                      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
+                      {isTabStreaming && (
+                        <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#06b6d4", animation: "streamingGlow 0.8s ease-in-out infinite", flexShrink: 0 }} />
+                      )}
+                      {isActive && (
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Separator */}
+          <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.06)", margin: "0 10px", flexShrink: 0 }} />
+
+          {/* Viewport icons */}
+          <div style={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }}>
+            {VIEWPORTS.map((vp) => (
+              <button
+                key={vp.id}
+                onClick={() => setViewport(vp.id)}
+                title={vp.label}
+                style={{
+                  width: 30, height: 28, borderRadius: 7,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer",
+                  background: viewport === vp.id ? "rgba(6,182,212,0.1)" : "transparent",
+                  border: viewport === vp.id ? "1px solid rgba(6,182,212,0.25)" : "1px solid transparent",
+                  color: viewport === vp.id ? "#06b6d4" : "#3f3f46",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={(e) => { if (viewport !== vp.id) { e.currentTarget.style.color = "#71717a"; e.currentTarget.style.background = "#111"; } }}
+                onMouseLeave={(e) => { if (viewport !== vp.id) { e.currentTarget.style.color = "#3f3f46"; e.currentTarget.style.background = "transparent"; } }}
+              >
+                {vp.icon}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Right controls */}
-        <div className="flex items-center gap-1">
-          {viewMode === "preview" && (
-            <>
-              {/* Viewport toggle */}
-              <div className="flex items-center rounded overflow-hidden" style={{ border: "1px solid #2a2a2a" }}>
-                {VIEWPORTS.map((vp) => (
-                  <button
-                    key={vp.id}
-                    onClick={() => setViewport(vp.id)}
-                    title={`${vp.label} (${vp.width})`}
-                    className="flex items-center justify-center px-2 py-1 transition-all duration-150"
-                    style={{
-                      color: viewport === vp.id ? "#d97706" : "#6b7280",
-                      background: viewport === vp.id ? "rgba(217,119,6,0.1)" : "transparent",
-                      borderRight: vp.id !== "desktop" ? "1px solid #2a2a2a" : "none",
-                      height: "24px",
-                      gap: "3px",
-                    }}
-                  >
-                    {vp.icon}
-                  </button>
-                ))}
-              </div>
-              {/* Reload */}
-              <button
-                onClick={handleReload}
-                title="Reload"
-                className="flex items-center justify-center w-6 h-6 rounded transition-all duration-150"
-                style={{ color: "#6b7280" }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = "#e5e5e5"; e.currentTarget.style.background = "#252525"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = "#6b7280"; e.currentTarget.style.background = "transparent"; }}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-                </svg>
-              </button>
-            </>
+        {/* Right: fullscreen button */}
+        <div
+          className="flex items-center shrink-0"
+          style={{ padding: "0 12px", borderLeft: "1px solid rgba(255,255,255,0.06)", gap: 6 }}
+        >
+          {/* Copy button (when code view is active) */}
+          {(viewMode === "code" || viewMode === "files") && activeContent && (
+            <button
+              onClick={handleCopy}
+              title="Copy code"
+              style={{
+                display: "flex", alignItems: "center", gap: 5,
+                fontFamily: "var(--font-dm-mono)", fontSize: 10, fontWeight: 500,
+                color: copied ? "#10b981" : "#71717a",
+                background: copied ? "rgba(16,185,129,0.08)" : "rgba(255,255,255,0.04)",
+                border: `1px solid ${copied ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.08)"}`,
+                borderRadius: 7, padding: "4px 10px", cursor: "pointer",
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={(e) => { if (!copied) { e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; } }}
+              onMouseLeave={(e) => { if (!copied) { e.currentTarget.style.color = "#71717a"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; } }}
+            >
+              {copied ? (
+                <>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  Copied
+                </>
+              ) : (
+                <>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy
+                </>
+              )}
+            </button>
           )}
 
-          {/* Copy */}
+          {/* Fullscreen button — prominent */}
           <button
-            onClick={handleCopy}
-            disabled={!activeContent}
-            className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded transition-all duration-150"
-            style={{ background: copied ? "#166534" : "#252525", color: copied ? "#86efac" : "#9ca3af" }}
+            onClick={onToggleFullscreen}
+            title={fullscreen ? "Exit fullscreen" : "Full screen preview"}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              width: 32, height: 32, borderRadius: 8, cursor: "pointer",
+              background: fullscreen ? "rgba(6,182,212,0.1)" : "rgba(255,255,255,0.04)",
+              border: `1px solid ${fullscreen ? "rgba(6,182,212,0.25)" : "rgba(255,255,255,0.08)"}`,
+              color: fullscreen ? "#06b6d4" : "#71717a",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              if (!fullscreen) {
+                e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+                e.currentTarget.style.color = "#fff";
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!fullscreen) {
+                e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                e.currentTarget.style.color = "#71717a";
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+              }
+            }}
           >
-            {copied ? "Copied!" : "Copy"}
+            <FullscreenIcon exit={fullscreen} />
           </button>
         </div>
       </div>
+
+      {/* ── Generation progress bar ── */}
+      {showProgress && (
+        <GenerationProgress
+          completed={completedStreamingPages}
+          total={totalExpected}
+          pct={progressPct}
+          currentLabel={currentPageLabel}
+          partialPage={!!partialPage}
+        />
+      )}
+
 
       {/* ── Content area ── */}
       <div className="flex flex-1 overflow-hidden">
