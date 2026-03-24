@@ -3,12 +3,15 @@
 import { use, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
-import { getProjectFiles, type ProjectFile } from "@/lib/db";
+import { getProjectFiles, upsertProjectFile, type ProjectFile } from "@/lib/db";
 import { createClient } from "@/lib/supabase/client";
 import { useChat, PersistConfig } from "@/hooks/useChat";
 import ChatPanel from "@/components/ChatPanel";
 import ProjectPreview from "@/components/ProjectPreview";
 import ShareProjectModal from "@/components/ShareProjectModal";
+import { useScreenGenerator } from "@/hooks/useScreenGenerator";
+import { brainToInputs } from "@/lib/zeach/buildPrompt";
+import { INTER_SCREEN_DELAY_MS } from "@/lib/zeach/generateScreen";
 
 const MIN_CHAT_PCT = 20;
 const MAX_CHAT_PCT = 80;
@@ -18,9 +21,16 @@ const DEFAULT_CHAT_PCT = 45;
 
 // Returns the correct screen count range for a complexity level
 function complexityScreenRange(complexity: string): { min: number; max: number; label: string } {
-  if (complexity === "Startup") return { min: 12, max: 15, label: "12–15 screens" };
-  if (complexity === "Scale")   return { min: 20, max: 30, label: "20+ screens" };
-  return { min: 8, max: 10, label: "8–10 screens" }; // MVP default
+  if (complexity === "Startup") return { min: 8, max: 12, label: "8–12 screens" };
+  if (complexity === "Scale")   return { min: 15, max: 20, label: "15–20 screens" };
+  return { min: 3, max: 3, label: "3 screens" }; // MVP — 3 screens only
+}
+
+// Cap for auto-generation per complexity level
+function complexityScreenCap(complexity: string): number {
+  if (complexity === "Startup") return 8;
+  if (complexity === "Scale")   return 15;
+  return 3; // MVP
 }
 
 // Whether the platforms list indicates a web/desktop app (not mobile-only)
@@ -337,24 +347,105 @@ function ChatWorkspace({
   const containerRef = useRef<HTMLDivElement>(null);
   const didAutoInit = useRef(false);
 
+  // ── New screen generator (replaces the old streaming artifact flow) ───────────
+  const { html: genHtml, isLoading: genLoading, error: genError, generate } = useScreenGenerator();
+  const [genQueue, setGenQueue] = useState<string[]>([]);
+  const [genActive, setGenActive] = useState<string | null>(null);
+  const [firstScreenReady, setFirstScreenReady] = useState(false);
+  // Local copy of files we can extend with freshly generated ones
+  const [generatedFiles, setGeneratedFiles] = useState<ProjectFile[]>(files);
 
-  // ── Auto-generate initial screens on first visit ──────────────────────────────
+  // Keep generatedFiles in sync when parent files prop changes (e.g. initial DB load)
+  useEffect(() => {
+    setGeneratedFiles(files);
+  }, [files]);
+
+  // Advance the queue — called on success OR error so a bad screen never stalls everything
+  const advanceQueue = useCallback(() => {
+    setGenQueue((prev) => {
+      const [next, ...rest] = prev;
+      if (next && persist.brain) {
+        const brain = persist.brain;
+        setGenActive(next);
+        setTimeout(() => generate(brainToInputs(brain, next)), INTER_SCREEN_DELAY_MS);
+        return rest;
+      }
+      setGenActive(null);
+      return [];
+    });
+  }, [persist.brain, generate]);
+
+  // When a screen finishes successfully — save and show immediately
+  useEffect(() => {
+    if (!genHtml || genLoading || !genActive || !persist.projectId || !persist.userId) return;
+
+    const filePath = `pages/${genActive}.html`;
+    const newFile: ProjectFile = {
+      id: filePath,
+      project_id: persist.projectId,
+      user_id: persist.userId!,
+      file_path: filePath,
+      content: genHtml,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    // Update local preview immediately so the screen appears right away
+    setGeneratedFiles((prev) => [...prev.filter((f) => f.file_path !== filePath), newFile]);
+    persist.onFilesUpdate?.([newFile]);
+
+    // Mark first screen ready so preview auto-selects it
+    if (!firstScreenReady) setFirstScreenReady(true);
+
+    // Persist to DB (fire-and-forget)
+    upsertProjectFile(persist.projectId, persist.userId!, filePath, genHtml).catch(
+      (err) => console.error("[upsertProjectFile]", err)
+    );
+
+    advanceQueue();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [genHtml, genLoading]);
+
+  // When a screen errors — log and continue to the next one so the queue never stalls
+  useEffect(() => {
+    if (!genError || genLoading || !genActive) return;
+    console.error(`[generate-screen] "${genActive}" failed:`, genError);
+    advanceQueue();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [genError, genLoading]);
+
+  // ── Auto-generate all screens on first visit ──────────────────────────────────
   useEffect(() => {
     if (
       !autoInit ||
       didAutoInit.current ||
-      isLoading ||
       pagesLoading ||
-      isStreaming ||
-      files.length > 0 ||
-      messages.length > 0 ||
+      generatedFiles.length > 0 ||
       !persist.brain
     ) return;
 
     didAutoInit.current = true;
-    const prompt = buildInitialPrompt(persist.brain);
-    sendMessage(prompt, [], { silent: true });
-  }, [autoInit, isLoading, pagesLoading, isStreaming, files.length, messages.length, persist.brain, sendMessage]);
+
+    const allScreens = (
+      (persist.brain.screens as Record<string, unknown>)?.inventory as string[]
+    ) ?? [];
+
+    if (allScreens.length === 0) return;
+
+    const complexity = (
+      (persist.brain.project as Record<string, unknown>)?.complexity as string
+    ) ?? "MVP";
+
+    // Limit the number of screens generated based on complexity
+    const cap = complexityScreenCap(complexity);
+    const screens = allScreens.slice(0, cap);
+
+    const [first, ...rest] = screens;
+    setFirstScreenReady(false); // reset so loading state shows for this new run
+    setGenQueue(rest);
+    setGenActive(first);
+    generate(brainToInputs(persist.brain, first));
+  }, [autoInit, pagesLoading, generatedFiles.length, persist.brain, generate]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -450,11 +541,16 @@ function ChatWorkspace({
         }}
       >
         <ProjectPreview
-          files={files}
-          pagesLoading={pagesLoading}
+          files={generatedFiles}
+          // Only block the full preview while waiting for the very first screen.
+          // Once screen 1 is ready, keep showing it while subsequent screens
+          // generate in the background.
+          pagesLoading={pagesLoading || (genLoading && !firstScreenReady)}
           messages={messages}
-          isStreaming={isStreaming}
-          isThinking={isThinking}
+          isStreaming={isStreaming || (genLoading && !firstScreenReady)}
+          isThinking={isThinking || (genLoading && !!genActive && !firstScreenReady)}
+          // Show a subtle badge when screens are still being generated in the bg
+          isGeneratingBackground={genLoading && firstScreenReady}
           fullscreen={previewFullscreen}
           onToggleFullscreen={() => setPreviewFullscreen((v) => !v)}
         />

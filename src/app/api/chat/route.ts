@@ -102,6 +102,42 @@ export async function POST(request: Request) {
           // budget_tokens is reserved within maxTokens for the thinking process.
           const thinkingBudget = 20000
 
+          // ── Pre-LLM debug log ─────────────────────────────────────────────────
+          const b = (brain ?? {}) as Record<string, unknown>;
+          const bProject = (b.project ?? {}) as Record<string, unknown>;
+          const bStylePack = (b.style_pack ?? {}) as Record<string, unknown>;
+          const bDesignTokens = (b.design_tokens ?? {}) as Record<string, unknown>;
+          const bScreens = (b.screens ?? {}) as Record<string, unknown>;
+
+          console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+          console.log("[PRE-LLM] Request:", isInitialGeneration ? "INITIAL GENERATION" : isArtifactRequest ? "ARTIFACT EDIT" : "CHAT");
+          console.log("[PRE-LLM] Model: claude-sonnet-4-6 | maxTokens:", maxTokens, "| thinkingBudget:", thinkingBudget);
+          console.log("[PRE-LLM] ── Screen 1 inputs ──────────────────────────────────");
+          console.log("[PRE-LLM]   Name:        ", bProject.name);
+          console.log("[PRE-LLM]   Description: ", bProject.description || "(empty)");
+          console.log("[PRE-LLM]   Notes:       ", bProject.notes || "(empty)");
+          console.log("[PRE-LLM]   Industry:    ", bProject.industry || "(none)");
+          console.log("[PRE-LLM]   App Type:    ", bProject.app_type || bProject.type || "(none)");
+          console.log("[PRE-LLM]   Complexity:  ", bProject.complexity);
+          console.log("[PRE-LLM]   Features:    ", bProject.features);
+          console.log("[PRE-LLM] ── Screen 2 inputs ──────────────────────────────────");
+          console.log("[PRE-LLM]   Style pack:  ", bStylePack.name, "|", bStylePack.aesthetic);
+          console.log("[PRE-LLM]   Tone:        ", bStylePack.tone);
+          console.log("[PRE-LLM]   Font pairing:", bProject.font_pairing || b.font_pairing);
+          console.log("[PRE-LLM]   Colors:      ", bDesignTokens.colors);
+          console.log("[PRE-LLM]   Typography:  ", bDesignTokens.typography);
+          console.log("[PRE-LLM]   Icons:       ", b.icons);
+          console.log("[PRE-LLM]   Dark mode:   ", (b.capsules as Record<string,unknown>)?.dark_mode ?? false);
+          console.log("[PRE-LLM] ── Suggested screens (hardcoded lookup — not user input) ──");
+          console.log("[PRE-LLM]   Inventory:   ", bScreens.inventory);
+          console.log("[PRE-LLM] ── Global theme ──────────────────────────────────────");
+          console.log("[PRE-LLM]   Present:     ", b.global_theme ? "✓ yes" : "✗ MISSING");
+          console.log("[PRE-LLM]   Full JSON:   ", JSON.stringify(b.global_theme ?? {}, null, 2));
+          console.log("[PRE-LLM] ── Prompt ───────────────────────────────────────────");
+          console.log("[PRE-LLM]   System chars:", system.length, "| Messages:", messages.length);
+          console.log("[PRE-LLM]   User msg:    ", lastContent.slice(0, 400));
+          console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
           const startMs = Date.now();
           const response = await anthropic.messages.stream({
             model: "claude-sonnet-4-6",

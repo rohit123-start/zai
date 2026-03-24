@@ -289,10 +289,8 @@ export function buildBrainContext(brain: Record<string, unknown>): string {
     const knownGtKeys = new Set(["radius","spacing","font_sizes","line_heights","shadows","transitions","breakpoints","layout"]);
     const gtExtraKeys = Object.keys(globalTheme).filter((k) => !knownGtKeys.has(k));
 
-    const platformList = Array.isArray(p.platform) ? (p.platform as string[]).join(", ") : "iOS";
     const featureList = Array.isArray(p.features) ? (p.features as string[]).join(", ") : "";
     const screenList = Array.isArray(screens.inventory) ? (screens.inventory as string[]).join(", ") : "";
-    const tabBarList = Array.isArray(screens.tab_bar) ? (screens.tab_bar as string[]).join(", ") : "";
     const primaryIconsList = Array.isArray(icons.primary_icons) ? (icons.primary_icons as string[]).join(", ") : "";
     const navIconsList = Array.isArray(icons.navigation_icons) ? (icons.navigation_icons as string[]).join(", ") : "";
 
@@ -306,7 +304,6 @@ export function buildBrainContext(brain: Record<string, unknown>): string {
 - **Description**: ${p.description ?? inputs.description ?? ""}
 - **Complexity**: ${p.complexity ?? "MVP"}
 - **Features to include**: ${featureList || "none specified"}
-- **Platform**: ${platformList}
 - **Notes**: ${p.notes ?? ""}
 
 ### Style Pack: ${stylePack.name ?? ""}
@@ -351,10 +348,7 @@ ${Object.entries(radius).map(([k, v]) => `- --radius-${k}: ${v}`).join("\n")}
 - NEVER use emoji. NEVER use Unicode symbols. ALWAYS use Material Symbols.
 
 ### Navigation & Layout
-- Nav type: **${nav.type ?? "bottom_tab"}** (${tabBarList ? `tabs: ${tabBarList}` : ""})
-- Base device: **${scaling.base_device ?? "iPhone"}**
 - Touch target min: ${scaling.touch_target_min ?? "44px"}
-- Breakpoints: phone=${breakpoints.iphone ?? "390px"}, tablet=${breakpoints.ipad ?? "820px"}
 
 ### Animations
 - Duration: ${animations.default_duration ?? "300ms"}

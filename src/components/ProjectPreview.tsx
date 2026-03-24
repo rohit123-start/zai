@@ -25,6 +25,8 @@ type Props = {
   messages: Message[];
   isStreaming: boolean;
   isThinking?: boolean;
+  /** When true, shows a subtle "generating…" badge without blocking the preview */
+  isGeneratingBackground?: boolean;
   fullscreen: boolean;
   onToggleFullscreen: () => void;
 };
@@ -298,6 +300,7 @@ export default function ProjectPreview({
   messages,
   isStreaming,
   isThinking = false,
+  isGeneratingBackground = false,
   fullscreen,
   onToggleFullscreen,
 }: Props) {
@@ -369,17 +372,23 @@ export default function ProjectPreview({
       return null;
     }
 
-    // Preview mode: stitch the page
-    const mergedMap = buildFileMap([
-      ...files.map((f) => ({ file_path: f.file_path, content: f.content })),
-      ...streamingFiles.map((f) => ({ file_path: f.path, content: f.content })),
-    ]);
-
+    // Preview mode
     const streamingPage = streamingFileMap.get(activeTab);
     if (streamingPage?.partial) {
       return { html: streamingPage.content, isPartial: true, lang: "html" };
     }
 
+    // New flow: file is a complete self-contained HTML — show directly, no stitching needed
+    const dbFile = files.find((f) => f.file_path === activeTab);
+    if (dbFile?.content.trimStart().startsWith("<!DOCTYPE")) {
+      return { html: dbFile.content, isPartial: false, lang: "html" };
+    }
+
+    // Legacy multi-file flow: stitch CSS/JS into the page
+    const mergedMap = buildFileMap([
+      ...files.map((f) => ({ file_path: f.file_path, content: f.content })),
+      ...streamingFiles.map((f) => ({ file_path: f.path, content: f.content })),
+    ]);
     const stitched = stitchPage(activeTab, mergedMap);
     return stitched ? { html: stitched, isPartial: false, lang: "html" } : null;
   }
@@ -598,6 +607,22 @@ export default function ProjectPreview({
               </div>
             )}
           </div>
+
+          {/* Background generation indicator */}
+          {isGeneratingBackground && (
+            <div
+              style={{
+                display: "flex", alignItems: "center", gap: 5,
+                padding: "3px 8px", borderRadius: 6,
+                background: "rgba(6,182,212,0.08)",
+                border: "1px solid rgba(6,182,212,0.2)",
+                marginLeft: 8, flexShrink: 0,
+              }}
+            >
+              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#06b6d4", animation: "streamingGlow 0.8s ease-in-out infinite", flexShrink: 0 }} />
+              <span style={{ fontSize: 10, color: "#06b6d4", fontFamily: "var(--font-dm-mono)", whiteSpace: "nowrap" }}>generating…</span>
+            </div>
+          )}
 
           {/* Separator */}
           <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.06)", margin: "0 10px", flexShrink: 0 }} />
