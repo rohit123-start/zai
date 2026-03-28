@@ -15,34 +15,55 @@ export function buildFileMap(files: { file_path: string; content: string }[]): F
 const NAV_INTERCEPTOR = `
 <script>
 (function() {
+  // ── Multi-screen show/hide (for single-HTML all-screens format) ──────────
+  function zaiShowScreen(id) {
+    var screens = document.querySelectorAll('.screen');
+    if (!screens.length) return false;
+    screens.forEach(function(s) { s.style.display = 'none'; });
+    var target = document.getElementById(id);
+    if (target) {
+      target.style.display = 'block';
+      return true;
+    }
+    return false;
+  }
+
   function zaiNavigate(raw) {
     if (!raw) return;
-    // Strip leading slash, .html extension, pages/ prefix
     var page = raw
-      .replace(/^https?:\\/\\/[^/]+/, '')   // strip origin
-      .replace(/^\\//, '')                    // strip leading /
-      .replace(/^pages\\//, '')              // strip pages/ folder
-      .replace(/\\.html$/, '');              // strip .html
+      .replace(/^https?:\\/\\/[^/]+/, '')
+      .replace(/^\\//, '')
+      .replace(/^pages\\//, '')
+      .replace(/\\.html$/, '');
     if (!page || page.startsWith('#') || page.startsWith('http') || page.startsWith('mailto')) return;
+    // Notify parent (updates tab label / dropdown)
     window.parent.postMessage({ type: 'zai-navigate', page: page }, '*');
+    // Also show screen div if this is a multi-screen single-HTML file
+    zaiShowScreen(page);
   }
 
   // Intercept <a> clicks
   document.addEventListener('click', function(e) {
     var el = e.target;
-    // Walk up the DOM in case click is on a child element of <a>
     while (el && el.tagName !== 'A') el = el.parentElement;
     if (!el) return;
     var href = el.getAttribute('href');
     if (!href) return;
-    // Let hash-only and external links pass through
     if (href === '#' || href.startsWith('mailto:') || href.startsWith('tel:')) return;
     if (href.startsWith('http://') || href.startsWith('https://')) return;
     e.preventDefault();
     zaiNavigate(href);
   }, true);
 
-  // Intercept history.pushState / replaceState (for SPA-style navigation)
+  // Listen for parent → iframe messages (e.g. dropdown screen switch)
+  window.addEventListener('message', function(e) {
+    if (!e.data) return;
+    if (e.data.type === 'zai-show-screen' && e.data.id) {
+      zaiShowScreen(e.data.id);
+    }
+  });
+
+  // Intercept history.pushState / replaceState (SPA-style navigation)
   ['pushState', 'replaceState'].forEach(function(method) {
     var original = history[method];
     history[method] = function(state, title, url) {

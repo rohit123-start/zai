@@ -12,7 +12,7 @@ import {
   getDisplayName,
   type ParsedFile,
 } from "@/utils/parseFiles";
-import { buildFileMap, stitchPage, fileLanguage, resolveNavigationTarget } from "@/utils/stitcher";
+import { buildFileMap, stitchPage, stitchLegacyPage, fileLanguage, resolveNavigationTarget } from "@/utils/stitcher";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -305,12 +305,14 @@ export default function ProjectPreview({
   onToggleFullscreen,
 }: Props) {
   const [activePageName, setActivePageName] = useState<string | null>(null);
+  const [activeScreenId, setActiveScreenId] = useState<string | null>(null);
   const [selectedFilePath, setSelectedFilePath] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("preview");
   const [viewport, setViewport] = useState<ViewportSize>("desktop");
   const [copied, setCopied] = useState(false);
   const [screensDdOpen, setScreensDdOpen] = useState(false);
   const screensDdRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeKey, setIframeKey] = useState(0);
 
   // Detect streaming multi-file format
@@ -341,6 +343,36 @@ export default function ProjectPreview({
     ...dbPagePaths,
     ...newStreamingPagePaths,
   ];
+
+  // ── Multi-screen single-HTML detection ────────────────────────────────────
+  // When the pipeline generates pages/app.html with all screens in one file,
+  // we detect this and switch to a postMessage-based screen switcher.
+
+  const isMultiScreenHtml = useMemo(() => {
+    const appFile = files.find((f) => f.file_path === "pages/app.html");
+    if (!appFile) return false;
+    return appFile.content.includes('class="screen"') || appFile.content.includes("class='screen'");
+  }, [files]);
+
+  // Extract all screen IDs from pages/app.html for the dropdown
+  const multiScreenIds = useMemo(() => {
+    if (!isMultiScreenHtml) return [];
+    const appFile = files.find((f) => f.file_path === "pages/app.html");
+    if (!appFile) return [];
+    const matches = [...appFile.content.matchAll(/class=["'][^"']*\bscreen\b[^"']*["'][^>]*id=["']([^"']+)["']|id=["']([^"']+)["'][^>]*class=["'][^"']*\bscreen\b[^"']*["']/g)];
+    return matches.map((m) => m[1] ?? m[2]).filter(Boolean);
+  }, [isMultiScreenHtml, files]);
+
+  // Format a screen_id like "home_discover" → "Home Discover"
+  function formatScreenId(id: string): string {
+    return id.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  // Send a postMessage to the iframe to show a specific screen (multi-screen mode)
+  const showScreenInIframe = useCallback((screenId: string) => {
+    setActiveScreenId(screenId);
+    iframeRef.current?.contentWindow?.postMessage({ type: "zai-show-screen", id: screenId }, "*");
+  }, []);
 
   // Show generating state as soon as streaming starts (even before first FILE: marker appears)
   const hasAnyStreaming = isStreaming && (streamIsMultiFile || files.length === 0);
@@ -378,10 +410,11 @@ export default function ProjectPreview({
       return { html: streamingPage.content, isPartial: true, lang: "html" };
     }
 
-    // New flow: file is a complete self-contained HTML — show directly, no stitching needed
+    // New flow: file is a complete self-contained HTML.
+    // Inject the nav interceptor so <a href="/screen_name"> links work for screen switching.
     const dbFile = files.find((f) => f.file_path === activeTab);
     if (dbFile?.content.trimStart().startsWith("<!DOCTYPE")) {
-      return { html: dbFile.content, isPartial: false, lang: "html" };
+      return { html: stitchLegacyPage(dbFile.content), isPartial: false, lang: "html" };
     }
 
     // Legacy multi-file flow: stitch CSS/JS into the page
@@ -415,12 +448,19 @@ export default function ProjectPreview({
   useEffect(() => {
     function onMessage(e: MessageEvent) {
       if (!e.data || e.data.type !== "zai-navigate") return;
-      const target = resolveNavigationTarget(String(e.data.page), allPageTabs);
-      if (target) setActivePageName(target);
+      const page = String(e.data.page);
+      if (isMultiScreenHtml) {
+        // Multi-screen: just update the active screen label (iframe already showed the screen)
+        setActiveScreenId(page);
+      } else {
+        // Separate files: switch the active file (causes srcDoc change)
+        const target = resolveNavigationTarget(page, allPageTabs);
+        if (target) setActivePageName(target);
+      }
     }
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [allPageTabs]);
+  }, [allPageTabs, isMultiScreenHtml]);
 
   const handleCopy = useCallback(async () => {
     if (!activeContent) return;
@@ -516,97 +556,120 @@ export default function ProjectPreview({
           style={{ gap: 0, minWidth: 0, padding: "0 4px" }}
         >
           {/* Screens dropdown */}
-          <div style={{ position: "relative", flexShrink: 0 }} ref={screensDdRef}>
-            <button
-              onClick={() => { if (allPageTabs.length > 0) setScreensDdOpen((o) => !o); }}
-              title="Switch screen"
-              style={{
-                display: "flex", alignItems: "center", gap: 6,
-                fontFamily: "var(--font-dm-mono)", fontSize: 10, fontWeight: 500,
-                color: allPageTabs.length > 0 ? "#e5e5e5" : "#3f3f46",
-                background: screensDdOpen ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: 8, padding: "4px 10px",
-                cursor: allPageTabs.length > 0 ? "pointer" : "default",
-                transition: "all 0.15s", minWidth: 110,
-              }}
-              onMouseEnter={(e) => { if (allPageTabs.length > 0) e.currentTarget.style.background = "rgba(255,255,255,0.07)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = screensDdOpen ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.03)"; }}
-            >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-              </svg>
-              <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "left" }}>
-                {allPageTabs.length === 0
-                  ? "No screens"
-                  : activeTab
-                    ? getDisplayName(activeTab)
-                    : `${totalPageCount} screen${totalPageCount !== 1 ? "s" : ""}`}
-              </span>
-              {allPageTabs.length > 0 && (
-                <span style={{ color: "#06b6d4", background: "rgba(6,182,212,0.12)", borderRadius: 6, padding: "0 5px", fontSize: 9 }}>
-                  {totalPageCount}
-                </span>
-              )}
-              {hasAnyStreaming && (
-                <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#06b6d4", animation: "streamingGlow 0.8s ease-in-out infinite", display: "inline-block", flexShrink: 0 }} />
-              )}
-              {allPageTabs.length > 0 && (
-                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.5, transform: screensDdOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              )}
-            </button>
+          {(() => {
+            // Multi-screen mode: show individual screen IDs from the HTML
+            const ddItems = isMultiScreenHtml && multiScreenIds.length > 0
+              ? multiScreenIds.map((id) => ({ key: id, label: formatScreenId(id), isScreen: true }))
+              : allPageTabs.map((tab) => ({ key: tab, label: getDisplayName(tab), isScreen: false }));
+            const ddCount = isMultiScreenHtml ? multiScreenIds.length : totalPageCount;
+            const hasItems = ddCount > 0;
 
-            {/* Dropdown list */}
-            {screensDdOpen && allPageTabs.length > 0 && (
-              <div
-                style={{
-                  position: "absolute", top: "calc(100% + 6px)", left: "50%",
-                  transform: "translateX(-50%)",
-                  background: "#161616", border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 10, padding: "4px", zIndex: 200,
-                  minWidth: 180, maxHeight: 280, overflowY: "auto",
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
-                }}
-              >
-                {allPageTabs.map((tab) => {
-                  const isActive = tab === activeTab;
-                  const label = getDisplayName(tab);
-                  const isTabStreaming = streamingPaths.has(tab) && streamingFileMap.get(tab)?.partial;
-                  return (
-                    <button
-                      key={tab}
-                      onClick={() => {
-                        switchPage(tab);
-                        if (viewMode === "files") setViewMode("preview");
-                        setScreensDdOpen(false);
-                      }}
-                      style={{
-                        display: "flex", alignItems: "center", gap: 8, width: "100%",
-                        padding: "7px 10px", borderRadius: 7, border: "none", cursor: "pointer",
-                        background: isActive ? "rgba(6,182,212,0.1)" : "transparent",
-                        color: isActive ? "#06b6d4" : "#a1a1aa",
-                        fontFamily: "var(--font-dm-mono)", fontSize: 11,
-                        textAlign: "left", transition: "all 0.1s",
-                      }}
-                      onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#e5e5e5"; } }}
-                      onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#a1a1aa"; } }}
-                    >
-                      <FileIcon path={tab} />
-                      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
-                      {isTabStreaming && (
-                        <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#06b6d4", animation: "streamingGlow 0.8s ease-in-out infinite", flexShrink: 0 }} />
-                      )}
-                      {isActive && (
-                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      )}
-                    </button>
-                  );
-                })}
+            // Current label shown in the button
+            const currentLabel = isMultiScreenHtml
+              ? (activeScreenId ? formatScreenId(activeScreenId) : (multiScreenIds[0] ? formatScreenId(multiScreenIds[0]) : "App Screens"))
+              : (activeTab ? getDisplayName(activeTab) : (hasItems ? `${ddCount} screen${ddCount !== 1 ? "s" : ""}` : "No screens"));
+
+            return (
+              <div style={{ position: "relative", flexShrink: 0 }} ref={screensDdRef}>
+                <button
+                  onClick={() => { if (hasItems) setScreensDdOpen((o) => !o); }}
+                  title="Switch screen"
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    fontFamily: "var(--font-dm-mono)", fontSize: 10, fontWeight: 500,
+                    color: hasItems ? "#e5e5e5" : "#3f3f46",
+                    background: screensDdOpen ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 8, padding: "4px 10px",
+                    cursor: hasItems ? "pointer" : "default",
+                    transition: "all 0.15s", minWidth: 110,
+                  }}
+                  onMouseEnter={(e) => { if (hasItems) e.currentTarget.style.background = "rgba(255,255,255,0.07)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = screensDdOpen ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.03)"; }}
+                >
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                  </svg>
+                  <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "left" }}>
+                    {currentLabel}
+                  </span>
+                  {hasItems && (
+                    <span style={{ color: "#06b6d4", background: "rgba(6,182,212,0.12)", borderRadius: 6, padding: "0 5px", fontSize: 9 }}>
+                      {ddCount}
+                    </span>
+                  )}
+                  {hasAnyStreaming && (
+                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#06b6d4", animation: "streamingGlow 0.8s ease-in-out infinite", display: "inline-block", flexShrink: 0 }} />
+                  )}
+                  {hasItems && (
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.5, transform: screensDdOpen ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>
+                      <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                  )}
+                </button>
+
+                {/* Dropdown list */}
+                {screensDdOpen && hasItems && (
+                  <div
+                    style={{
+                      position: "absolute", top: "calc(100% + 6px)", left: "50%",
+                      transform: "translateX(-50%)",
+                      background: "#161616", border: "1px solid rgba(255,255,255,0.1)",
+                      borderRadius: 10, padding: "4px", zIndex: 200,
+                      minWidth: 200, maxHeight: 340, overflowY: "auto",
+                      boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+                    }}
+                  >
+                    {ddItems.map((item) => {
+                      const isActive = item.isScreen
+                        ? (activeScreenId ?? multiScreenIds[0]) === item.key
+                        : item.key === activeTab;
+                      const isTabStreaming = !item.isScreen && streamingPaths.has(item.key) && streamingFileMap.get(item.key)?.partial;
+                      return (
+                        <button
+                          key={item.key}
+                          onClick={() => {
+                            if (item.isScreen) {
+                              showScreenInIframe(item.key);
+                            } else {
+                              switchPage(item.key);
+                              if (viewMode === "files") setViewMode("preview");
+                            }
+                            setScreensDdOpen(false);
+                          }}
+                          style={{
+                            display: "flex", alignItems: "center", gap: 8, width: "100%",
+                            padding: "7px 10px", borderRadius: 7, border: "none", cursor: "pointer",
+                            background: isActive ? "rgba(6,182,212,0.1)" : "transparent",
+                            color: isActive ? "#06b6d4" : "#a1a1aa",
+                            fontFamily: "var(--font-dm-mono)", fontSize: 11,
+                            textAlign: "left", transition: "all 0.1s",
+                          }}
+                          onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#e5e5e5"; } }}
+                          onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#a1a1aa"; } }}
+                        >
+                          {item.isScreen ? (
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>
+                            </svg>
+                          ) : (
+                            <FileIcon path={item.key} />
+                          )}
+                          <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</span>
+                          {isTabStreaming && (
+                            <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#06b6d4", animation: "streamingGlow 0.8s ease-in-out infinite", flexShrink: 0 }} />
+                          )}
+                          {isActive && (
+                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            );
+          })()}
 
           {/* Background generation indicator */}
           {isGeneratingBackground && (
@@ -757,23 +820,29 @@ export default function ProjectPreview({
           ) : activeContent?.isPartial ? (
             <ZaiLoading label={activeTab ? getDisplayName(activeTab) : "page"} />
           ) : viewMode === "preview" ? (
-            <div
-              className="h-full shrink-0 overflow-hidden shadow-2xl fade-in"
-              style={{
-                width: viewportWidth,
-                maxWidth: "100%",
-                transition: "width 0.3s ease",
-              }}
-            >
-              <iframe
-                key={`${activeTab}-${iframeKey}`}
-                srcDoc={activeContent?.html ?? ""}
-                sandbox="allow-scripts allow-same-origin"
-                className="w-full h-full border-0"
-                style={{ background: "#fff", display: "block" }}
-                title={activeTab ?? "Preview"}
-              />
-            </div>
+            <>
+              <style>{`@keyframes zaiScreenIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+              <div
+                key={`screen-${activeTab}`}
+                className="h-full shrink-0 overflow-hidden shadow-2xl"
+                style={{
+                  width: viewportWidth,
+                  maxWidth: "100%",
+                  transition: "width 0.3s ease",
+                  animation: "zaiScreenIn 0.22s cubic-bezier(0.4,0,0.2,1)",
+                }}
+              >
+                <iframe
+                  ref={iframeRef}
+                  key={`iframe-${activeTab}-${iframeKey}`}
+                  srcDoc={activeContent?.html ?? ""}
+                  sandbox="allow-scripts allow-same-origin"
+                  className="w-full h-full border-0"
+                  style={{ background: "#fff", display: "block" }}
+                  title={activeTab ?? "Preview"}
+                />
+              </div>
+            </>
           ) : (
             <div className="w-full h-full overflow-auto">
               <SyntaxHighlighter

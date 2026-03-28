@@ -1,0 +1,109 @@
+{
+  "feature_id": "authentication",
+  "feature_name": "Authentication",
+  "description": "User identity \u2014 signup, login, session management, and account recovery.",
+  "screens_added": [
+    {
+      "id": "splash",
+      "name": "Splash / Launch",
+      "purpose": "Auth state check \u2014 redirect to login or home"
+    },
+    {
+      "id": "login",
+      "name": "Login",
+      "purpose": "Email/password, social login, biometric"
+    },
+    {
+      "id": "signup",
+      "name": "Sign Up",
+      "purpose": "Account creation \u2014 email or social"
+    },
+    {
+      "id": "verify_email",
+      "name": "Verify Email",
+      "purpose": "OTP or magic link confirmation"
+    },
+    {
+      "id": "forgot_password",
+      "name": "Forgot Password",
+      "purpose": "Password reset via email"
+    },
+    {
+      "id": "onboarding_profile",
+      "name": "Profile Setup",
+      "purpose": "Name, avatar, preferences after signup"
+    }
+  ],
+  "entities_added": [
+    "User",
+    "Session",
+    "OAuthProvider",
+    "VerificationToken"
+  ],
+  "flows_added": [
+    "Email signup \u2192 verify email \u2192 profile setup \u2192 home",
+    "Social login (Google/Apple) \u2192 permissions \u2192 home",
+    "Login \u2192 biometric or PIN \u2192 home",
+    "Forgot password \u2192 email sent \u2192 reset link \u2192 new password \u2192 login"
+  ],
+  "interaction_patterns": [
+    "Biometric login \u2014 Face ID or fingerprint on return visit",
+    "Social login buttons \u2014 Google and Apple always above the fold",
+    "OTP input \u2014 6 digits, auto-advance on each digit",
+    "Magic link \u2014 single CTA, no password required",
+    "Session timeout warning \u2014 modal with extend or logout"
+  ],
+  "generates_images": false,
+  "error_flows": [
+    {
+      "trigger": "Wrong password entered",
+      "ui": "Inline error below password field: 'Incorrect password'. Field border red. Password field cleared. After 3 failed attempts: 'Too many attempts \u2014 try again in 30 seconds'. Countdown timer shown. Never lock permanently on first session."
+    },
+    {
+      "trigger": "Email not registered",
+      "ui": "Inline error: 'No account found with this email'. Do NOT confirm whether email exists if security-sensitive \u2014 show generic 'Email or password incorrect' instead. Context-dependent."
+    },
+    {
+      "trigger": "OTP expired or incorrect",
+      "ui": "Red border on OTP input. Message: 'Invalid or expired code'. Resend CTA appears immediately. Countdown resets. Previous entry cleared. Never leave user stranded without resend option."
+    },
+    {
+      "trigger": "Social login fails (Google/Apple)",
+      "ui": "Toast: 'Sign in with [Provider] failed'. Fallback CTA: 'Continue with email instead'. Never show raw OAuth error codes to user. Log internally."
+    },
+    {
+      "trigger": "Session expired mid-use",
+      "ui": "Modal overlay: 'Your session has expired'. CTA: 'Log in again'. Preserve current page state where possible \u2014 user returns to same screen after re-auth. Never silently redirect to home."
+    },
+    {
+      "trigger": "Account already exists with same email",
+      "ui": "On signup: 'An account with this email already exists'. CTA: 'Log in instead'. Pre-fill email on login screen. Do not allow duplicate accounts."
+    }
+  ],
+  "edge_cases": [
+    {
+      "case": "User switches between social and email login for same account",
+      "ui": "Detect email match \u2014 prompt to link accounts: 'You previously signed in with Google. Link your accounts?' Confirm before merging. Never create duplicate account silently."
+    },
+    {
+      "case": "Biometric not set up on device",
+      "ui": "Biometric option hidden \u2014 never shown as disabled or greyed. Fall back to PIN or password without mentioning biometric unavailability."
+    },
+    {
+      "case": "User enters email with typo (e.g. .con instead of .com)",
+      "ui": "Inline suggestion: 'Did you mean [corrected email]?' Shown immediately on blur, not on submit. Tap to accept correction."
+    },
+    {
+      "case": "Password reset link already used",
+      "ui": "Show: 'This reset link has already been used or has expired'. CTA: 'Request a new reset link'. Never show a blank or error page."
+    },
+    {
+      "case": "User is already logged in on another device",
+      "ui": "On login: 'You are already signed in on another device. Continue here?' Options: 'Sign in here' (logs out other device) or 'Cancel'. Make the consequence explicit."
+    },
+    {
+      "case": "Magic link clicked on different device than requested",
+      "ui": "Show warning: 'This link was opened on a different device'. Options: 'Continue anyway' or 'Request a new link'. Do not auto-approve cross-device without acknowledgement."
+    }
+  ]
+}

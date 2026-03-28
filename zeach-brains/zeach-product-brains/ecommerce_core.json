@@ -1,0 +1,1177 @@
+{
+  "archetype_id": "ecommerce_core",
+  "archetype_name": "E-commerce",
+  "description": "Direct-to-consumer product selling platform. Industry brain defines what is sold and the visual world. This core defines how the shopping experience works.",
+  "valid_industries": [
+    "Beauty & Wellness",
+    "Retail & Fashion",
+    "Food & Beverage",
+    "Healthcare",
+    "Finance",
+    "Education",
+    "Fitness & Sport",
+    "Travel & Lifestyle",
+    "Real Estate",
+    "Transport & Logistics",
+    "Events & Ticketing",
+    "Entertainment & Media",
+    "AI & Technology",
+    "Developer Tools"
+  ],
+  "icon_pack": {
+    "default_library": {
+      "name": "Lucide",
+      "variant": "Rounded line",
+      "url": "https://lucide.dev"
+    },
+    "industry_overrides": {
+      "Retail & Fashion": {
+        "name": "Remix Icons",
+        "variant": "Ultra-thin line",
+        "url": "https://remixicon.com"
+      },
+      "Beauty & Wellness": {
+        "name": "Phosphor Icons",
+        "variant": "Duotone",
+        "url": "https://phosphoricons.com"
+      }
+    },
+    "core_nav_icons": [
+      "home",
+      "search",
+      "shopping-bag",
+      "heart",
+      "user",
+      "bell",
+      "filter",
+      "grid",
+      "arrow-back",
+      "tag"
+    ],
+    "core_domain_icons": [
+      "shopping-cart",
+      "heart",
+      "star",
+      "package",
+      "truck",
+      "tag",
+      "percent",
+      "gift",
+      "return",
+      "shield"
+    ]
+  },
+  "landing_page": {
+    "sections": [
+      {
+        "id": "hero",
+        "generates_images": true
+      },
+      {
+        "id": "category_entry",
+        "generates_images": true
+      },
+      {
+        "id": "featured_products",
+        "generates_images": true
+      },
+      {
+        "id": "cta_footer",
+        "generates_images": false
+      }
+    ],
+    "three_js": {
+      "style": "rotating_geometry",
+      "description": "Clean geometric shapes \u2014 icosahedrons and torus wireframes \u2014 rotating slowly at different speeds and depths. Minimal, product-first.",
+      "intensity": "subtle",
+      "interaction": "mouse_parallax",
+      "avoid": "no status pills, no hero-stat-line, no ticker strips"
+    }
+  },
+  "core_entities": {
+    "entities": [
+      "User",
+      "Product",
+      "Variant",
+      "Category",
+      "Cart",
+      "Order",
+      "Review",
+      "Wishlist",
+      "Payment",
+      "Address",
+      "Promotion",
+      "Notification",
+      "Return"
+    ],
+    "relationships": [
+      "Product belongs to one or more Categories",
+      "Product has many Variants (size, colour, etc.)",
+      "Cart belongs to User, contains Product Variants",
+      "Order is created from Cart, belongs to User",
+      "Order has a Payment and an Address",
+      "Order has a Status (pending, confirmed, shipped, delivered, returned)",
+      "Review belongs to User, written about a Product after Order",
+      "Wishlist belongs to User, contains Products",
+      "Promotion applies to Products, Categories, or Orders",
+      "Return belongs to Order, initiated by User",
+      "Notification belongs to User, triggered by Order status or price drop events"
+    ]
+  },
+  "tiers": {
+    "mvp": {
+      "tier": "MVP",
+      "description": "Core shopping \u2014 browse, search, product detail, cart, checkout, orders.",
+      "screen_count": 9,
+      "primary_flows": [
+        "Browse home \u2192 tap category \u2192 browse products \u2192 product detail \u2192 add to cart \u2192 checkout \u2192 order confirmation",
+        "Search product \u2192 filter results \u2192 product detail \u2192 add to cart \u2192 checkout",
+        "View orders \u2192 track order status"
+      ],
+      "secondary_flows": [
+        "Save product to wishlist",
+        "Apply promo code at checkout",
+        "Leave product review",
+        "Share product"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Home / Storefront",
+          "purpose": "Brand entry, featured products, categories, promotions",
+          "visual": "Industry brain visual. Hero banner. Category chips. Featured products grid.",
+          "entities": [
+            "Product",
+            "Category",
+            "Promotion"
+          ],
+          "actions": [
+            "Search products",
+            "Browse categories",
+            "Tap featured product",
+            "View promotion banner",
+            "Navigate to all sections"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['E-commerce'].headline}}",
+            "cta": "{{industry.copy_by_app_type['E-commerce'].cta}}",
+            "empty_state": "Nothing here yet \u2014 new products are on their way."
+          }
+        },
+        {
+          "id": "category_browse",
+          "name": "Category / Browse",
+          "purpose": "Product listing within a category with filters and sort",
+          "visual": "Product grid or list. Filter and sort bar. Active filter chips.",
+          "entities": [
+            "Product",
+            "Category",
+            "Variant"
+          ],
+          "actions": [
+            "Filter by price, size, colour, rating",
+            "Sort by relevance, price, newest, bestselling",
+            "Toggle grid or list view",
+            "Tap product",
+            "Save to wishlist from card"
+          ]
+        },
+        {
+          "id": "product_detail",
+          "name": "Product Detail",
+          "purpose": "Full product page \u2014 images, description, variants, reviews",
+          "visual": "Full-bleed image gallery. Variant selector. Price prominent. Reviews section. Sticky add to cart.",
+          "entities": [
+            "Product",
+            "Variant",
+            "Review",
+            "Cart"
+          ],
+          "actions": [
+            "View image gallery",
+            "Select variant (size, colour)",
+            "Read full description",
+            "View reviews",
+            "Add to wishlist",
+            "Add to cart",
+            "Buy now",
+            "Share product"
+          ]
+        },
+        {
+          "id": "cart",
+          "name": "Cart",
+          "purpose": "Review cart items before checkout",
+          "visual": "Item list with thumbnails. Variant shown. Price breakdown. Promo code. Checkout CTA.",
+          "entities": [
+            "Cart",
+            "Product",
+            "Variant",
+            "Promotion"
+          ],
+          "actions": [
+            "View cart items",
+            "Change quantity",
+            "Change variant",
+            "Remove item",
+            "Apply promo code",
+            "View price breakdown",
+            "Proceed to checkout"
+          ],
+          "copy": {
+            "headline": "Your cart",
+            "cta": "Checkout",
+            "empty_state": "Your cart is empty. Start browsing to add something."
+          }
+        },
+        {
+          "id": "checkout",
+          "name": "Checkout",
+          "purpose": "Complete purchase \u2014 address, delivery, payment",
+          "visual": "Step flow. Address selector. Delivery options. Payment method. Order summary. Place order.",
+          "entities": [
+            "Order",
+            "Payment",
+            "Address",
+            "Promotion"
+          ],
+          "actions": [
+            "Select or add address",
+            "Select delivery option",
+            "Select or add payment method",
+            "Apply promo",
+            "View order summary",
+            "Place order"
+          ]
+        },
+        {
+          "id": "order_confirmation",
+          "name": "Order Confirmation",
+          "purpose": "Post-purchase confirmation with summary",
+          "visual": "Success animation. Order number. Summary. Track order CTA. Continue shopping CTA.",
+          "entities": [
+            "Order"
+          ],
+          "actions": [
+            "View order summary",
+            "Track order",
+            "Continue shopping",
+            "Share order"
+          ]
+        },
+        {
+          "id": "orders",
+          "name": "My Orders",
+          "purpose": "Order history and status tracking",
+          "visual": "Order cards with status badges and product thumbnails. Track and review CTAs.",
+          "entities": [
+            "Order",
+            "Product"
+          ],
+          "actions": [
+            "View all orders",
+            "Filter by status",
+            "Track order",
+            "View order detail",
+            "Leave review",
+            "Initiate return"
+          ]
+        },
+        {
+          "id": "wishlist",
+          "name": "Wishlist",
+          "purpose": "Saved products",
+          "visual": "Product grid. Price. Add to cart from wishlist. Remove.",
+          "entities": [
+            "Wishlist",
+            "Product"
+          ],
+          "actions": [
+            "View saved products",
+            "Add to cart",
+            "Remove from wishlist",
+            "Share wishlist"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Account, addresses, payment methods, settings",
+          "visual": "Profile details. Addresses list. Payment methods. Order history link. Settings.",
+          "entities": [
+            "User",
+            "Address",
+            "Payment"
+          ],
+          "actions": [
+            "Edit profile",
+            "Manage addresses",
+            "Manage payment methods",
+            "Notification settings",
+            "Log out"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "Sticky add to cart on product detail \u2014 always visible on scroll",
+        "Variant selector \u2014 colour as swatches, size as chips",
+        "Out of stock variant greyed and crossed out",
+        "Heart tap to wishlist \u2014 animated fill from outline",
+        "Cart item count badge on cart icon \u2014 updates on add",
+        "Order status colour coded \u2014 processing grey, shipped blue, delivered green",
+        "Image gallery full-screen pinch to zoom on product detail",
+        "Size guide link always visible near size selector"
+      ]
+    },
+    "startup": {
+      "tier": "Startup",
+      "description": "Full e-commerce with search, reviews, returns, notifications, promotions, and loyalty.",
+      "screen_count": 14,
+      "primary_flows": [
+        "All MVP flows",
+        "Search with live suggestions \u2192 filtered results \u2192 product detail \u2192 purchase",
+        "Receive price drop notification \u2192 view product \u2192 add to cart \u2192 checkout",
+        "Initiate return \u2192 select reason \u2192 drop off or collect \u2192 refund processed",
+        "Earn loyalty points on purchase \u2192 redeem on next order"
+      ],
+      "secondary_flows": [
+        "All MVP secondary flows",
+        "Write and submit product review with photos",
+        "Refer a friend for store credit",
+        "Subscribe to restock notification for out of stock product",
+        "Apply gift card at checkout"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Home / Storefront",
+          "purpose": "Personalised home with loyalty balance and trending",
+          "visual": "Personalised product feed. Loyalty points balance chip. Trending section. Promotions.",
+          "entities": [
+            "Product",
+            "Category",
+            "Promotion"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View loyalty balance",
+            "View trending",
+            "View personalised picks"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['E-commerce'].headline}}",
+            "cta": "{{industry.copy_by_app_type['E-commerce'].cta}}",
+            "empty_state": "Nothing here yet \u2014 new products are on their way."
+          }
+        },
+        {
+          "id": "search",
+          "name": "Search",
+          "purpose": "Full search with live suggestions, recent, and trending",
+          "visual": "Search bar. Live suggestions dropdown. Recent searches. Trending searches.",
+          "entities": [
+            "Product",
+            "Category"
+          ],
+          "actions": [
+            "Type to search",
+            "Live suggestions",
+            "Recent searches",
+            "Trending searches",
+            "Voice search",
+            "Scan barcode"
+          ]
+        },
+        {
+          "id": "category_browse",
+          "name": "Category / Browse",
+          "purpose": "Advanced filtered results with in-stock and sale filters",
+          "visual": "Grid or list. Active filters. Sale badge on discounted products. In-stock filter.",
+          "entities": [
+            "Product",
+            "Category",
+            "Variant"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Filter in-stock only",
+            "Filter on sale",
+            "View sale badge"
+          ]
+        },
+        {
+          "id": "product_detail",
+          "name": "Product Detail",
+          "purpose": "Full product with reviews, restock notify, and complete the look",
+          "visual": "Gallery. Variants. Price with sale strikethrough. Reviews with photos. Complete the look section.",
+          "entities": [
+            "Product",
+            "Variant",
+            "Review",
+            "Cart"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Notify me when back in stock",
+            "View complete the look",
+            "Read photo reviews"
+          ]
+        },
+        {
+          "id": "cart",
+          "name": "Cart",
+          "purpose": "Cart with loyalty points redemption and gift options",
+          "visual": "Items. Loyalty points toggle. Gift wrap option. Promo. Checkout CTA.",
+          "entities": [
+            "Cart",
+            "Product",
+            "Variant",
+            "Promotion"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Redeem loyalty points",
+            "Add gift wrap",
+            "Gift message input"
+          ],
+          "copy": {
+            "headline": "Your cart",
+            "cta": "Checkout",
+            "empty_state": "Your cart is empty. Start browsing to add something."
+          }
+        },
+        {
+          "id": "checkout",
+          "name": "Checkout",
+          "purpose": "Full checkout with gift card, loyalty, and delivery scheduling",
+          "visual": "Step flow. Address. Scheduled delivery option. Gift card field. Payment. Summary.",
+          "entities": [
+            "Order",
+            "Payment",
+            "Address",
+            "Promotion"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Apply gift card",
+            "Schedule delivery date",
+            "Add delivery note"
+          ]
+        },
+        {
+          "id": "order_confirmation",
+          "name": "Order Confirmation",
+          "purpose": "Confirmation with loyalty points earned",
+          "visual": "Success. Points earned badge. Order summary. Track and continue shopping CTAs.",
+          "entities": [
+            "Order"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View points earned"
+          ]
+        },
+        {
+          "id": "orders",
+          "name": "My Orders",
+          "purpose": "Order history with tracking and return initiation",
+          "visual": "Order cards. Tracking button. Return window indicator. Review prompt.",
+          "entities": [
+            "Order",
+            "Product"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View return window",
+            "Track with courier link"
+          ]
+        },
+        {
+          "id": "returns",
+          "name": "Returns & Refunds",
+          "purpose": "Initiate and track returns",
+          "visual": "Return reason selector. Return method selector. Return label. Status tracker.",
+          "entities": [
+            "Return",
+            "Order"
+          ],
+          "actions": [
+            "Select item to return",
+            "Select reason",
+            "Choose return method",
+            "Generate return label",
+            "Track return status",
+            "View refund status"
+          ]
+        },
+        {
+          "id": "promotions",
+          "name": "Promotions & Offers",
+          "purpose": "All active promotions, flash sales, and vouchers",
+          "visual": "Flash sale countdown. Promo cards. Voucher codes. Apply to cart CTA.",
+          "entities": [
+            "Promotion",
+            "Product"
+          ],
+          "actions": [
+            "View active promotions",
+            "Copy voucher code",
+            "Apply to cart",
+            "View flash sale countdown",
+            "Save promo"
+          ]
+        },
+        {
+          "id": "wishlist",
+          "name": "Wishlist",
+          "purpose": "Saved products with price change alerts",
+          "visual": "Product grid. Price drop badge. Add to cart. Remove. Share.",
+          "entities": [
+            "Wishlist",
+            "Product"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View price drop alert",
+            "Share wishlist link"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "purpose": "All order updates, price drops, restock alerts",
+          "visual": "Categorised list. Order updates. Price drops. Promotions.",
+          "entities": [
+            "Notification",
+            "Order",
+            "Product"
+          ],
+          "actions": [
+            "View all",
+            "Filter by type",
+            "Mark read",
+            "Tap to navigate"
+          ]
+        },
+        {
+          "id": "loyalty",
+          "name": "Loyalty & Rewards",
+          "purpose": "Points balance, history, and redemption",
+          "visual": "Points balance card. Earning history. Redemption options. Tier progress.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "View points balance",
+            "View earning history",
+            "Redeem points",
+            "View tier status",
+            "Refer a friend"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Full profile with loyalty and notification management",
+          "visual": "Profile. Loyalty balance. Addresses. Payments. Notifications. Settings.",
+          "entities": [
+            "User",
+            "Address",
+            "Payment"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View loyalty balance",
+            "Manage subscriptions",
+            "Communication preferences"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP interaction patterns",
+        "Price drop badge \u2014 percentage off in accent colour on product card",
+        "Flash sale countdown timer on home banner and product cards",
+        "Restock notify \u2014 bell icon on out of stock, filled on subscribe",
+        "Loyalty points counter on cart \u2014 animates as points are applied",
+        "Return window countdown on orders \u2014 14 days remaining indicator",
+        "Photo review upload \u2014 camera tap in review form",
+        "Delivery schedule date picker on checkout \u2014 accessible calendar"
+      ]
+    },
+    "scale": {
+      "tier": "Scale",
+      "description": "Full e-commerce platform with subscriptions, AR try-on, advanced analytics, admin, and multi-region support.",
+      "screen_count": 22,
+      "primary_flows": [
+        "All MVP and Startup flows",
+        "Subscribe to product \u2192 set frequency \u2192 auto-charged and shipped \u2192 manage subscription",
+        "AR try-on \u2192 view product on self via camera \u2192 add to cart",
+        "Browse as guest \u2192 checkout \u2192 account created post-purchase",
+        "Admin views sales dashboard \u2192 identifies top products \u2192 runs promotion \u2192 tracks impact",
+        "Multi-currency checkout \u2014 user switches currency \u2192 sees localised price \u2192 pays in local currency"
+      ],
+      "secondary_flows": [
+        "All previous secondary flows",
+        "Personalised product recommendations engine",
+        "Abandoned cart recovery flow",
+        "Affiliate and influencer discount codes",
+        "Bulk order for B2B buyers",
+        "Product bundling and upsell at checkout"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Home / Storefront",
+          "purpose": "AI-personalised storefront with subscription and AR integration",
+          "visual": "AI picks for you section. Subscription products row. AR try-on badge on eligible products.",
+          "entities": [
+            "Product",
+            "Category",
+            "Promotion"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View AI recommendations",
+            "Tap AR try-on badge",
+            "View subscription products"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['E-commerce'].headline}}",
+            "cta": "{{industry.copy_by_app_type['E-commerce'].cta}}",
+            "empty_state": "Nothing here yet \u2014 new products are on their way."
+          }
+        },
+        {
+          "id": "search",
+          "name": "Search",
+          "purpose": "AI-powered search with visual search",
+          "visual": "Search bar. Camera icon for visual search. AI suggestions. Filters.",
+          "entities": [
+            "Product",
+            "Category"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Visual search via camera",
+            "AI-powered suggestions"
+          ]
+        },
+        {
+          "id": "category_browse",
+          "name": "Category / Browse",
+          "purpose": "Full browse with subscription and bundle indicators",
+          "visual": "Product grid. Subscribe badge. Bundle badge. All filters.",
+          "entities": [
+            "Product",
+            "Category",
+            "Variant"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Filter subscription products",
+            "View bundle deals"
+          ]
+        },
+        {
+          "id": "product_detail",
+          "name": "Product Detail",
+          "purpose": "Full product with AR try-on, subscription, and upsell",
+          "visual": "Gallery. AR try-on button. Subscribe and save option. Bundle upsell. Reviews.",
+          "entities": [
+            "Product",
+            "Variant",
+            "Review",
+            "Cart"
+          ],
+          "actions": [
+            "All Startup actions",
+            "AR try-on",
+            "Subscribe and save toggle",
+            "View bundle deals"
+          ]
+        },
+        {
+          "id": "ar_tryon",
+          "name": "AR Try-On",
+          "purpose": "Augmented reality product preview on user via camera",
+          "visual": "Full camera view. Product overlay. Variant switcher. Add to cart CTA.",
+          "entities": [
+            "Product",
+            "Variant"
+          ],
+          "actions": [
+            "Enable camera",
+            "View product on self",
+            "Switch variant",
+            "Capture screenshot",
+            "Add to cart from AR"
+          ]
+        },
+        {
+          "id": "cart",
+          "name": "Cart",
+          "purpose": "Cart with upsell, bundles, and subscription toggle",
+          "visual": "Items. Upsell section. Bundle suggestion. Subscription toggle. Loyalty. Promo. Checkout.",
+          "entities": [
+            "Cart",
+            "Product",
+            "Variant",
+            "Promotion"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View upsell products",
+            "Switch to subscription",
+            "View bundle savings"
+          ],
+          "copy": {
+            "headline": "Your cart",
+            "cta": "Checkout",
+            "empty_state": "Your cart is empty. Start browsing to add something."
+          }
+        },
+        {
+          "id": "checkout",
+          "name": "Checkout",
+          "purpose": "Multi-currency, instalment, and express checkout",
+          "visual": "Currency selector. Instalment option. Express checkout buttons. Summary.",
+          "entities": [
+            "Order",
+            "Payment",
+            "Address",
+            "Promotion"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Select currency",
+            "Pay in instalments",
+            "Express checkout (Apple Pay, Google Pay)"
+          ]
+        },
+        {
+          "id": "order_confirmation",
+          "name": "Order Confirmation",
+          "purpose": "Confirmation with upsell and referral prompt",
+          "visual": "Success. Points earned. Referral link CTA. You might also like section.",
+          "entities": [
+            "Order"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View referral link",
+            "View recommended products"
+          ]
+        },
+        {
+          "id": "orders",
+          "name": "My Orders",
+          "purpose": "Full order history with subscription orders tab",
+          "visual": "All orders tab. Subscriptions tab. Status. Track. Return.",
+          "entities": [
+            "Order",
+            "Product"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View subscription orders",
+            "Manage subscription from order"
+          ]
+        },
+        {
+          "id": "subscriptions",
+          "name": "Subscriptions",
+          "purpose": "Manage product subscriptions \u2014 frequency, pause, cancel",
+          "visual": "Active subscriptions list. Next delivery date. Frequency selector. Pause and cancel.",
+          "entities": [
+            "User",
+            "Product"
+          ],
+          "actions": [
+            "View active subscriptions",
+            "Change frequency",
+            "Skip delivery",
+            "Pause subscription",
+            "Cancel subscription",
+            "Add product to subscription"
+          ]
+        },
+        {
+          "id": "returns",
+          "name": "Returns & Refunds",
+          "purpose": "Full returns with QR code drop-off and instant refund option",
+          "visual": "Return flow. QR code label. Instant refund option. Return status.",
+          "entities": [
+            "Return",
+            "Order"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Generate QR return label",
+            "Request instant refund",
+            "View return status timeline"
+          ]
+        },
+        {
+          "id": "promotions",
+          "name": "Promotions & Offers",
+          "purpose": "Flash sales, affiliate codes, bundle deals, and referral",
+          "visual": "Flash countdown. Bundle deals. Affiliate code input. Referral section.",
+          "entities": [
+            "Promotion",
+            "Product"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Apply affiliate code",
+            "View bundle deals",
+            "Referral link"
+          ]
+        },
+        {
+          "id": "wishlist",
+          "name": "Wishlist",
+          "purpose": "Saved products with low stock alerts and share",
+          "visual": "Collections. Low stock badge. Price drop. Share.",
+          "entities": [
+            "Wishlist",
+            "Product"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View low stock alert",
+            "Share collection"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "purpose": "All alerts with abandoned cart recovery",
+          "visual": "All notifications. Abandoned cart reminder. Low stock. Price drop.",
+          "entities": [
+            "Notification",
+            "Order",
+            "Product"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View abandoned cart reminder",
+            "Complete purchase from notification"
+          ]
+        },
+        {
+          "id": "loyalty",
+          "name": "Loyalty & Rewards",
+          "purpose": "Tiered loyalty with exclusive member perks",
+          "visual": "Tier card. Points. Perks by tier. Upgrade progress bar.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View tier perks",
+            "View upgrade progress",
+            "Access member-only deals"
+          ]
+        },
+        {
+          "id": "analytics_admin",
+          "name": "Admin \u2014 Sales Dashboard",
+          "purpose": "Platform sales KPIs, top products, revenue trends",
+          "visual": "Revenue chart. Top products table. Conversion funnel. Geographic breakdown.",
+          "entities": [
+            "Product",
+            "Order"
+          ],
+          "actions": [
+            "View revenue trend",
+            "View top products",
+            "View conversion funnel",
+            "Filter by region",
+            "Export report"
+          ]
+        },
+        {
+          "id": "product_management",
+          "name": "Admin \u2014 Product Management",
+          "purpose": "Full product catalogue management",
+          "visual": "Product data table. Bulk edit. Inventory levels. Publish or draft.",
+          "entities": [
+            "Product",
+            "Variant",
+            "Category"
+          ],
+          "actions": [
+            "Add product",
+            "Edit product",
+            "Bulk price edit",
+            "Manage inventory",
+            "Publish or unpublish",
+            "Import CSV"
+          ]
+        },
+        {
+          "id": "promotion_management",
+          "name": "Admin \u2014 Promotion Management",
+          "purpose": "Create and manage promotions, flash sales, and codes",
+          "visual": "Promotions list. Create form. Active and scheduled tabs. Performance stats.",
+          "entities": [
+            "Promotion"
+          ],
+          "actions": [
+            "Create promotion",
+            "Set flash sale",
+            "View performance",
+            "End promotion",
+            "Duplicate promotion"
+          ]
+        },
+        {
+          "id": "customer_management",
+          "name": "Admin \u2014 Customer Management",
+          "purpose": "View and manage customer accounts and orders",
+          "visual": "Customer table. Search. Customer detail panel. Order history.",
+          "entities": [
+            "User",
+            "Order"
+          ],
+          "actions": [
+            "Search customers",
+            "View customer detail",
+            "View order history",
+            "Issue store credit",
+            "Suspend account"
+          ]
+        },
+        {
+          "id": "b2b_bulk_order",
+          "name": "B2B Bulk Order",
+          "purpose": "Business buyers order in bulk with volume pricing",
+          "visual": "Product table with quantity inputs. Volume pricing tiers. Invoice request.",
+          "entities": [
+            "User",
+            "Product",
+            "Order"
+          ],
+          "actions": [
+            "Enter bulk quantities",
+            "View volume pricing",
+            "Request invoice",
+            "Submit bulk order",
+            "View B2B order history"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Full profile with subscription, B2B, and privacy controls",
+          "visual": "Comprehensive settings. Subscription section. B2B section. Privacy.",
+          "entities": [
+            "User",
+            "Address",
+            "Payment"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Subscription settings",
+            "B2B account settings",
+            "Data and privacy controls"
+          ]
+        },
+        {
+          "id": "help_centre",
+          "name": "Help Centre",
+          "purpose": "Self-serve help with returns and order guidance",
+          "visual": "Search. Categories. Featured articles. Contact CTA.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Search",
+            "Browse articles",
+            "Contact support",
+            "Initiate return from help"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP and Startup interaction patterns",
+        "AR try-on button pulses on eligible products \u2014 draws attention",
+        "Subscribe and save toggle on product detail \u2014 monthly saving shown instantly",
+        "Abandoned cart push notification \u2014 product thumbnail in notification",
+        "Low stock badge \u2014 only X left \u2014 creates urgency",
+        "Bundle savings badge \u2014 save 20% shown on bundle suggestion",
+        "Admin funnel chart \u2014 drop-off percentage on each step clearly labelled",
+        "B2B quantity input \u2014 volume pricing tier updates as quantity changes",
+        "Instalment amount shown per month clearly on checkout \u2014 reduces friction"
+      ]
+    }
+  },
+  "layout": {
+    "iphone": {
+      "nav": "bottom_tab_4",
+      "nav_items": [
+        "Home",
+        "Search",
+        "Wishlist",
+        "Profile"
+      ],
+      "content": "full_width_single_column",
+      "card_style": "2col_product_grid",
+      "cta": "sticky_add_to_cart_bottom_on_product_detail",
+      "hero": "full_bleed_banner_with_shop_now",
+      "padding": "12px horizontal",
+      "image_ratio": "1:1 product cards 16:9 hero banner"
+    },
+    "ipad": {
+      "nav": "top_navbar_with_cart_icon",
+      "nav_items": [
+        "Home",
+        "Categories",
+        "Wishlist",
+        "Cart",
+        "Profile"
+      ],
+      "content": "3col_product_grid_centred",
+      "card_style": "3col_product_grid",
+      "cta": "inline_add_to_cart_on_card_hover",
+      "hero": "full_width_hero_banner",
+      "padding": "24px horizontal",
+      "image_ratio": "1:1 product cards"
+    },
+    "desktop": {
+      "nav": "top_navbar_with_mega_category_menu_and_cart",
+      "nav_items": [
+        "Home",
+        "Women",
+        "Men",
+        "Sale",
+        "Cart",
+        "Profile"
+      ],
+      "content": "4col_product_grid_max_1280px_centred",
+      "card_style": "4col_grid_quick_add_on_hover",
+      "cta": "prominent_add_to_cart_on_product_detail_sticky_right",
+      "hero": "full_width_hero_with_overlay_text_left",
+      "padding": "64px horizontal",
+      "image_ratio": "2:3 product cards portrait 21:9 hero"
+    },
+    "notes": "Product photography is the entire UI. Every layout decision exists to surface product images. Minimal chrome \u2014 no clutter competing with the product."
+  },
+  "constraints": {
+    "avoid": [
+      "Never use a white background card border around product images \u2014 full bleed only",
+      "Never centre product titles on cards \u2014 always left-aligned",
+      "Never show more than 2 lines of product title on a card \u2014 truncate with ellipsis",
+      "Never use a dropdown for size or colour selection \u2014 always use chips or swatches",
+      "Never hide the price \u2014 it must be visible on the card without tapping",
+      "Never use a quantity stepper smaller than 44px tap target",
+      "Never show out of stock variants as available \u2014 grey them with strikethrough",
+      "Never use generic stock photography \u2014 if no product image, show a branded category placeholder",
+      "Never put more than 4 items in a bottom navigation \u2014 home, search, cart, profile is the max"
+    ],
+    "enforce": [
+      "Add to cart CTA always sticky at bottom of product detail screen",
+      "Colour variants always shown as actual colour swatches \u2014 never dropdown",
+      "Size guide link always visible near size selector",
+      "Return policy always visible on product detail \u2014 never buried in footer",
+      "Cart item count badge always visible on cart icon",
+      "Out of stock state: grey image overlay, crossed price, 'Notify me' CTA",
+      "Product rating and review count always shown on product detail \u2014 never hidden",
+      "Checkout progress indicator always visible \u2014 step 1 of 3, etc."
+    ]
+  },
+  "states": {
+    "empty_states": [
+      {
+        "screen": "home",
+        "trigger": "New user, no browsing history",
+        "ui": "Featured category banners full bleed. Bestsellers grid below. Never show personalised section until 3+ products browsed."
+      },
+      {
+        "screen": "cart",
+        "trigger": "Cart is empty",
+        "ui": "Shopping bag illustration. Message: 'Your cart is empty'. CTA: 'Start shopping'. Show 3 recently viewed products below if available."
+      },
+      {
+        "screen": "wishlist",
+        "trigger": "No saved items",
+        "ui": "Heart illustration. Message: 'Save items you love'. Instruction: 'Tap the heart icon on any product'. CTA: 'Browse products'."
+      },
+      {
+        "screen": "orders",
+        "trigger": "No orders yet",
+        "ui": "Package illustration. Message: 'No orders yet'. CTA: 'Shop now'. Never show empty table."
+      }
+    ],
+    "loading_states": [
+      {
+        "screen": "home",
+        "ui": "Hero banner loads first \u2014 skeleton full width. Below: 2-col product grid with skeleton cards \u2014 image block top, 2 text lines below."
+      },
+      {
+        "screen": "product_detail",
+        "ui": "Image gallery placeholder top full width. Title and price skeleton below. Skeleton never taller than a typical product page. Variant chips skeleton visible."
+      },
+      {
+        "screen": "checkout",
+        "ui": "Order summary visible immediately. Spinner on payment processing button only. Never full screen loader during checkout."
+      }
+    ],
+    "error_flows": [
+      {
+        "trigger": "Item sold out after adding to cart",
+        "ui": "Cart shows red badge on item: 'Now out of stock'. Checkout blocked until item removed. Option: 'Remove and continue' or 'Save to wishlist'."
+      },
+      {
+        "trigger": "Payment declined",
+        "ui": "Inline error below payment method. Specific reason if available: 'Insufficient funds' / 'Card expired'. Order not placed. Cart preserved. Retry without re-entering all details."
+      },
+      {
+        "trigger": "Delivery address not serviceable",
+        "ui": "Error on address step: 'We don't deliver to this address yet'. Map shows delivery zone. Option to enter alternative address."
+      },
+      {
+        "trigger": "Promo code invalid",
+        "ui": "Inline error below code input: 'Code not valid' or 'Code expired'. Never remove the code field \u2014 let user try another. Show discount amount clearly when code is valid."
+      }
+    ],
+    "edge_cases": [
+      {
+        "case": "Single item left in stock",
+        "ui": "Urgency label on card and detail: 'Only 1 left'. Never fabricate scarcity \u2014 only show when stock count is genuinely 1."
+      },
+      {
+        "case": "Product with 50+ variants",
+        "ui": "Colour selector scrollable horizontal. Size selector scrollable. Never collapse into a dropdown even with many variants."
+      },
+      {
+        "case": "Guest checkout",
+        "ui": "Checkout available without account. Account creation offered after purchase \u2014 'Save your details for next time'. Never force registration before purchase."
+      },
+      {
+        "case": "Price drop on wishlist item",
+        "ui": "Push notification: '[Product] is now [price]'. Wishlist item shows 'Price dropped' badge with original and new price."
+      }
+    ]
+  },
+  "components": [
+    "ProductCard",
+    "VariantSelector",
+    "AddToCartButton",
+    "ProductImageGallery",
+    "PriceDisplay",
+    "WishlistButton",
+    "SizeChart"
+  ],
+  "nav_active_states": {
+    "home": "Home",
+    "category_browse": "Search",
+    "product_detail": "Home",
+    "cart": "Cart",
+    "checkout": "Cart",
+    "order_confirmation": "Profile",
+    "orders": "Profile",
+    "wishlist": "Wishlist",
+    "profile_settings": "Profile"
+  }
+}

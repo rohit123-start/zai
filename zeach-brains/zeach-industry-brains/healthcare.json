@@ -1,0 +1,174 @@
+{
+  "industry_id": "healthcare",
+  "industry_name": "Healthcare",
+  "tone": {
+    "primary": "trustworthy, calm, professional",
+    "secondary": "empathetic, clear, reassuring",
+    "voice": "a knowledgeable doctor who speaks plainly \u2014 never condescending, always clear",
+    "avoid": "alarming, overly casual, jargon-heavy, cold or robotic"
+  },
+  "trust_signals": [
+    "verified doctor credentials and photos",
+    "years of experience and specialisation",
+    "patient review count and rating",
+    "clinic/hospital affiliation",
+    "secure and private data indicators",
+    "appointment confirmation and reminders",
+    "regulated platform badges"
+  ],
+  "ux_norms": [
+    "clarity above all \u2014 no ambiguous actions in a health context",
+    "large readable typography \u2014 accessibility is non-negotiable \u2014 minimum 16px body text",
+    "never use dark mode as default \u2014 light clinical environments build trust and aid readability",
+    "emergency contact or help is always accessible from any screen \u2014 never buried",
+    "privacy indicators always visible \u2014 lock icon, HIPAA badge, or data use note on screens handling sensitive data",
+    "progress indicators for all multi-step flows \u2014 booking, onboarding, form completion",
+    "patient app screens: home health dashboard leads with upcoming appointment \u2014 never with feed or discovery",
+    "patient app screens: prescriptions always show next dose time and refill remaining \u2014 never just a list",
+    "patient app screens: medical records use timeline view \u2014 chronological, most recent first",
+    "patient app screens: doctor profile shows credentials, years of experience, and patient rating before any other detail",
+    "patient app screens: telehealth waiting room shows estimated wait and doctor preparing status \u2014 never blank",
+    "patient app screens: consultation active screen has end call always red, always in the same position",
+    "notification and reminder system is prominent \u2014 medication reminders are mission-critical, not decorative",
+    "never show medical information in a way that could cause alarm without context \u2014 always pair data with normal range"
+  ],
+  "icons": {
+    "style": "clean rounded line, trustworthy",
+    "weight": "medium",
+    "mood": "trustworthy, clinical-clean, calm",
+    "library": {
+      "name": "Material Symbols",
+      "variant": "Rounded",
+      "url": "https://fonts.google.com/icons"
+    },
+    "domain_icons": [
+      "favorite",
+      "assignment",
+      "person",
+      "calendar_month",
+      "schedule",
+      "science",
+      "verified_user",
+      "phone",
+      "medical_services",
+      "medication",
+      "monitor_heart",
+      "healing"
+    ],
+    "nav_icons": [
+      "home",
+      "search",
+      "calendar_month",
+      "person",
+      "notifications",
+      "verified_user",
+      "schedule",
+      "list",
+      "arrow_back",
+      "check_circle"
+    ]
+  },
+  "visual_language": {
+    "primary_type": "vector illustrations",
+    "style": "clean, friendly medical illustrations \u2014 not clinical or scary",
+    "photography_rules": [
+      "real doctor photos for profiles \u2014 professional headshots only",
+      "never use graphic medical imagery",
+      "diverse representation in all human imagery",
+      "patient photos only with clear consent context"
+    ],
+    "background_treatment": "clean white or very light blue-grey \u2014 calm and clinical without being cold",
+    "empty_state_style": "friendly SVG illustration \u2014 stethoscope, clipboard, or health icon with reassuring copy",
+    "onboarding_visual": "clean friendly vector illustration \u2014 approachable health theme",
+    "illustration_style": "flat vector, soft rounded shapes \u2014 medical but not intimidating"
+  },
+  "themes": {
+    "pack": [
+      "Clinical",
+      "Soft Care",
+      "Modern Medical",
+      "Wellness",
+      "Emergency"
+    ]
+  },
+  "fonts": {
+    "ai_pick_heading": "Inter",
+    "ai_pick_body": "Inter"
+  },
+  "valid_app_types": [
+    "Marketplace",
+    "Booking & Appointments",
+    "E-commerce",
+    "Social & Community",
+    "Dashboard SaaS",
+    "Content & Streaming",
+    "Chat / Messaging",
+    "Map & Location-Based",
+    "AI Tool",
+    "Developer Tool",
+    "Patient App"
+  ],
+  "monetization_models": [
+    "consultation fee per booking",
+    "subscription for unlimited consultations",
+    "SaaS per seat for clinics",
+    "insurance billing integration",
+    "pharmacy partnerships"
+  ],
+  "compliance_notes": [
+    "HIPAA compliance required in US market",
+    "GDPR for European health data",
+    "medical advice disclaimer always visible",
+    "emergency services signposting required",
+    "prescription-related flows require regulatory approval",
+    "data encryption and security must be communicated clearly"
+  ],
+  "constraints": {
+    "avoid": [
+      "Never use dark mode as default \u2014 high contrast light UI is accessibility standard in healthcare",
+      "Never use red for branding, decorative elements, or non-urgent states \u2014 red means emergency",
+      "Never truncate medical information \u2014 dosage, instructions, and warnings always in full",
+      "Never use casual or colloquial language for medical information \u2014 precision is patient safety",
+      "Never show another patient's data \u2014 HIPAA compliance is absolute",
+      "Never gamify medication adherence with points or streaks \u2014 trivialises compliance",
+      "Never hide a crisis resource or emergency contact behind more than one tap",
+      "Never use dark patterns that obscure the cost of a medical service before commitment"
+    ],
+    "enforce": [
+      "Emergency contact and crisis resources always one tap away",
+      "HIPAA compliance badge visible on all data-sharing and messaging screens",
+      "All medical data changes logged with timestamp and user ID",
+      "Doctor credentials and verification badge always visible",
+      "Prescription expiry always shown with amber warning before expiry",
+      "Lab results always shown with reference range \u2014 never just the value",
+      "Medication interaction warnings always shown before prescription confirmation",
+      "Accessibility: minimum 16px font size for all medical information"
+    ]
+  },
+  "copy_by_app_type": {
+    "AI Tool": {
+      "headline": "Clinical intelligence, on demand",
+      "cta": "Ask now"
+    },
+    "Booking & Appointments": {
+      "headline": "Book your next appointment",
+      "cta": "Find availability"
+    },
+    "Dashboard SaaS": {
+      "headline": "Patient data, always in focus",
+      "cta": "Open dashboard"
+    },
+    "Patient App": {
+      "headline": "Your health, in one place",
+      "cta": "Book appointment"
+    },
+    "Chat / Messaging": {
+      "headline": "Secure care, anywhere",
+      "cta": "Start a conversation"
+    },
+    "default": {
+      "headline": "Healthcare that works for you",
+      "cta": "Get started"
+    }
+  }
+}

@@ -1,0 +1,1079 @@
+{
+  "archetype_id": "property_management",
+  "archetype_name": "Property Management",
+  "description": "Landlord and property manager tool \u2014 tenants, leases, maintenance requests, rent collection, and financial reporting. Real Estate industry only.",
+  "valid_industries": [
+    "Real Estate"
+  ],
+  "icon_pack": {
+    "default_library": {
+      "name": "Material Symbols",
+      "variant": "Outlined",
+      "url": "https://fonts.google.com/icons"
+    },
+    "industry_overrides": {},
+    "core_nav_icons": [
+      "home",
+      "apartment",
+      "group",
+      "build",
+      "payments",
+      "description",
+      "notifications",
+      "arrow_back",
+      "search",
+      "settings"
+    ],
+    "core_domain_icons": [
+      "apartment",
+      "key",
+      "group",
+      "build",
+      "payments",
+      "calendar_month",
+      "description",
+      "location_on",
+      "attach_money",
+      "verified_user"
+    ]
+  },
+  "landing_page": {
+    "sections": [
+      {
+        "id": "hero",
+        "generates_images": false
+      },
+      {
+        "id": "stats_bar",
+        "generates_images": false
+      },
+      {
+        "id": "pricing",
+        "generates_images": false
+      },
+      {
+        "id": "cta_footer",
+        "generates_images": false
+      }
+    ],
+    "three_js": {
+      "style": "architectural_grid",
+      "description": "Isometric grid lines suggesting a floor plan or architectural blueprint. Clean, precise, structured. Lines animate in from edges on load.",
+      "intensity": "very_subtle",
+      "interaction": "none",
+      "avoid": "no status pills, no hero-stat-line, no ticker strips"
+    }
+  },
+  "core_entities": {
+    "entities": [
+      "Landlord",
+      "Property",
+      "Unit",
+      "Tenant",
+      "Lease",
+      "RentPayment",
+      "MaintenanceRequest",
+      "Expense",
+      "Document",
+      "Inspection",
+      "Notification"
+    ],
+    "relationships": [
+      "Landlord owns many Properties",
+      "Property has many Units",
+      "Unit has one active Lease",
+      "Lease belongs to a Tenant and a Unit",
+      "RentPayment belongs to Lease and Tenant",
+      "MaintenanceRequest belongs to Unit, filed by Tenant or Landlord",
+      "Expense belongs to Property \u2014 repairs, fees, insurance",
+      "Document belongs to Property, Unit, or Lease \u2014 agreements, certificates",
+      "Inspection belongs to Unit with a date and report",
+      "Notification belongs to Landlord \u2014 rent due, maintenance updates, lease renewals"
+    ]
+  },
+  "tiers": {
+    "mvp": {
+      "tier": "MVP",
+      "description": "Core property management \u2014 properties, tenants, rent tracking, maintenance.",
+      "screen_count": 9,
+      "primary_flows": [
+        "Add property \u2192 add units \u2192 add tenant \u2192 create lease \u2192 track rent payments",
+        "Tenant submits maintenance request \u2192 landlord views \u2192 assigns \u2192 marks resolved",
+        "View financial overview \u2192 income vs expenses per property"
+      ],
+      "secondary_flows": [
+        "Send rent reminder",
+        "Upload lease document",
+        "Log expense",
+        "View occupancy rate"
+      ],
+      "screens": [
+        {
+          "id": "dashboard",
+          "name": "Dashboard",
+          "purpose": "Portfolio overview \u2014 properties, rent status, maintenance",
+          "visual": "KPI cards \u2014 properties, units occupied, rent collected this month, open maintenance. Property list below.",
+          "entities": [
+            "Property",
+            "Unit",
+            "RentPayment",
+            "MaintenanceRequest"
+          ],
+          "actions": [
+            "View portfolio KPIs",
+            "View properties",
+            "View open maintenance",
+            "View overdue rent"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Property Management'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Property Management'].cta}}",
+            "empty_state": "Add your first property to start tracking rent, tenants, and maintenance."
+          }
+        },
+        {
+          "id": "properties",
+          "name": "Properties",
+          "purpose": "All properties with occupancy and rent status",
+          "visual": "Property cards. Occupancy rate badge. Monthly rent income. Maintenance count.",
+          "entities": [
+            "Property",
+            "Unit"
+          ],
+          "actions": [
+            "View property",
+            "Add property",
+            "View units",
+            "View financials per property"
+          ]
+        },
+        {
+          "id": "property_detail",
+          "name": "Property Detail",
+          "purpose": "Single property \u2014 units, financials, documents",
+          "visual": "Property header. Units list with status. Financial summary. Documents.",
+          "entities": [
+            "Property",
+            "Unit",
+            "Expense",
+            "Document"
+          ],
+          "actions": [
+            "View units",
+            "Add unit",
+            "View financials",
+            "Upload document",
+            "Add expense"
+          ]
+        },
+        {
+          "id": "tenants",
+          "name": "Tenants",
+          "purpose": "All tenants with lease and payment status",
+          "visual": "Tenant list. Lease status badge. Last payment date. Maintenance requests count.",
+          "entities": [
+            "Tenant",
+            "Lease",
+            "RentPayment"
+          ],
+          "actions": [
+            "View tenant detail",
+            "Add tenant",
+            "View lease",
+            "Send message",
+            "View payment history"
+          ]
+        },
+        {
+          "id": "tenant_detail",
+          "name": "Tenant Detail",
+          "purpose": "Full tenant profile \u2014 lease, payments, maintenance history",
+          "visual": "Tenant info. Active lease card. Payment history. Maintenance requests. Documents.",
+          "entities": [
+            "Tenant",
+            "Lease",
+            "RentPayment",
+            "MaintenanceRequest"
+          ],
+          "actions": [
+            "View lease",
+            "View payment history",
+            "View maintenance history",
+            "Send rent reminder",
+            "Message tenant"
+          ]
+        },
+        {
+          "id": "rent_tracking",
+          "name": "Rent Tracking",
+          "purpose": "All rent payments \u2014 collected, due, overdue",
+          "visual": "Monthly view. Paid green, due amber, overdue red. Per tenant rows.",
+          "entities": [
+            "RentPayment",
+            "Tenant",
+            "Lease"
+          ],
+          "actions": [
+            "View all payments",
+            "Mark as paid",
+            "Send reminder",
+            "Log manual payment",
+            "View payment history"
+          ]
+        },
+        {
+          "id": "maintenance",
+          "name": "Maintenance",
+          "purpose": "All maintenance requests \u2014 open, in progress, resolved",
+          "visual": "Kanban or list. Status badges. Property and unit. Priority flag.",
+          "entities": [
+            "MaintenanceRequest",
+            "Unit",
+            "Tenant"
+          ],
+          "actions": [
+            "View all requests",
+            "Update status",
+            "Assign to contractor",
+            "Add note",
+            "Mark resolved",
+            "View request detail"
+          ],
+          "copy": {
+            "headline": "Maintenance requests",
+            "cta": "Log request",
+            "empty_state": "No open requests. All clear."
+          }
+        },
+        {
+          "id": "financials",
+          "name": "Financials",
+          "purpose": "Income and expenses per property",
+          "visual": "Income vs expense chart. Category breakdown. Export CTA.",
+          "entities": [
+            "RentPayment",
+            "Expense",
+            "Property"
+          ],
+          "actions": [
+            "View income vs expense",
+            "Add expense",
+            "View by property",
+            "Export CSV",
+            "View by category"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Landlord profile and notification settings",
+          "visual": "Profile. Business details. Notification settings. Billing.",
+          "entities": [
+            "Landlord"
+          ],
+          "actions": [
+            "Edit profile",
+            "Business settings",
+            "Notification preferences",
+            "Billing",
+            "Log out"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "Rent status colour coded \u2014 paid green, due amber, overdue red always",
+        "Maintenance priority flag \u2014 urgent badge in red",
+        "Occupancy rate \u2014 visual progress bar on property card",
+        "KPI cards animate on dashboard load",
+        "Overdue rent \u2014 push notification with tenant name"
+      ]
+    },
+    "startup": {
+      "tier": "Startup",
+      "description": "Full property management with online rent collection, lease automation, and contractor management.",
+      "screen_count": 15,
+      "primary_flows": [
+        "All MVP flows",
+        "Online rent collection \u2192 tenant pays via app \u2192 automatically recorded \u2192 landlord notified",
+        "Lease renewal due \u2192 auto-reminder \u2192 generate new lease \u2192 send for e-signature \u2192 signed \u2192 stored",
+        "Maintenance request \u2192 assign contractor \u2192 contractor updates status \u2192 tenant notified \u2192 resolved"
+      ],
+      "secondary_flows": [
+        "All MVP secondary flows",
+        "Property inspection scheduling",
+        "Utility tracking",
+        "Tenant screening",
+        "Late fee automation"
+      ],
+      "screens": [
+        {
+          "id": "dashboard",
+          "name": "Dashboard",
+          "purpose": "Full portfolio with cash flow and upcoming tasks",
+          "visual": "Cash flow chart. Upcoming lease renewals. Maintenance queue. Rent collection rate.",
+          "entities": [
+            "Property",
+            "Unit",
+            "RentPayment",
+            "MaintenanceRequest"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View cash flow chart",
+            "View upcoming renewals",
+            "View rent collection rate"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Property Management'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Property Management'].cta}}",
+            "empty_state": "Add your first property to start tracking rent, tenants, and maintenance."
+          }
+        },
+        {
+          "id": "properties",
+          "name": "Properties",
+          "purpose": "Properties with online payment and vacancy status",
+          "visual": "Property cards. Online payments enabled badge. Vacancy alert.",
+          "entities": [
+            "Property",
+            "Unit"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Enable online payments",
+            "View vacancy alert",
+            "List vacant unit"
+          ]
+        },
+        {
+          "id": "rent_collection",
+          "name": "Rent Collection",
+          "purpose": "Online rent collection with auto-reminders",
+          "visual": "Collection dashboard. Auto-reminder toggle per tenant. Payment method setup. Late fee rules.",
+          "entities": [
+            "RentPayment",
+            "Tenant",
+            "Lease"
+          ],
+          "actions": [
+            "Enable auto-reminder",
+            "Set late fee rules",
+            "View collection stats",
+            "Manually charge late fee",
+            "Set up ACH or card collection"
+          ]
+        },
+        {
+          "id": "leases",
+          "name": "Leases",
+          "purpose": "Lease management with templates and e-signature",
+          "visual": "Active leases. Expiry date. Renewal status. Create lease CTA.",
+          "entities": [
+            "Lease",
+            "Tenant",
+            "Unit"
+          ],
+          "actions": [
+            "Create lease from template",
+            "Send for e-signature",
+            "View signed lease",
+            "Initiate renewal",
+            "View lease terms"
+          ]
+        },
+        {
+          "id": "lease_builder",
+          "name": "Lease Builder",
+          "purpose": "Create and customise lease agreements",
+          "visual": "Template selector. Clause editor. Preview. Send for signature CTA.",
+          "entities": [
+            "Lease"
+          ],
+          "actions": [
+            "Select template",
+            "Edit clauses",
+            "Add custom clause",
+            "Preview",
+            "Send for e-signature"
+          ]
+        },
+        {
+          "id": "tenants",
+          "name": "Tenants",
+          "purpose": "Tenant management with screening and portal",
+          "visual": "Tenant list. Screening status. Tenant portal activity. Payment method on file.",
+          "entities": [
+            "Tenant",
+            "Lease",
+            "RentPayment"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Run tenant screening",
+            "View portal activity",
+            "View payment method on file"
+          ]
+        },
+        {
+          "id": "tenant_portal",
+          "name": "Tenant Portal",
+          "purpose": "Tenant-facing view \u2014 pay rent, submit maintenance, view documents",
+          "visual": "Rent due card. Pay now CTA. Submit maintenance. Documents list.",
+          "entities": [
+            "Tenant",
+            "RentPayment",
+            "MaintenanceRequest",
+            "Document"
+          ],
+          "actions": [
+            "Pay rent",
+            "Submit maintenance request",
+            "View documents",
+            "View lease",
+            "Contact landlord"
+          ]
+        },
+        {
+          "id": "maintenance",
+          "name": "Maintenance",
+          "purpose": "Full maintenance with contractor assignment and tracking",
+          "visual": "Requests board. Contractor assigned indicator. Status updates timeline.",
+          "entities": [
+            "MaintenanceRequest",
+            "Unit",
+            "Tenant"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Assign to contractor",
+            "Track contractor updates",
+            "Approve quote",
+            "Mark complete with photos"
+          ],
+          "copy": {
+            "headline": "Maintenance requests",
+            "cta": "Log request",
+            "empty_state": "No open requests. All clear."
+          }
+        },
+        {
+          "id": "contractors",
+          "name": "Contractors",
+          "purpose": "Manage trusted contractors per trade",
+          "visual": "Contractor list. Trade badge. Rating. Last job. Assign CTA.",
+          "entities": [
+            "MaintenanceRequest"
+          ],
+          "actions": [
+            "Add contractor",
+            "View contractor history",
+            "Rate contractor",
+            "Assign to maintenance request"
+          ]
+        },
+        {
+          "id": "inspections",
+          "name": "Inspections",
+          "purpose": "Schedule and record property inspections",
+          "visual": "Upcoming inspections. Past reports. Schedule CTA. Photo evidence per item.",
+          "entities": [
+            "Inspection",
+            "Unit"
+          ],
+          "actions": [
+            "Schedule inspection",
+            "Complete inspection checklist",
+            "Add photos",
+            "Generate report",
+            "Share with tenant"
+          ]
+        },
+        {
+          "id": "financials",
+          "name": "Financials",
+          "purpose": "Full P&L with tax categories and export",
+          "visual": "P&L summary. Tax category breakdown. YTD summary. Export.",
+          "entities": [
+            "RentPayment",
+            "Expense",
+            "Property"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View P&L",
+            "Tag expense as tax deductible",
+            "YTD summary",
+            "Export for accountant"
+          ]
+        },
+        {
+          "id": "documents",
+          "name": "Documents",
+          "purpose": "All property documents organised",
+          "visual": "Document library. Categories \u2014 leases, certificates, insurance, permits. Search.",
+          "entities": [
+            "Document",
+            "Property",
+            "Lease"
+          ],
+          "actions": [
+            "Upload document",
+            "Search documents",
+            "Share document",
+            "Set expiry reminder",
+            "Download"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "purpose": "All alerts \u2014 rent due, maintenance, lease renewal",
+          "visual": "Notification list. Category. Priority. Mark resolved.",
+          "entities": [
+            "Notification"
+          ],
+          "actions": [
+            "View all",
+            "Mark resolved",
+            "Navigate to relevant screen",
+            "Manage preferences"
+          ]
+        },
+        {
+          "id": "reports",
+          "name": "Reports",
+          "purpose": "Rental income, vacancy, and expense reports",
+          "visual": "Report type cards. Date range. Chart + table. Export PDF.",
+          "entities": [
+            "RentPayment",
+            "Expense",
+            "Property"
+          ],
+          "actions": [
+            "Select report type",
+            "Set date range",
+            "View chart",
+            "Export PDF",
+            "Schedule recurring report"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Full settings with payment processing and automation",
+          "visual": "Profile. Payment settings. Automation rules. Team. Billing.",
+          "entities": [
+            "Landlord"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Payment processing setup",
+            "Automation rules",
+            "Invite team member"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP patterns",
+        "Online payment \u2014 Stripe integration, tenant pays in app, instantly reflected",
+        "E-signature \u2014 lease sent to tenant email, signed in browser, stored automatically",
+        "Late fee \u2014 auto-applied based on rules, tenant notified",
+        "Inspection checklist \u2014 swipe through items, photo upload per item",
+        "Contractor status update \u2014 push to landlord and tenant simultaneously"
+      ]
+    },
+    "scale": {
+      "tier": "Scale",
+      "description": "Enterprise property management \u2014 large portfolios, multi-owner, accounting integration, and owner reporting.",
+      "screen_count": 22,
+      "primary_flows": [
+        "All MVP and Startup flows",
+        "Multi-owner portfolio \u2014 each owner sees only their properties",
+        "QuickBooks/Xero sync \u2192 all transactions exported automatically \u2192 accountant has live data",
+        "Owner report generated monthly \u2192 sent automatically \u2192 shows NOI, vacancy, maintenance costs"
+      ],
+      "secondary_flows": [
+        "All previous flows",
+        "Commercial property support",
+        "HOA management",
+        "Short-term rental management",
+        "Portfolio analytics and benchmarking"
+      ],
+      "screens": [
+        {
+          "id": "dashboard",
+          "name": "Portfolio Dashboard",
+          "purpose": "Enterprise portfolio overview with owner breakdown",
+          "visual": "Total portfolio value. NOI. Vacancy rate. Owner breakdown. Alerts queue.",
+          "entities": [
+            "Property",
+            "Unit",
+            "RentPayment"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Switch owner view",
+            "View portfolio value",
+            "View NOI"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Property Management'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Property Management'].cta}}",
+            "empty_state": "Add your first property to start tracking rent, tenants, and maintenance."
+          }
+        },
+        {
+          "id": "owner_portal",
+          "name": "Owner Portal",
+          "purpose": "Property owner view \u2014 their properties, income, and reports",
+          "visual": "Owner's properties. Monthly income. Occupancy. Latest report. Distributions.",
+          "entities": [
+            "Property",
+            "RentPayment",
+            "Expense"
+          ],
+          "actions": [
+            "View own properties",
+            "View income statement",
+            "Download report",
+            "View distributions",
+            "Message property manager"
+          ]
+        },
+        {
+          "id": "owner_report",
+          "name": "Owner Report",
+          "purpose": "Monthly or quarterly owner financial report",
+          "visual": "NOI summary. Income breakdown. Expense breakdown. Maintenance summary. Distributions.",
+          "entities": [
+            "Property",
+            "RentPayment",
+            "Expense"
+          ],
+          "actions": [
+            "View report",
+            "Download PDF",
+            "View historical reports",
+            "Compare to budget"
+          ]
+        },
+        {
+          "id": "accounting_sync",
+          "name": "Accounting Integration",
+          "purpose": "QuickBooks, Xero, or Sage sync",
+          "visual": "Connected account. Sync status. Last synced. Chart of accounts mapping.",
+          "entities": [
+            "Expense",
+            "RentPayment"
+          ],
+          "actions": [
+            "Connect accounting software",
+            "Map chart of accounts",
+            "View sync log",
+            "Manual sync",
+            "View discrepancies"
+          ]
+        },
+        {
+          "id": "portfolio_analytics",
+          "name": "Portfolio Analytics",
+          "purpose": "Performance analytics across entire portfolio",
+          "visual": "NOI trend. Cap rate. Vacancy trend. Top and bottom performers.",
+          "entities": [
+            "Property",
+            "RentPayment",
+            "Expense"
+          ],
+          "actions": [
+            "View NOI trend",
+            "View cap rate",
+            "View vacancy trend",
+            "Compare properties",
+            "Benchmark against market"
+          ]
+        },
+        {
+          "id": "properties",
+          "name": "Properties",
+          "purpose": "Large portfolio with owner and manager filtering",
+          "visual": "Property list. Owner badge. Manager assigned. Bulk actions.",
+          "entities": [
+            "Property",
+            "Unit"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Filter by owner",
+            "Filter by manager",
+            "Bulk update",
+            "Export property list"
+          ]
+        },
+        {
+          "id": "commercial_units",
+          "name": "Commercial Units",
+          "purpose": "Commercial property specifics \u2014 CAM, NNN leases",
+          "visual": "Commercial unit list. Lease type badge. CAM reconciliation status.",
+          "entities": [
+            "Unit",
+            "Lease"
+          ],
+          "actions": [
+            "View commercial units",
+            "CAM reconciliation",
+            "NNN lease management",
+            "View rent escalations"
+          ]
+        },
+        {
+          "id": "short_term_rental",
+          "name": "Short-Term Rental",
+          "purpose": "Airbnb/VRBO channel management and occupancy",
+          "visual": "Calendar occupancy view. Channel distribution. Revenue per night. Dynamic pricing.",
+          "entities": [
+            "Unit",
+            "RentPayment"
+          ],
+          "actions": [
+            "View occupancy calendar",
+            "Manage channel distribution",
+            "Set dynamic pricing rules",
+            "View revenue analytics"
+          ]
+        },
+        {
+          "id": "hoa_management",
+          "name": "HOA Management",
+          "purpose": "HOA dues, violations, and community management",
+          "visual": "HOA dues tracker. Violation queue. Meeting minutes. Reserve fund.",
+          "entities": [
+            "Property",
+            "Tenant"
+          ],
+          "actions": [
+            "Track HOA dues",
+            "Log violation",
+            "Send violation notice",
+            "Manage reserve fund",
+            "Schedule meeting"
+          ]
+        },
+        {
+          "id": "leases",
+          "name": "Leases",
+          "purpose": "Enterprise lease management with escalations and options",
+          "visual": "Lease list. Escalation schedule. Option dates. Renewal pipeline.",
+          "entities": [
+            "Lease",
+            "Tenant",
+            "Unit"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View rent escalation schedule",
+            "Track lease options",
+            "View renewal pipeline"
+          ]
+        },
+        {
+          "id": "maintenance",
+          "name": "Maintenance",
+          "purpose": "Portfolio-wide maintenance with budget tracking",
+          "visual": "All requests. Property filter. Budget vs actual maintenance spend. Contractor performance.",
+          "entities": [
+            "MaintenanceRequest",
+            "Unit",
+            "Tenant"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View maintenance budget",
+            "Contractor performance stats",
+            "Recurring maintenance schedule"
+          ],
+          "copy": {
+            "headline": "Maintenance requests",
+            "cta": "Log request",
+            "empty_state": "No open requests. All clear."
+          }
+        },
+        {
+          "id": "financials",
+          "name": "Financials",
+          "purpose": "Full portfolio P&L with owner distributions",
+          "visual": "Portfolio P&L. Per property breakdown. Distribution calculator. Export.",
+          "entities": [
+            "RentPayment",
+            "Expense",
+            "Property"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Calculate owner distributions",
+            "View per property P&L",
+            "Consolidated P&L",
+            "Export for audit"
+          ]
+        },
+        {
+          "id": "team_management",
+          "name": "Team Management",
+          "purpose": "Property managers, assistants, and roles",
+          "visual": "Team list. Role badge. Property assignments. Activity log.",
+          "entities": [
+            "Landlord"
+          ],
+          "actions": [
+            "Add team member",
+            "Assign properties",
+            "Set permissions",
+            "View activity log",
+            "Remove member"
+          ]
+        },
+        {
+          "id": "documents",
+          "name": "Documents",
+          "purpose": "Enterprise document management with compliance tracking",
+          "visual": "Document library. Compliance status. Expiry calendar. Bulk upload.",
+          "entities": [
+            "Document",
+            "Property",
+            "Lease"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Compliance status view",
+            "Expiry calendar",
+            "Bulk upload",
+            "Version control"
+          ]
+        },
+        {
+          "id": "reports",
+          "name": "Reports",
+          "purpose": "Full reporting suite \u2014 owner, tax, regulatory",
+          "visual": "Report library. Owner reports. Tax reports. Regulatory filings.",
+          "entities": [
+            "RentPayment",
+            "Expense",
+            "Property"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Owner report",
+            "Tax schedule E",
+            "Regulatory reports",
+            "Custom report builder"
+          ]
+        },
+        {
+          "id": "admin_dashboard",
+          "name": "Admin \u2014 Platform",
+          "purpose": "Platform admin \u2014 all portfolios, billing, support",
+          "visual": "Portfolio table. Revenue. Support queue. Usage stats.",
+          "entities": [
+            "Landlord",
+            "Property"
+          ],
+          "actions": [
+            "View all portfolios",
+            "View platform revenue",
+            "Support queue",
+            "Usage analytics"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Enterprise settings \u2014 accounting, owners, compliance",
+          "visual": "Comprehensive settings. Accounting integration. Owner management. Compliance.",
+          "entities": [
+            "Landlord"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Accounting settings",
+            "Owner portal settings",
+            "Compliance settings"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP and Startup patterns",
+        "Owner distribution calculator \u2014 inputs NOI and expenses, outputs distribution amount",
+        "CAM reconciliation \u2014 annual process, step-by-step with approval",
+        "Portfolio heat map \u2014 properties coloured by performance metric",
+        "Accounting sync status \u2014 live indicator, error badge if sync fails",
+        "Compliance expiry calendar \u2014 red on expired, amber 30 days out"
+      ]
+    }
+  },
+  "layout": {
+    "iphone": {
+      "nav": "bottom_tab_5",
+      "nav_items": [
+        "Dashboard",
+        "Properties",
+        "Tenants",
+        "Maintenance",
+        "Financials"
+      ],
+      "content": "full_width_kpi_cards_then_list",
+      "card_style": "full_width_property_status_card",
+      "cta": "floating_action_button_bottom_right",
+      "hero": "kpi_cards_stacked_then_alert_list",
+      "padding": "16px horizontal",
+      "image_ratio": "16:9 property thumbnail no_full_bleed"
+    },
+    "ipad": {
+      "nav": "sidebar_left_with_labels",
+      "nav_items": [
+        "Dashboard",
+        "Properties",
+        "Tenants",
+        "Maintenance",
+        "Financials",
+        "Documents"
+      ],
+      "content": "2col_list_left_detail_right",
+      "card_style": "property_row_with_status_badges",
+      "cta": "top_right_add_property_button",
+      "hero": "kpi_row_3col_then_property_list",
+      "padding": "24px",
+      "image_ratio": "4:3 property photo in list"
+    },
+    "desktop": {
+      "nav": "sidebar_left_fixed_with_section_groups",
+      "nav_items": [
+        "Dashboard",
+        "Properties",
+        "Units",
+        "Tenants",
+        "Rent",
+        "Maintenance",
+        "Financials",
+        "Documents",
+        "Reports"
+      ],
+      "content": "left_anchored_max_1440px_with_sidebar",
+      "card_style": "data_table_rows_with_status_colour_coding",
+      "cta": "top_right_header_primary_action",
+      "hero": "4col_kpi_row_then_property_table",
+      "padding": "32px content",
+      "image_ratio": "4:3 property thumbnail in table"
+    },
+    "notes": "Rent status colour coding must be consistent across all form factors \u2014 green paid, amber due, red overdue. This is the single most important data signal in the product."
+  },
+  "constraints": {
+    "avoid": [
+      "Never show financial data without specifying currency",
+      "Never mix income and expense in the same row without clear visual separation",
+      "Never send automated communications to tenants without landlord preview and confirmation",
+      "Never delete a record permanently \u2014 always archive with full history preserved",
+      "Never auto-apply late fees without explicit rule configuration and landlord confirmation",
+      "Never show occupancy rate as a percentage without the underlying unit count",
+      "Never use a modal for maintenance request details \u2014 full screen navigation",
+      "Never collapse property financial history \u2014 always show full audit trail"
+    ],
+    "enforce": [
+      "Rent status always colour-coded: paid green, due amber, overdue red \u2014 across every screen",
+      "Maintenance priority always shown: urgent red, normal amber, low grey",
+      "Lease expiry always shown with days remaining \u2014 red under 30 days, amber under 90",
+      "All financial figures right-aligned in lists and tables",
+      "Tenant communication history always preserved and viewable",
+      "Late fee calculations always shown with breakdown \u2014 never just a total",
+      "Inspection reports always include date, inspector, and photo evidence count",
+      "All bulk actions require confirmation showing exactly how many records are affected"
+    ]
+  },
+  "states": {
+    "empty_states": [
+      {
+        "screen": "dashboard",
+        "trigger": "No properties added yet",
+        "ui": "Building illustration. Message: 'Add your first property to get started'. CTA: 'Add property'. Step-by-step onboarding checklist: add property, add units, add tenants."
+      },
+      {
+        "screen": "maintenance",
+        "trigger": "No maintenance requests",
+        "ui": "Wrench illustration. Message: 'No maintenance requests'. Sub: 'Requests submitted by tenants will appear here'. Not 'nothing to do' \u2014 this is expected positive state."
+      },
+      {
+        "screen": "financials",
+        "trigger": "No transactions recorded yet",
+        "ui": "Chart illustration. Message: 'Financial data will appear here'. Sub: 'Record your first rent payment or expense to see reports'."
+      }
+    ],
+    "loading_states": [
+      {
+        "screen": "dashboard",
+        "ui": "KPI cards skeleton \u2014 4 cards in row shimmer. Property list skeleton below \u2014 3 property rows with status badge placeholder."
+      },
+      {
+        "screen": "rent_tracking",
+        "ui": "Tenant rows skeleton \u2014 name left, due date centre, amount right, status badge far right. All shimmer. Month selector visible and interactive."
+      },
+      {
+        "screen": "maintenance",
+        "ui": "Request cards skeleton \u2014 title, property badge, status badge, date. 4 skeleton cards shimmer."
+      }
+    ],
+    "error_flows": [
+      {
+        "trigger": "Rent payment recording fails",
+        "ui": "Form stays open. Red inline error at top. Specific reason shown. Payment NOT recorded. Retry with same details \u2014 no re-entry needed."
+      },
+      {
+        "trigger": "Tenant communication fails to send",
+        "ui": "Message draft preserved. Red error: 'Message not sent'. Retry option. Option to copy and send manually. Never silently drop the message."
+      },
+      {
+        "trigger": "Lease document generation fails",
+        "ui": "Error shown with reason. Draft data preserved. Option to try again or download editable template instead."
+      },
+      {
+        "trigger": "Maintenance contractor notification fails",
+        "ui": "Toast: 'Could not notify contractor'. Request still saved. Option to notify manually \u2014 phone or email shown. Status not automatically updated to assigned."
+      }
+    ],
+    "edge_cases": [
+      {
+        "case": "Property with 0% occupancy",
+        "ui": "Vacancy alert shown prominently on property card. Red occupancy badge. 'List vacant unit' CTA shown directly on dashboard card."
+      },
+      {
+        "case": "Lease ending in the past (overdue renewal)",
+        "ui": "Lease shown as 'Expired' in red. Urgent banner on tenant detail: 'Lease expired [X days] ago. Renew or begin eviction process.' Legal resources linked."
+      },
+      {
+        "case": "Multiple tenants on same unit (joint tenancy)",
+        "ui": "All tenant names shown on unit. Rent split configuration shown. Communications sent to all tenants by default. One tenant paying full rent is a separate config."
+      },
+      {
+        "case": "Maintenance request from unknown tenant",
+        "ui": "Request flagged as 'Unknown submitter'. Landlord notified. Option to link to existing tenant, add new tenant, or reject request."
+      }
+    ]
+  },
+  "components": [
+    "PropertyCard",
+    "TenantRow",
+    "RentStatusBadge",
+    "MaintenanceCard",
+    "LeaseChip",
+    "FinancialSummary",
+    "InspectionRow"
+  ],
+  "nav_active_states": {
+    "dashboard": "Dashboard",
+    "properties": "Properties",
+    "property_detail": "Properties",
+    "tenants": "Tenants",
+    "tenant_detail": "Tenants",
+    "rent_tracking": "Financials",
+    "maintenance": "Maintenance",
+    "financials": "Financials",
+    "profile_settings": "Settings"
+  }
+}

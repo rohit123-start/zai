@@ -1,0 +1,173 @@
+{
+  "industry_id": "travel_lifestyle",
+  "industry_name": "Travel & Lifestyle",
+  "tone": {
+    "primary": "adventurous, aspirational, liberating",
+    "secondary": "trustworthy, helpful, culturally aware",
+    "voice": "a well-travelled friend who has been everywhere and knows all the best spots \u2014 inspiring but practical",
+    "avoid": "corporate, generic, overly cautious, tourist-trap feeling"
+  },
+  "trust_signals": [
+    "verified traveller reviews and ratings",
+    "real guest or visitor photography",
+    "booking confirmation and instant availability",
+    "secure payment and refund policy",
+    "host or operator verification badges",
+    "response time and acceptance rate for hosts",
+    "travel insurance integration"
+  ],
+  "ux_norms": [
+    "full-bleed destination photography dominates every screen \u2014 never small thumbnails for destinations",
+    "map view is always an alternative to list view for any location-based content",
+    "price transparency \u2014 total cost always shown before any commitment step",
+    "reviews and photos from real travellers drive decisions \u2014 always show review count not just rating",
+    "trip planner screens: home shows active trip progress and countdown to departure \u2014 never generic discover feed",
+    "trip planner screens: trip overview uses day tabs \u2014 swipe between Day 1, Day 2 etc as primary navigation",
+    "trip planner screens: day plan uses timeline view \u2014 hour by hour, activities in chronological order with gaps visible",
+    "trip planner screens: add activity always offers search first \u2014 never blank form first",
+    "trip planner screens: map view shows all activities as numbered pins matching the day plan order",
+    "trip planner screens: packing list uses category sections with progress bar \u2014 percentage packed always visible",
+    "trip planner screens: group collaboration shows member avatars on any shared content \u2014 always visible who added what",
+    "trip planner screens: budget tracker shows remaining budget prominently \u2014 ring chart, not just a number",
+    "trip planner screens: travel documents show expiry date with colour coded urgency \u2014 amber 30 days, red 7 days",
+    "offline access indicators always visible for downloaded trip content \u2014 critical when travelling internationally"
+  ],
+  "icons": {
+    "style": "rounded line, airy, light weight",
+    "weight": "light",
+    "mood": "adventurous, aspirational, open",
+    "library": {
+      "name": "Lucide",
+      "variant": "Rounded line",
+      "url": "https://lucide.dev"
+    },
+    "domain_icons": [
+      "plane",
+      "map-pin",
+      "compass",
+      "mountain",
+      "camera",
+      "sun",
+      "palm-tree",
+      "luggage",
+      "star",
+      "globe",
+      "bed",
+      "navigation"
+    ],
+    "nav_icons": [
+      "home",
+      "search",
+      "heart",
+      "calendar",
+      "user",
+      "bell",
+      "map",
+      "list",
+      "arrow-left",
+      "filter"
+    ]
+  },
+  "visual_language": {
+    "primary_type": "real photography",
+    "style": "stunning destination photography \u2014 wide landscapes, golden hour, authentic local life",
+    "photography_rules": [
+      "always use high quality destination and lifestyle photography",
+      "golden hour and natural light strongly preferred",
+      "authentic local culture over staged tourist imagery",
+      "diverse travellers represented",
+      "wide angle for landscapes, intimate for experiences",
+      "never use generic travel stock photography"
+    ],
+    "background_treatment": "photography-first \u2014 UI overlays are semi-transparent. Clean white for detail screens.",
+    "empty_state_style": "friendly SVG \u2014 compass, map pin, or plane \u2014 with inspiring copy",
+    "onboarding_visual": "stunning destination photography or warm flat vector illustration \u2014 wanderlust theme",
+    "illustration_style": "when used: warm flat vector \u2014 maps, landmarks, travel icons"
+  },
+  "themes": {
+    "pack": [
+      "Wanderlust",
+      "Resort",
+      "Adventure",
+      "City Guide",
+      "Nomad"
+    ]
+  },
+  "fonts": {
+    "ai_pick_heading": "Syne",
+    "ai_pick_body": "DM Sans"
+  },
+  "valid_app_types": [
+    "Marketplace",
+    "Booking & Appointments",
+    "E-commerce",
+    "Social & Community",
+    "Dashboard SaaS",
+    "Content & Streaming",
+    "Chat / Messaging",
+    "Map & Location-Based",
+    "AI Tool",
+    "Developer Tool",
+    "Trip Planner"
+  ],
+  "monetization_models": [
+    "booking commission percentage",
+    "host or operator listing fee",
+    "travel insurance affiliate",
+    "premium placement for listings",
+    "subscription for travel perks",
+    "experiences and activities marketplace fee"
+  ],
+  "compliance_notes": [
+    "local tourism licensing requirements vary by region",
+    "GDPR for traveller data and preferences",
+    "payment regulations for international transactions",
+    "cancellation and refund policy must be prominent",
+    "accessibility information for destinations required",
+    "tax collection requirements vary by jurisdiction"
+  ],
+  "constraints": {
+    "avoid": [
+      "Never show a destination without photography \u2014 imagery is the emotional driver of travel decisions",
+      "Never hide visa requirements or entry restrictions for a destination",
+      "Never show pricing without specifying the currency",
+      "Never use a countdown timer on flight or hotel availability without it being accurate",
+      "Never make cancellation terms hard to find \u2014 they must be prominent before booking",
+      "Never show accommodation without showing the exact address or neighbourhood \u2014 location drives decisions"
+    ],
+    "enforce": [
+      "Destination photography always full bleed \u2014 no borders or card containers on hero imagery",
+      "Cancellation policy always visible before booking confirmation",
+      "Total price including taxes and fees always shown \u2014 no hidden costs at checkout",
+      "Travel advisory and safety information always available for destination",
+      "Local time at destination always shown alongside home timezone",
+      "Offline access to booking confirmations and tickets always available"
+    ]
+  },
+  "copy_by_app_type": {
+    "AI Tool": {
+      "headline": "Your AI travel planner",
+      "cta": "Plan my trip"
+    },
+    "Trip Planner": {
+      "headline": "Your next trip, perfectly planned",
+      "cta": "Start planning"
+    },
+    "Marketplace": {
+      "headline": "Find a place that feels like home",
+      "cta": "Explore listings"
+    },
+    "Booking & Appointments": {
+      "headline": "Book experiences worth remembering",
+      "cta": "Find availability"
+    },
+    "Map & Location-Based": {
+      "headline": "Explore what's around you",
+      "cta": "Open map"
+    },
+    "default": {
+      "headline": "Go further. Live better.",
+      "cta": "Get started"
+    }
+  }
+}

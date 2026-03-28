@@ -1,4 +1,5 @@
 import type { Project, Theme, ThemeTokens, GlobalTheme, ProjectBrain } from "./db";
+import type { LLMScreenPlan } from "@/app/api/generate-screens-plan/route";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -14,178 +15,6 @@ function isDark(hex: string): boolean {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0.4;
 }
 
-// Tint primary color into a shadow rgba
-function shadowColor(hex: string, alpha: number): string {
-  if (!hex || hex.length < 7) return `rgba(0,0,0,${alpha})`;
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-
-// ─── Industry → icons ─────────────────────────────────────────────────────────
-
-const INDUSTRY_ICONS: Record<string, { set: string; primary: string[] }> = {
-  beauty_wellness:     { set: "beauty_wellness",  primary: ["scissors","spa","self_care","favorite","star"] },
-  food_delivery:       { set: "food_delivery",    primary: ["restaurant","delivery_dining","local_pizza","star","favorite"] },
-  healthcare:          { set: "healthcare",        primary: ["medical_services","favorite","health_and_safety","monitor_heart","medication"] },
-  finance_banking:     { set: "finance",           primary: ["account_balance","credit_card","payments","savings","trending_up"] },
-  education:           { set: "education",         primary: ["school","book","quiz","leaderboard","emoji_events"] },
-  travel_lifestyle:    { set: "travel",            primary: ["flight","hotel","map","explore","luggage"] },
-  e_commerce_retail:   { set: "ecommerce",         primary: ["shopping_cart","store","favorite","local_offer","star"] },
-  social_community:    { set: "social",            primary: ["group","chat","thumb_up","share","person_add"] },
-  fitness_sport:       { set: "fitness",           primary: ["fitness_center","directions_run","timer","track_changes","sports"] },
-  ai_technology:       { set: "tech",              primary: ["auto_awesome","psychology","hub","analytics","code"] },
-  developer_tools:     { set: "developer",         primary: ["code","terminal","bug_report","api","data_object"] },
-  entertainment_media: { set: "media",             primary: ["play_circle","movie","music_note","headphones","live_tv"] },
-  events_ticketing:    { set: "events",            primary: ["event","confirmation_number","celebration","people","place"] },
-  real_estate:         { set: "real_estate",       primary: ["home","apartment","location_on","key","sell"] },
-  transport_logistics: { set: "transport",         primary: ["local_shipping","directions_car","route","speed","package_2"] },
-  saas_productivity:   { set: "productivity",      primary: ["dashboard","task_alt","schedule","insights","workspace_premium"] },
-  booking_appointments:{ set: "booking",           primary: ["calendar_today","schedule","person","check_circle","event_available"] },
-  marketplace:         { set: "marketplace",       primary: ["storefront","sell","search","favorite","local_offer"] },
-};
-
-const DEFAULT_ICONS = { set: "general", primary: ["home","search","person","star","settings"] };
-
-// ─── App type → screens ───────────────────────────────────────────────────────
-
-const APP_SCREENS: Record<string, string[]> = {
-  "Booking & Appointments": ["splash","onboarding","login","signup","home","search","provider_profile","booking_calendar","booking_confirm","payment","profile","settings","notifications","booking_history"],
-  "Food & Delivery":        ["splash","onboarding","login","signup","home","restaurant_list","restaurant_detail","menu","cart","checkout","order_tracking","profile","order_history"],
-  "E-commerce & Retail":    ["splash","onboarding","login","signup","home","category","product_list","product_detail","cart","checkout","payment","order_tracking","profile","wishlist"],
-  "Marketplace":            ["splash","onboarding","login","signup","home","browse","listing_detail","seller_profile","cart","checkout","messages","profile","my_listings"],
-  "Social & Community":     ["splash","onboarding","login","signup","feed","explore","create_post","post_detail","profile","notifications","messages","settings"],
-  "Finance & Banking":      ["splash","onboarding","login","signup","dashboard","transactions","send_money","receive_money","cards","analytics","profile","settings"],
-  "Healthcare":             ["splash","onboarding","login","signup","home","search_provider","provider_profile","appointment_booking","my_appointments","health_records","profile","settings"],
-  "Fitness & Sport":        ["splash","onboarding","login","signup","home","workout_list","workout_detail","active_workout","progress","nutrition","profile","settings"],
-  "Education":              ["splash","onboarding","login","signup","home","course_list","course_detail","lesson","quiz","progress","profile","settings"],
-  "Travel & Lifestyle":     ["splash","onboarding","login","signup","home","search","destination","listing_list","listing_detail","booking_confirm","my_trips","profile","settings"],
-  "SaaS & Productivity":    ["splash","onboarding","login","signup","dashboard","projects","project_detail","tasks","calendar","team","settings","billing"],
-  "AI & Technology":        ["splash","onboarding","login","signup","home","new_chat","chat","history","settings","profile"],
-  "Developer Tools":        ["splash","onboarding","login","signup","dashboard","projects","editor","terminal","logs","settings","billing"],
-  "Entertainment & Media":  ["splash","onboarding","login","signup","home","browse","detail","player","search","watchlist","profile","settings"],
-  "Events & Ticketing":     ["splash","onboarding","login","signup","home","event_list","event_detail","seat_map","checkout","ticket_wallet","profile","settings"],
-  "Real Estate":            ["splash","onboarding","login","signup","home","map","property_list","property_detail","inquiry","saved","profile","settings"],
-  "Transport & Logistics":  ["splash","onboarding","login","signup","home","book_ride","tracking","history","profile","settings"],
-};
-
-const DEFAULT_SCREENS = ["splash","onboarding","login","signup","home","search","detail","profile","settings"];
-
-// ─── Feature → extra screens ─────────────────────────────────────────────────
-// Screens added to the inventory when a user selects the corresponding feature chip
-
-const FEATURE_SCREENS: Record<string, string[]> = {
-  "Payments":             ["checkout","payment","payment_methods","payment_success"],
-  "Chat / Messaging":     ["messages","conversation","new_message"],
-  "Notifications":        ["notifications"],
-  "Search & Filters":     ["search","filters"],
-  "Maps / Location":      ["map","location_picker"],
-  "Analytics / Dashboard":["analytics","dashboard"],
-  "Authentication":       ["login","signup","forgot_password"],
-  "File Upload":          ["upload","media_picker"],
-  "Video / Calls":        ["video_call","calls","call_history"],
-};
-
-// ─── App type → nav flow ──────────────────────────────────────────────────────
-
-const NAV_FLOWS: Record<string, Record<string, string[]>> = {
-  "Booking & Appointments": { home:["search","provider_profile"], search:["provider_profile"], provider_profile:["booking_calendar"], booking_calendar:["booking_confirm"], booking_confirm:["payment"], payment:["booking_history"] },
-  "Food & Delivery":        { home:["restaurant_list","restaurant_detail"], restaurant_detail:["menu"], menu:["cart"], cart:["checkout"], checkout:["payment"], payment:["order_tracking"] },
-  "E-commerce & Retail":    { home:["category","product_list"], product_list:["product_detail"], product_detail:["cart"], cart:["checkout"], checkout:["payment"], payment:["order_tracking"] },
-  "Social & Community":     { feed:["post_detail","profile"], explore:["post_detail","profile"], profile:["post_detail"] },
-  "Finance & Banking":      { dashboard:["transactions","cards","analytics"], transactions:["send_money","receive_money"] },
-  "Travel & Lifestyle":     { home:["search","destination"], destination:["listing_list"], listing_list:["listing_detail"], listing_detail:["booking_confirm"], booking_confirm:["my_trips"] },
-  "SaaS & Productivity":    { dashboard:["projects","tasks","calendar"], projects:["project_detail"], project_detail:["tasks"] },
-  "AI & Technology":        { home:["new_chat","history"], new_chat:["chat"], history:["chat"] },
-};
-
-// ─── App type → tab bar ───────────────────────────────────────────────────────
-
-const TAB_BARS: Record<string, string[]> = {
-  "Booking & Appointments": ["home","search","bookings","profile"],
-  "Food & Delivery":        ["home","search","orders","profile"],
-  "E-commerce & Retail":    ["home","search","cart","profile"],
-  "Marketplace":            ["home","browse","messages","profile"],
-  "Social & Community":     ["feed","explore","create","notifications","profile"],
-  "Finance & Banking":      ["dashboard","payments","cards","profile"],
-  "Healthcare":             ["home","search","appointments","profile"],
-  "Fitness & Sport":        ["home","workouts","progress","profile"],
-  "Education":              ["home","courses","progress","profile"],
-  "Travel & Lifestyle":     ["home","search","trips","profile"],
-  "SaaS & Productivity":    ["dashboard","projects","tasks","profile"],
-  "AI & Technology":        ["home","history","settings","profile"],
-  "Developer Tools":        ["dashboard","projects","logs","settings"],
-  "Entertainment & Media":  ["home","browse","search","profile"],
-  "Events & Ticketing":     ["home","explore","tickets","profile"],
-  "Real Estate":            ["home","map","saved","profile"],
-  "Transport & Logistics":  ["home","track","history","profile"],
-};
-
-const DEFAULT_TAB = ["home","search","profile","settings"];
-
-// ─── Style pack → aesthetic/tone/motion ───────────────────────────────────────
-
-type Aesthetic = { aesthetic: string; tone: string; motion: string };
-
-const PACK_AESTHETICS: Record<string, Aesthetic> = {
-  Sakura:          { aesthetic: "soft, feminine, pastel",         tone: "warm, approachable, premium",           motion: "gentle fades, soft springs, slow entrances" },
-  Luxe:            { aesthetic: "dark, opulent, editorial",       tone: "exclusive, aspirational, sophisticated", motion: "slow dissolves, dramatic reveals, sharp cuts" },
-  Fresh:           { aesthetic: "clean, botanical, airy",         tone: "healthy, optimistic, natural",           motion: "crisp slides, light bounces, quick fades" },
-  Glow:            { aesthetic: "warm, organic, earthy",          tone: "nurturing, authentic, sensory",          motion: "smooth ease-in-out, warm fades, gentle blooms" },
-  Petal:           { aesthetic: "soft, lavender, dreamy",         tone: "gentle, feminine, calm",                 motion: "floating entrances, soft fades, dreamy transitions" },
-  Neural:          { aesthetic: "dark, technical, deep",          tone: "intelligent, powerful, precise",         motion: "fast cuts, data animations, sharp transitions" },
-  Clarity:         { aesthetic: "clean, professional, light",     tone: "trustworthy, clear, efficient",          motion: "crisp slides, clean fades, minimal animation" },
-  Terminal:        { aesthetic: "monospace, retro, matrix",       tone: "technical, hacker, raw",                 motion: "type-in animations, glitch effects, instant cuts" },
-  Gradient:        { aesthetic: "vibrant, gradient, neon",        tone: "exciting, modern, bold",                 motion: "gradient shifts, energetic bounces, neon pulses" },
-  Pulse:           { aesthetic: "cyan, electric, futuristic",     tone: "cutting-edge, fast, dynamic",            motion: "electric reveals, fast pulses, sharp entrances" },
-  Slate:           { aesthetic: "professional, clean, structured",tone: "reliable, authoritative, trustworthy",   motion: "smooth slides, professional fades, clean transitions" },
-  Obsidian:        { aesthetic: "dark, premium, gold",            tone: "exclusive, powerful, elite",             motion: "smooth reveals, gold shimmer, elegant transitions" },
-  Nordic:          { aesthetic: "minimal, Scandinavian, calm",    tone: "focused, honest, trustworthy",           motion: "subtle slides, minimal animation, clean fades" },
-  Vault:           { aesthetic: "dark, monochrome, secure",       tone: "secure, institutional, serious",         motion: "technical reveals, minimal animation, precise timing" },
-  Mint:            { aesthetic: "green, fresh, growth",           tone: "growing, healthy, positive",             motion: "growth animations, upward reveals, fresh bounces" },
-  Campus:          { aesthetic: "bright, academic, blue",         tone: "encouraging, clear, approachable",       motion: "friendly bounces, bright reveals, smooth slides" },
-  Scholar:         { aesthetic: "teal, intellectual, warm",       tone: "thoughtful, precise, engaged",           motion: "measured transitions, scholarly reveals, smooth" },
-  Kids:            { aesthetic: "playful, colourful, joyful",     tone: "fun, encouraging, safe",                 motion: "bouncy entrances, playful pops, cartoon springs" },
-  Academy:         { aesthetic: "dark, gold, prestigious",        tone: "elite, rigorous, aspirational",          motion: "dramatic reveals, gold shimmer, slow entrances" },
-  Stream:          { aesthetic: "dark, cinematic, red",           tone: "entertainment, engaging, bold",          motion: "cinematic reveals, dramatic fades, full-screen transitions" },
-  Podcast:         { aesthetic: "dark, purple, intimate",         tone: "authentic, immersive, personal",         motion: "smooth fades, intimate reveals, gentle transitions" },
-  Gaming:          { aesthetic: "dark, neon, electric",           tone: "exciting, competitive, immersive",       motion: "explosive reveals, fast cuts, particle effects" },
-  Magazine:        { aesthetic: "editorial, clean, classic",      tone: "informative, sophisticated, curated",    motion: "editorial flips, clean slides, measured transitions" },
-  Spotlight:       { aesthetic: "dark, gold, theatrical",         tone: "dramatic, prestige, exclusive",          motion: "spotlight reveals, gold shimmer, theatrical entrances" },
-  Power:           { aesthetic: "dark, bold, yellow",             tone: "energetic, strong, motivating",          motion: "explosive entrances, fast transitions, power animations" },
-  Athletic:        { aesthetic: "clean, blue, precise",           tone: "performance, professional, sharp",       motion: "fast slides, sharp cuts, performance reveals" },
-  Zen:             { aesthetic: "soft green, calm, balanced",     tone: "peaceful, mindful, restorative",         motion: "breathing animations, slow fades, gentle slides" },
-  Gains:           { aesthetic: "dark, red, intense",             tone: "hardcore, raw, intense",                 motion: "hard cuts, intense reveals, fast transitions" },
-  Track:           { aesthetic: "dark, cyan, technical",          tone: "data-driven, precise, performance",      motion: "data animations, precision reveals, sharp transitions" },
-  Linear:          { aesthetic: "dark, indigo, precise",          tone: "focused, productive, elegant",           motion: "instant transitions, precise animations, minimal" },
-  Notion:          { aesthetic: "clean, minimal, warm",           tone: "calm, flexible, focused",                motion: "subtle fades, minimal animation, clean reveals" },
-  Dashboard:       { aesthetic: "dark, indigo, data",             tone: "powerful, insightful, professional",     motion: "data reveals, smooth slides, professional transitions" },
-  Focus:           { aesthetic: "white, minimal, pure",           tone: "distraction-free, calm, precise",        motion: "instant, minimal, no decoration" },
-  Command:         { aesthetic: "black, green, terminal",         tone: "powerful, developer, raw",               motion: "type-in animations, instant cuts, terminal style" },
-  Wanderlust:      { aesthetic: "dark, orange, adventurous",      tone: "adventurous, free, exciting",            motion: "dramatic slides, wandering reveals, bold entrances" },
-  Resort:          { aesthetic: "warm, sand, luxurious",          tone: "relaxed, premium, escapist",             motion: "slow fades, gentle waves, luxurious transitions" },
-  Adventure:       { aesthetic: "earthy, warm, rugged",           tone: "authentic, bold, outdoorsy",             motion: "rugged reveals, earthy transitions, bold entrances" },
-  "City Guide":    { aesthetic: "clean, editorial, urban",        tone: "informed, modern, local",                motion: "editorial slides, clean reveals, smooth transitions" },
-  Nomad:           { aesthetic: "warm, minimal, earthy",          tone: "free, adaptable, authentic",             motion: "wandering reveals, warm fades, minimal animation" },
-  Appetite:        { aesthetic: "warm, red, appetising",          tone: "hungry, vibrant, joyful",                motion: "mouth-watering reveals, warm bounces, energetic" },
-  "Street Food":   { aesthetic: "dark, yellow, urban",            tone: "bold, fun, street-level",                motion: "bold reveals, fast cuts, urban energy" },
-  "Fresh Market":  { aesthetic: "green, fresh, organic",          tone: "healthy, honest, local",                 motion: "fresh bounces, organic reveals, clean slides" },
-  Bistro:          { aesthetic: "warm, brown, classic",           tone: "welcoming, classic, artisan",            motion: "warm fades, classic reveals, gentle transitions" },
-  "Dark Kitchen":  { aesthetic: "dark, amber, professional",      tone: "efficient, modern, bold",                motion: "sharp reveals, bold transitions, fast cuts" },
-  Clinical:        { aesthetic: "clean, blue, precise",           tone: "trustworthy, clinical, safe",            motion: "clean slides, precise reveals, minimal animation" },
-  "Soft Care":     { aesthetic: "cyan, warm, caring",             tone: "caring, approachable, reassuring",       motion: "gentle fades, warm reveals, soft transitions" },
-  "Modern Medical":{ aesthetic: "dark, teal, advanced",           tone: "cutting-edge, trusted, sophisticated",   motion: "technical reveals, precise transitions, sharp" },
-  Wellness:        { aesthetic: "soft green, natural, calm",      tone: "holistic, nurturing, balanced",          motion: "breathing animations, slow fades, natural transitions" },
-  Emergency:       { aesthetic: "clean, red, urgent",             tone: "urgent, clear, reliable",                motion: "instant reveals, urgent transitions, clear animation" },
-};
-
-const DEFAULT_AESTHETIC: Aesthetic = {
-  aesthetic: "clean, minimal, modern",
-  tone: "professional, clear, approachable",
-  motion: "smooth slides, clean fades, standard transitions",
-};
-
 // ─── Main generator ───────────────────────────────────────────────────────────
 
 export function generateBrain(
@@ -198,6 +27,7 @@ export function generateBrain(
     reference_urls: string[];
     font_pairing: string;
   },
+  llmPlan: LLMScreenPlan,
   orgData?: {
     org_id?: string;
     plan?: string;
@@ -217,40 +47,23 @@ export function generateBrain(
   const darkMode = isDark(t.background);
   const iconWeight = t.icon_weight ?? "rounded";
 
-  // ── Icons ────────────────────────────────────────────────────────────────────
-  const iconData = INDUSTRY_ICONS[industryKey] ?? INDUSTRY_ICONS[toKey(appType)] ?? DEFAULT_ICONS;
+  // ── Screen plan from LLM 1 ────────────────────────────────────────────────
+  const inventory  = llmPlan.screens   ?? [];
+  const navFlow    = llmPlan.nav_flow  ?? {};
+  const tabBar     = llmPlan.tab_bar   ?? ["home", "search", "profile"];
+  const aesthetic  = llmPlan.aesthetic ?? {
+    aesthetic: "clean, minimal, modern",
+    tone:      "professional, clear, approachable",
+    motion:    "smooth slides, clean fades, standard transitions",
+  };
+  const iconData = llmPlan.icons ?? { set: "general", primary_icons: ["home", "search", "person", "star", "settings"] };
 
-  // ── Screens ──────────────────────────────────────────────────────────────────
-  const baseInventory = APP_SCREENS[appType] ?? APP_SCREENS[industry] ?? DEFAULT_SCREENS;
-  const selectedFeatures = project.features ?? [];
-
-  // Append feature-specific screens not already in the base inventory
-  const featureScreens = selectedFeatures.flatMap(
-    (f) => (FEATURE_SCREENS[f] ?? []).filter((s) => !baseInventory.includes(s))
-  );
-  const inventory = [...baseInventory, ...featureScreens];
-
-  const navFlow = NAV_FLOWS[appType] ?? NAV_FLOWS[industry] ?? {};
-  const tabBar = TAB_BARS[appType] ?? TAB_BARS[industry] ?? DEFAULT_TAB;
-
-  // ── Aesthetic ────────────────────────────────────────────────────────────────
-  const aesthetic = PACK_AESTHETICS[packName] ?? DEFAULT_AESTHETIC;
-
-  // ── Animations ───────────────────────────────────────────────────────────────
-  const isGentle  = aesthetic.motion.includes("gentle") || aesthetic.motion.includes("soft") || aesthetic.motion.includes("slow");
-  const isFast    = aesthetic.motion.includes("fast") || aesthetic.motion.includes("instant") || aesthetic.motion.includes("explosive");
+  // ── Animations ───────────────────────────────────────────────────────────
+  const isGentle   = aesthetic.motion.includes("gentle") || aesthetic.motion.includes("soft") || aesthetic.motion.includes("slow");
+  const isFast     = aesthetic.motion.includes("fast") || aesthetic.motion.includes("instant") || aesthetic.motion.includes("explosive");
   const isDramatic = aesthetic.motion.includes("dramatic") || aesthetic.motion.includes("cinematic");
 
-  // ── Shadows (tinted with primary) ────────────────────────────────────────────
-  const shadowBase = darkMode ? "0,0,0" : `${parseInt(t.primary.slice(1,3),16)},${parseInt(t.primary.slice(3,5),16)},${parseInt(t.primary.slice(5,7),16)}`;
-  const shadows = {
-    sm: `0 1px 4px rgba(${shadowBase},0.08)`,
-    md: `0 4px 16px rgba(${shadowBase},0.12)`,
-    lg: `0 8px 32px rgba(${shadowBase},0.16)`,
-  };
-
-  // ── Global token fallbacks ────────────────────────────────────────────────────
-  // Handles both flat ("8px") and responsive ({mobile:"8px", tablet:"10px"}) formats
+  // ── Global token fallbacks ────────────────────────────────────────────────
   function scalarVal(v: unknown, vp: "mobile" | "tablet" | "desktop" = "mobile"): string {
     if (typeof v === "string") return v;
     if (typeof v === "object" && v !== null) {
@@ -262,17 +75,17 @@ export function generateBrain(
 
   const rawSpacing = (globalTokens?.spacing ?? {}) as Record<string, unknown>;
   const spacing = {
-    xs:     scalarVal(rawSpacing.xs)    || "4px",
-    sm:     scalarVal(rawSpacing.sm)    || "8px",
-    md:     scalarVal(rawSpacing.md)    || "16px",
-    lg:     scalarVal(rawSpacing.lg)    || "24px",
-    xl:     scalarVal(rawSpacing.xl)    || "32px",
-    xxl:    scalarVal(rawSpacing.xxl)   || "48px",
+    xs:     scalarVal(rawSpacing.xs)     || "4px",
+    sm:     scalarVal(rawSpacing.sm)     || "8px",
+    md:     scalarVal(rawSpacing.md)     || "16px",
+    lg:     scalarVal(rawSpacing.lg)     || "24px",
+    xl:     scalarVal(rawSpacing.xl)     || "32px",
+    xxl:    scalarVal(rawSpacing.xxl)    || "48px",
     screen: scalarVal(rawSpacing.screen) || "24px",
     card:   scalarVal(rawSpacing.card)   || "16px",
   };
 
-  const radius = (globalTokens?.radius ?? { sm:"8px", md:"12px", lg:"16px", xl:"20px", pill:"999px" }) as Record<string, string>;
+  const radius = (globalTokens?.radius ?? { sm: "8px", md: "12px", lg: "16px", xl: "20px", pill: "999px" }) as Record<string, string>;
 
   const rawFontSizes = (globalTokens?.font_sizes ?? {}) as Record<string, unknown>;
   const fontSizes = {
@@ -292,7 +105,6 @@ export function generateBrain(
     caption: scalarVal(rawLineHeights.caption) || "1.4",
   };
 
-  // New breakpoint format uses tablet/desktop keys; old used iphone/ipad
   const rawBp = (globalTokens?.breakpoints ?? {}) as Record<string, string>;
   const breakpoints = {
     iphone:     rawBp.mobile_max ?? rawBp.iphone     ?? "390px",
@@ -302,18 +114,18 @@ export function generateBrain(
     ipad_pro:   rawBp.desktop    ?? rawBp.ipad_pro   ?? "1280px",
   };
 
-  // ── Component styles ──────────────────────────────────────────────────────────
+  // ── Component styles ──────────────────────────────────────────────────────
   const isRounded = iconWeight === "rounded";
   const pillOrRound = isRounded ? "pill shape" : "rounded md";
 
-  // ── System summary ────────────────────────────────────────────────────────────
+  // ── System summary ────────────────────────────────────────────────────────
   const platformStr = platform.join(" and ");
   const complexity = project.complexity ?? "MVP";
   const features = project.features ?? [];
   const description = project.description ?? "";
   const systemSummary = `${industry} ${appType} app called "${project.name}". ${complexity} complexity. ${packName} aesthetic — ${t.primary} primary colour, ${t.heading_font} headings, ${t.body_font} body, Material Symbols ${iconWeight} icons. Tone: ${aesthetic.tone}. Platform: ${platformStr}. Description: ${description || "(none)"}. Features: ${features.length ? features.join(", ") : "none specified"}.`;
 
-  // ── Base device ───────────────────────────────────────────────────────────────
+  // ── Base device ───────────────────────────────────────────────────────────
   const baseDevice = platform.includes("Android") && !platform.includes("iOS") ? "Android" : "iPhone";
 
   return {
@@ -358,14 +170,14 @@ export function generateBrain(
         heading_font: t.heading_font,
         body_font:    t.body_font,
         scale: {
-          h1: fontSizes.h1 ?? "28px",
-          h2: fontSizes.h2 ?? "22px",
-          h3: fontSizes.h3 ?? "18px",
-          body: fontSizes.body ?? "15px",
+          h1:      fontSizes.h1      ?? "28px",
+          h2:      fontSizes.h2      ?? "22px",
+          h3:      fontSizes.h3      ?? "18px",
+          body:    fontSizes.body    ?? "15px",
           caption: fontSizes.caption ?? "12px",
-          label: fontSizes.label ?? "11px",
+          label:   fontSizes.label   ?? "11px",
         },
-        weights: { heading: "700", body: "400", emphasis: "600" },
+        weights:      { heading: "700", body: "400", emphasis: "600" },
         line_heights: {
           heading: lineHeights.heading ?? "1.2",
           body:    lineHeights.body    ?? "1.5",
@@ -393,18 +205,22 @@ export function generateBrain(
         pill:    radius.pill ?? "999px",
         default: radius.lg   ?? "16px",
       },
-      shadows,
+      shadows: {
+        sm: darkMode ? "0 1px 4px rgba(0,0,0,0.08)" : `0 1px 4px rgba(${parseInt(t.primary.slice(1,3),16)},${parseInt(t.primary.slice(3,5),16)},${parseInt(t.primary.slice(5,7),16)},0.08)`,
+        md: darkMode ? "0 4px 16px rgba(0,0,0,0.12)" : `0 4px 16px rgba(${parseInt(t.primary.slice(1,3),16)},${parseInt(t.primary.slice(3,5),16)},${parseInt(t.primary.slice(5,7),16)},0.12)`,
+        lg: darkMode ? "0 8px 32px rgba(0,0,0,0.16)" : `0 8px 32px rgba(${parseInt(t.primary.slice(1,3),16)},${parseInt(t.primary.slice(3,5),16)},${parseInt(t.primary.slice(5,7),16)},0.16)`,
+      },
     },
 
     icons: {
-      library:         "material-symbols",
-      weight:          iconWeight,
-      fill:            1,
-      industry_set:    iconData.set,
-      primary_icons:   iconData.primary,
-      navigation_icons:["home","search","calendar_today","person"],
-      action_icons:    ["add","edit","share","more_horiz","arrow_forward"],
-      fallback:        `material-symbols-${iconWeight}`,
+      library:          "material-symbols",
+      weight:           iconWeight,
+      fill:             1,
+      industry_set:     iconData.set,
+      primary_icons:    iconData.primary_icons,
+      navigation_icons: tabBar.slice(0, 4),
+      action_icons:     ["add", "edit", "share", "more_horiz", "arrow_forward"],
+      fallback:         `material-symbols-${iconWeight}`,
     },
 
     style_pack: {
@@ -444,22 +260,22 @@ export function generateBrain(
     },
 
     scaling: {
-      base_device:      baseDevice,
+      base_device: baseDevice,
       breakpoints: {
-        iphone:    breakpoints.iphone     ?? "390px",
-        iphone_max:breakpoints.iphone_max ?? "430px",
-        ipad_mini: breakpoints.ipad_mini  ?? "744px",
-        ipad:      breakpoints.ipad       ?? "820px",
-        ipad_pro:  breakpoints.ipad_pro   ?? "1024px",
+        iphone:     breakpoints.iphone     ?? "390px",
+        iphone_max: breakpoints.iphone_max ?? "430px",
+        ipad_mini:  breakpoints.ipad_mini  ?? "744px",
+        ipad:       breakpoints.ipad       ?? "820px",
+        ipad_pro:   breakpoints.ipad_pro   ?? "1024px",
       },
       nav_shift_at:     "1024px",
       layout_shift_at:  "744px",
       touch_target_min: "44px",
       grid_base:        "8px",
       safe_areas: {
-        ios_top:          "59px",
-        ios_bottom:       "34px",
-        android_status:   "24dp",
+        ios_top:        "59px",
+        ios_bottom:     "34px",
+        android_status: "24dp",
       },
     },
 
@@ -520,15 +336,13 @@ export function generateBrain(
     },
 
     meta: {
-      brain_version:          "2.0",
-      created_at:             today,
-      updated_at:             today,
-      total_prompts:          0,
+      brain_version:           "2.0",
+      created_at:              today,
+      updated_at:              today,
+      total_prompts:           0,
       total_screens_generated: inventory.length,
     },
 
-    // Full global theme tokens stored verbatim so any downstream consumer
-    // (LLM context builder, export tools) has access to the complete set.
     global_theme: globalTokens ?? null,
 
     _inputs: {

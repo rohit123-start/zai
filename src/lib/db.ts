@@ -62,6 +62,23 @@ export async function getThemes(industry?: string): Promise<Theme[]> {
   return data ?? [];
 }
 
+/**
+ * Fetch a single theme by name from the DB.
+ * Used when a theme card is clicked in Screen 2 — catalog handles display,
+ * DB is the source of truth for generation tokens (inc. animation fields from migration 014).
+ */
+export async function getThemeByName(name: string): Promise<Theme | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("themes")
+    .select("*")
+    .eq("name", name)
+    .limit(1)
+    .maybeSingle();
+  if (error) return null;
+  return data as Theme | null;
+}
+
 export async function getThemesByIndustry(): Promise<Record<string, Theme[]>> {
   const supabase = createClient();
   const { data, error } = await supabase
@@ -604,6 +621,30 @@ export async function getIndustry(slug: string): Promise<Industry | null> {
   return data as Industry;
 }
 
+/** Fetch full industry record (including brain JSON) by industry name. */
+export async function getIndustryByName(name: string): Promise<Industry | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("industries")
+    .select("*")
+    .eq("name", name)
+    .maybeSingle();
+  if (error) return null;
+  return data as Industry | null;
+}
+
+/** Fetch full product record (including brain JSON) by product name (archetype_name). */
+export async function getProductByName(name: string): Promise<Product | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("name", name)
+    .maybeSingle();
+  if (error) return null;
+  return data as Product | null;
+}
+
 // ─── Products (archetypes / app types) ────────────────────────────────────────
 
 export type Product = {
@@ -636,6 +677,43 @@ export async function getProductsForIndustry(industryName: string): Promise<Prod
     .order("sort_order", { ascending: true });
   if (error) throw error;
   return (data ?? []) as Product[];
+}
+
+// ─── Features (optional capability chips in the new-project flow) ─────────────
+
+export type Feature = {
+  id: string;
+  feature_id: string;
+  label: string;
+  description: string | null;
+  icon: string | null;
+  /** Empty = universal (shown for all products). Non-empty = archetype-specific. */
+  archetypes: string[];
+  brain: Record<string, unknown>;
+  sort_order: number;
+  created_at: string;
+};
+
+/** All features ordered by sort_order. */
+export async function getFeatures(): Promise<Feature[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("features")
+    .select("id, feature_id, label, description, icon, archetypes, brain, sort_order, created_at")
+    .order("sort_order", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as Feature[];
+}
+
+/**
+ * Features relevant to a given archetype_id.
+ * Returns universal features (archetypes = []) plus those that include the given archetype.
+ */
+export async function getFeaturesForArchetype(archetypeId: string): Promise<Feature[]> {
+  const all = await getFeatures();
+  return all.filter(
+    (f) => f.archetypes.length === 0 || f.archetypes.includes(archetypeId)
+  );
 }
 
 // ─── Project Collaborators ────────────────────────────────────────────────────

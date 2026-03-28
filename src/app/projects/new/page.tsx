@@ -3,19 +3,20 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
-import { createProjectWithSetup, getIndustries, getProducts, type Industry, type Product } from "@/lib/db";
+import { createProjectWithSetup, getIndustries, getProducts, getFeatures, type Industry, type Product, type Feature } from "@/lib/db";
+import * as LucideIcons from "lucide-react";
 
-const FEATURES = [
-  { id: "Authentication", icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> },
-  { id: "Payments", icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> },
-  { id: "Chat / Messaging", icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> },
-  { id: "Notifications", icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg> },
-  { id: "Search & Filters", icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> },
-  { id: "Maps / Location", icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> },
-  { id: "Analytics / Dashboard", icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
-  { id: "File Upload", icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> },
-  { id: "Video / Calls", icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> },
-];
+/** Renders a Lucide icon by its kebab-case name stored in the DB (e.g. "bell", "credit-card"). */
+function FeatureIcon({ name }: { name: string }) {
+  if (!name) return <span style={{ width: 13, height: 13, display: "inline-block" }} />;
+  const componentName = name
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join("") as keyof typeof LucideIcons;
+  const Icon = LucideIcons[componentName] as React.FC<{ size?: number; strokeWidth?: number }> | undefined;
+  if (!Icon) return <span style={{ width: 13, height: 13, display: "inline-block" }} />;
+  return <Icon size={13} strokeWidth={2} />;
+}
 
 const COMPLEXITY_OPTIONS = [
   { id: "MVP", sub: "Simple prototype", screens: "8–10 screens" },
@@ -79,23 +80,48 @@ export default function NewProjectPage() {
 
   const [industries, setIndustries] = useState<Industry[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [allFeatures, setAllFeatures] = useState<Feature[]>([]);
   const [loadingOptions, setLoadingOptions] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   const fieldRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
-    Promise.all([getIndustries(), getProducts()])
-      .then(([inds, prods]) => { setIndustries(inds); setProducts(prods); })
-      .catch(console.error)
+    Promise.all([getIndustries(), getProducts(), getFeatures()])
+      .then(([inds, prods, feats]) => {
+        setIndustries(inds);
+        setProducts(prods);
+        setAllFeatures(feats);
+      })
+      .catch((err) => {
+        console.error("[Screen 1] Failed to load options:", err);
+        setLoadError("Could not load options. Please refresh and try again.");
+      })
       .finally(() => setLoadingOptions(false));
   }, []);
 
+  // Products filtered by selected industry
   const filteredProducts = useMemo(
     () =>
       industry
         ? products.filter((p) => p.valid_industries.length === 0 || p.valid_industries.includes(industry))
         : products,
     [industry, products],
+  );
+
+  // Selected product archetype_id
+  const selectedArchetypeId = useMemo(
+    () => filteredProducts.find((p) => p.name === appType)?.archetype_id ?? "",
+    [filteredProducts, appType],
+  );
+
+  // Features shown: universal + archetype-specific for selected product
+  const visibleFeatures = useMemo(
+    () =>
+      selectedArchetypeId
+        ? allFeatures.filter((f) => f.archetypes.length === 0 || f.archetypes.includes(selectedArchetypeId))
+        : allFeatures.filter((f) => f.archetypes.length === 0),
+    [allFeatures, selectedArchetypeId],
   );
 
   // Auto-select when exactly one app type is available; reset when the list changes
@@ -113,6 +139,13 @@ export default function NewProjectPage() {
   function toggleFeature(id: string) {
     setFeatures((prev) => prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]);
   }
+
+  // Clear selected features that are no longer visible when product changes
+  useEffect(() => {
+    const visibleIds = new Set(visibleFeatures.map((f) => f.feature_id));
+    setFeatures((prev) => prev.filter((id) => visibleIds.has(id)));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedArchetypeId]);
 
   function clearInvalid(field: string) {
     setInvalidFields((prev) => { const next = new Set(prev); next.delete(field); return next; });
@@ -235,26 +268,61 @@ export default function NewProjectPage() {
             <FieldError show={isInvalid("description")} msg="Please describe your idea" />
           </div>
 
-          {/* Industry */}
+          {/* DB load error */}
+          {loadError && (
+            <p style={{ fontSize: 12, padding: "10px 14px", borderRadius: 8, background: "rgba(239,68,68,0.06)", color: "#f87171", border: "1px solid rgba(239,68,68,0.15)" }}>
+              {loadError}
+            </p>
+          )}
+
+          {/* Industry — from industries table */}
           <div ref={(el) => { fieldRefs.current["industry"] = el; }}
             style={{ animation: isInvalid("industry") ? "fieldShake 0.3s ease" : undefined }}>
             <FieldLabel>Industry</FieldLabel>
-            <SelectInput value={industry} onChange={(v) => { setIndustry(v); setAppType(""); clearInvalid("industry"); }}>
-              <option value="" disabled>{loadingOptions ? "Loading…" : "Select industry"}</option>
-              {industries.map((i) => <option key={i.slug} value={i.name} style={{ background: "#111" }}>{i.name}</option>)}
+            <SelectInput
+              value={industry}
+              onChange={(v) => { setIndustry(v); setAppType(""); setFeatures([]); clearInvalid("industry"); }}
+              disabled={loadingOptions || !!loadError}
+            >
+              <option value="" disabled>
+                {loadingOptions ? "Loading industries…" : loadError ? "Unavailable" : `Select industry (${industries.length})`}
+              </option>
+              {industries.map((i) => (
+                <option key={i.slug} value={i.name} style={{ background: "#111" }}>{i.name}</option>
+              ))}
             </SelectInput>
             <FieldError show={isInvalid("industry")} msg="Please select an industry" />
           </div>
 
-          {/* App Type */}
+          {/* App Type — from products table, filtered by selected industry */}
           <div ref={(el) => { fieldRefs.current["appType"] = el; }}
             style={{ animation: isInvalid("appType") ? "fieldShake 0.3s ease" : undefined }}>
             <FieldLabel>App Type</FieldLabel>
-            <SelectInput value={appType} onChange={(v) => { setAppType(v); clearInvalid("appType"); }}>
-              <option value="" disabled>{loadingOptions ? "Loading…" : "What type of app is this?"}</option>
-              {filteredProducts.map((p) => <option key={p.archetype_id} value={p.name} style={{ background: "#111" }}>{p.name}</option>)}
+            <SelectInput
+              value={appType}
+              onChange={(v) => { setAppType(v); clearInvalid("appType"); }}
+              disabled={loadingOptions || !!loadError || !industry}
+            >
+              <option value="" disabled>
+                {!industry
+                  ? "Select an industry first"
+                  : loadingOptions
+                  ? "Loading…"
+                  : `Select product type (${filteredProducts.length})`}
+              </option>
+              {filteredProducts.map((p) => (
+                <option key={p.archetype_id} value={p.name} style={{ background: "#111" }}>
+                  {p.name}
+                </option>
+              ))}
             </SelectInput>
             <FieldError show={isInvalid("appType")} msg="Please select an app type" />
+            {/* Show selected product description from DB */}
+            {appType && filteredProducts.find(p => p.name === appType)?.description && (
+              <p style={{ fontSize: 11, color: "#52525b", marginTop: 6, lineHeight: 1.5 }}>
+                {filteredProducts.find(p => p.name === appType)?.description}
+              </p>
+            )}
           </div>
 
           {/* What are you building */}
@@ -292,18 +360,42 @@ export default function NewProjectPage() {
             </div>
           </div>
 
-          {/* Features */}
+          {/* Features — from features table, filtered by selected product archetype */}
           <div>
             <FieldLabel optional>Features</FieldLabel>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-              {FEATURES.map(({ id, icon }) => (
-                <button key={id} type="button" onClick={() => toggleFeature(id)}
-                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 11px", border: `1px solid ${features.includes(id) ? "#06b6d4" : "rgba(255,255,255,0.06)"}`, borderRadius: 20, fontFamily: "var(--font-dm-sans)", fontSize: 12, color: features.includes(id) ? "#06b6d4" : "#3f3f46", cursor: "pointer", transition: "all 0.15s", background: features.includes(id) ? "rgba(6,182,212,0.1)" : "#0a0a0a", whiteSpace: "nowrap" }}>
-                  <span style={{ color: "currentColor", flexShrink: 0 }}>{icon}</span>
-                  {id}
-                </button>
-              ))}
-            </div>
+            {loadingOptions ? (
+              <div style={{ fontSize: 12, color: "#3f3f46" }}>Loading features…</div>
+            ) : visibleFeatures.length === 0 ? (
+              <div style={{ fontSize: 12, color: "#3f3f46" }}>No features available.</div>
+            ) : (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+                {visibleFeatures.map((feat) => {
+                  const active = features.includes(feat.feature_id);
+                  return (
+                    <button
+                      key={feat.feature_id}
+                      type="button"
+                      title={feat.description ?? undefined}
+                      onClick={() => toggleFeature(feat.feature_id)}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 6,
+                        padding: "7px 11px",
+                        border: `1px solid ${active ? "#06b6d4" : "rgba(255,255,255,0.06)"}`,
+                        borderRadius: 20,
+                        fontFamily: "var(--font-dm-sans)", fontSize: 12,
+                        color: active ? "#06b6d4" : "#3f3f46",
+                        cursor: "pointer", transition: "all 0.15s",
+                        background: active ? "rgba(6,182,212,0.1)" : "#0a0a0a",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <FeatureIcon name={feat.icon ?? ""} />
+                      {feat.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Additional Notes */}

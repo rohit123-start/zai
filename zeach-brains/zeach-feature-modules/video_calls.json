@@ -1,0 +1,99 @@
+{
+  "feature_id": "video_calls",
+  "feature_name": "Video / Calls",
+  "description": "Voice and video calling between users with call management and history.",
+  "screens_added": [
+    {
+      "id": "call_incoming",
+      "name": "Incoming Call",
+      "purpose": "Full-screen incoming call with accept and decline"
+    },
+    {
+      "id": "active_call",
+      "name": "Active Call",
+      "purpose": "Voice or video call screen with controls"
+    },
+    {
+      "id": "call_history",
+      "name": "Call History",
+      "purpose": "All past calls \u2014 missed, incoming, outgoing"
+    },
+    {
+      "id": "call_settings",
+      "name": "Call Settings",
+      "purpose": "Audio, video, and notification preferences for calls"
+    }
+  ],
+  "entities_added": [
+    "Call",
+    "CallParticipant",
+    "CallRecording"
+  ],
+  "flows_added": [
+    "Initiate call \u2192 ring \u2192 recipient accepts \u2192 connected \u2192 end call \u2192 summary",
+    "Receive incoming call \u2192 full-screen overlay \u2192 accept or decline",
+    "Voice call \u2192 upgrade to video \u2192 switch camera \u2192 mute \u2192 end"
+  ],
+  "interaction_patterns": [
+    "Incoming call \u2014 full-screen overlay, never a banner",
+    "Mute \u2014 fills with red when active, always visible",
+    "Camera toggle \u2014 indicator always shows whether camera is on",
+    "Speaker toggle \u2014 prominent, especially for voice calls",
+    "End call \u2014 always red, always in the same position",
+    "Call duration timer \u2014 always visible during active call",
+    "Tap to show or hide controls during video call"
+  ],
+  "generates_images": false,
+  "error_flows": [
+    {
+      "trigger": "Camera or microphone permission denied",
+      "ui": "Can not join with video/audio. Show specific missing permission. CTA: direct link to browser/device settings. Option: 'Join without camera' if audio-only is acceptable. Never silently join muted with no camera \u2014 be explicit about state."
+    },
+    {
+      "trigger": "Poor connection during call",
+      "ui": "Connection quality indicator in corner: green/amber/red bars. At amber: 'Your connection is unstable \u2014 the other person may experience issues'. At red: 'Poor connection \u2014 switching to audio only'. Auto-degrade video quality before dropping to audio."
+    },
+    {
+      "trigger": "Call drops unexpectedly",
+      "ui": "Full-screen: 'Call disconnected'. Duration shown. Rejoin button. Option to call back. If all parties dropped: show who was on the call. Never return to home screen silently."
+    },
+    {
+      "trigger": "Other party's camera or mic fails mid-call",
+      "ui": "Show video placeholder with their name and camera-off icon. Audio indicator still shows if they're speaking. Never show frozen last frame as if still live."
+    },
+    {
+      "trigger": "Call fails to connect (ring timeout)",
+      "ui": "After 30 seconds no answer: 'No answer'. CTA: 'Try again' or 'Send a message'. Call logged in history as 'Missed'. Never show endless ringing with no timeout."
+    },
+    {
+      "trigger": "Recording fails to save",
+      "ui": "End of call: 'Recording could not be saved \u2014 storage issue'. Explain why if possible. If recording was promised to participants: notify all that recording is unavailable. Never silently lose a recording."
+    }
+  ],
+  "edge_cases": [
+    {
+      "case": "User joins call from multiple devices simultaneously",
+      "ui": "Second device shows: 'You are already in this call on another device. Join here and disconnect the other?' Explicit choice. Never allow silent multi-device join \u2014 audio echo risk."
+    },
+    {
+      "case": "Call scheduled but organiser hasn't joined yet",
+      "ui": "Waiting room shows: 'Waiting for [organiser name] to start the call'. Timer showing how long since scheduled start. Leave option always available. Never strand participants indefinitely."
+    },
+    {
+      "case": "Group call where all but one participant leaves",
+      "ui": "Show: 'Everyone else has left the call'. Options: 'End call' or 'Stay on'. Auto-end after 60 seconds with no action. Never leave user on an empty call indefinitely."
+    },
+    {
+      "case": "Screen share shows sensitive content accidentally",
+      "ui": "Screen share always requires explicit start confirmation: 'You are about to share your entire screen \u2014 make sure no sensitive content is visible'. Stop sharing button always prominent during share."
+    },
+    {
+      "case": "Incoming call while user is already on a call",
+      "ui": "Incoming call banner at top: caller name and decline/hold-and-answer options. Never auto-answer second call. First call put on hold explicitly, not silently."
+    },
+    {
+      "case": "Call participant uses a very slow device (high CPU)",
+      "ui": "Auto-reduce received video quality for that participant. Their feed stays visible but at lower resolution. Never cause their app to crash by sending too high a stream."
+    }
+  ]
+}

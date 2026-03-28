@@ -1,0 +1,93 @@
+{
+  "feature_id": "file_upload",
+  "feature_name": "File Upload",
+  "description": "User-generated file and media upload \u2014 images, documents, and attachments.",
+  "screens_added": [
+    {
+      "id": "file_picker",
+      "name": "File Picker",
+      "purpose": "Select files from device, camera, or cloud"
+    },
+    {
+      "id": "upload_progress",
+      "name": "Upload Progress",
+      "purpose": "Upload status with progress indicator"
+    },
+    {
+      "id": "file_library",
+      "name": "File Library",
+      "purpose": "All uploaded files \u2014 browse, preview, delete"
+    }
+  ],
+  "entities_added": [
+    "File",
+    "Upload",
+    "MediaAsset"
+  ],
+  "flows_added": [
+    "Tap upload \u2192 pick from camera/gallery/files \u2192 preview \u2192 confirm \u2192 upload \u2192 success",
+    "Drag and drop file onto upload zone \u2192 progress bar \u2192 file available",
+    "View file library \u2192 tap file \u2192 preview \u2192 share or delete"
+  ],
+  "interaction_patterns": [
+    "Drag and drop on desktop \u2014 dotted border animates on hover",
+    "Upload progress ring on file thumbnail \u2014 fills as upload completes",
+    "Camera vs gallery vs files \u2014 three options always shown, never assume",
+    "File type validation \u2014 show error inline before upload attempt",
+    "Retry button on failed upload \u2014 never silent failure",
+    "Preview before confirm \u2014 user sees what they're uploading"
+  ],
+  "generates_images": false,
+  "error_flows": [
+    {
+      "trigger": "File exceeds size limit",
+      "ui": "Inline error before upload attempt: 'File too large \u2014 maximum [X]MB'. Size of selected file shown. Suggestion: compress or use a different format. Never start upload then fail at 90%."
+    },
+    {
+      "trigger": "File type not supported",
+      "ui": "Inline error: 'File type not supported \u2014 please use [accepted formats]'. Show accepted formats as chips. Never show raw MIME type to user. Fail immediately on selection, not on upload."
+    },
+    {
+      "trigger": "Upload fails mid-way",
+      "ui": "Progress bar stops. Red state: 'Upload interrupted at [X]%'. Retry button. Option to resume if server supports resumable uploads. Other uploads in queue unaffected. Partial upload cleaned up on server."
+    },
+    {
+      "trigger": "Storage quota exceeded",
+      "ui": "Before upload: check quota. If insufficient: 'You have used [X]GB of your [Y]GB limit'. CTA: 'Manage storage' or 'Upgrade plan'. Never start upload that will fail due to quota."
+    },
+    {
+      "trigger": "File fails virus/malware scan",
+      "ui": "File removed from queue. Message: 'This file could not be uploaded \u2014 it may contain harmful content'. Generic message only \u2014 never reveal scan details. Other files in batch unaffected."
+    },
+    {
+      "trigger": "Duplicate file detected",
+      "ui": "Warning before upload: 'A file with this name already exists'. Options: 'Replace existing', 'Keep both' (auto-rename), 'Cancel'. Default: Keep both. Never silently overwrite."
+    }
+  ],
+  "edge_cases": [
+    {
+      "case": "User uploads same file twice in same session",
+      "ui": "Detect duplicate by name and size hash. Warn: 'This file has already been uploaded in this session'. Option to proceed or cancel. Never silently upload twice."
+    },
+    {
+      "case": "Batch upload where some succeed and some fail",
+      "ui": "Show per-file status: green check for success, red X for failure. Summary: '4 of 6 files uploaded successfully'. Retry failed files individually. Never report partial batch as full success."
+    },
+    {
+      "case": "File name contains special characters or very long name",
+      "ui": "Sanitise file name silently for storage. Display original name to user. Never expose internal sanitised name. Long names truncated in UI with full name in tooltip."
+    },
+    {
+      "case": "Upload initiated but user closes browser or navigates away",
+      "ui": "Show warning: 'Upload in progress \u2014 leaving this page will cancel the upload'. If PWA or native: continue upload in background. Web: warn and let user decide."
+    },
+    {
+      "case": "Camera upload on mobile \u2014 very large raw photo",
+      "ui": "Auto-compress before upload if file exceeds limit. Show: 'Image compressed for upload \u2014 original quality preserved on device'. Compression settings configurable in settings."
+    },
+    {
+      "case": "PDF upload with password protection",
+      "ui": "Detect password-protected PDF. Show: 'This PDF is password protected and cannot be previewed'. Still allow upload if file type is accepted. Note in file library."
+    }
+  ]
+}

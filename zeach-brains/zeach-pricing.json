@@ -1,0 +1,1237 @@
+{
+  "meta": {
+    "version": "1.0",
+    "description": "Zeach pricing \u2014 only app types that show a pricing section on the landing page. 61 combos.",
+    "fields": {
+      "model": "Pricing model type",
+      "tiers": "Array of 2\u20133 plan names (order: entry \u2192 mid \u2192 top)",
+      "price_anchors": "Suggested price points per tier (can be overridden by user)",
+      "billing": "Billing cadence shown by default",
+      "cta": "CTA label per tier",
+      "landing_page_notes": "What the pricing section should emphasise on the landing page",
+      "free_tier": "Whether a free/trial tier exists"
+    }
+  },
+  "pricing": {
+    "Healthcare \u00d7 Dashboard SaaS": {
+      "model": "per-seat",
+      "tiers": [
+        "Team",
+        "Practice",
+        "Enterprise"
+      ],
+      "price_anchors": [
+        "$49/seat/mo",
+        "$149/mo up to 5 seats",
+        "Custom"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Contact sales"
+      ],
+      "free_tier": true
+    },
+    "Finance \u00d7 Dashboard SaaS": {
+      "model": "per-seat",
+      "tiers": [
+        "Starter",
+        "Business",
+        "Enterprise"
+      ],
+      "price_anchors": [
+        "$49/mo",
+        "$149/mo",
+        "Custom"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Book a demo"
+      ],
+      "free_tier": true
+    },
+    "Education \u00d7 Content & Streaming": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Teams"
+      ],
+      "price_anchors": [
+        "Free",
+        "$19/mo",
+        "$49/mo per team"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start learning free",
+        "Go Pro",
+        "Get Teams"
+      ],
+      "free_tier": true
+    },
+    "Education \u00d7 Dashboard SaaS": {
+      "model": "per-seat",
+      "tiers": [
+        "Classroom",
+        "School",
+        "District"
+      ],
+      "price_anchors": [
+        "$8/student/mo",
+        "$299/mo up to 50 students",
+        "Custom"
+      ],
+      "billing": "annual",
+      "cta": [
+        "Start free trial",
+        "Book a demo",
+        "Contact sales"
+      ],
+      "free_tier": true
+    },
+    "Fitness & Sport \u00d7 Content & Streaming": {
+      "model": "subscription",
+      "tiers": [
+        "Basic",
+        "All Access",
+        "Family"
+      ],
+      "price_anchors": [
+        "$9/mo",
+        "$19/mo",
+        "$29/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Start free trial"
+      ],
+      "free_tier": true
+    },
+    "Real Estate \u00d7 Dashboard SaaS": {
+      "model": "per-seat",
+      "tiers": [
+        "Agent",
+        "Team",
+        "Enterprise"
+      ],
+      "price_anchors": [
+        "$59/mo",
+        "$149/mo up to 5 agents",
+        "Custom"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Book a demo"
+      ],
+      "free_tier": true
+    },
+    "Transport & Logistics \u00d7 Dashboard SaaS": {
+      "model": "per-seat",
+      "tiers": [
+        "Team",
+        "Business",
+        "Enterprise"
+      ],
+      "price_anchors": [
+        "$79/mo up to 10 vehicles",
+        "$199/mo up to 50 vehicles",
+        "Custom"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Contact sales"
+      ],
+      "free_tier": true
+    },
+    "Entertainment & Media \u00d7 Content & Streaming": {
+      "model": "subscription",
+      "tiers": [
+        "Free",
+        "Standard",
+        "Premium"
+      ],
+      "price_anchors": [
+        "Free (ads)",
+        "$9.99/mo",
+        "$15.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Watch free",
+        "Go Standard",
+        "Go Premium"
+      ],
+      "free_tier": true
+    },
+    "AI & Technology \u00d7 AI Tool": {
+      "model": "usage-based",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free (limited credits)",
+        "$20/mo",
+        "$50/mo per user"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "AI & Technology \u00d7 Dashboard SaaS": {
+      "model": "per-seat",
+      "tiers": [
+        "Starter",
+        "Growth",
+        "Enterprise"
+      ],
+      "price_anchors": [
+        "$49/mo",
+        "$149/mo",
+        "Custom"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Book a demo"
+      ],
+      "free_tier": true
+    },
+    "Developer Tools \u00d7 Developer Tool": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free",
+        "$15/mo",
+        "$35/seat/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Developer Tools \u00d7 Dashboard SaaS": {
+      "model": "per-seat",
+      "tiers": [
+        "Starter",
+        "Pro",
+        "Enterprise"
+      ],
+      "price_anchors": [
+        "$29/mo up to 3 seats",
+        "$79/mo up to 10 seats",
+        "Custom"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Contact sales"
+      ],
+      "free_tier": true
+    },
+    "Beauty & Wellness \u00d7 Dashboard SaaS": {
+      "model": "per-seat",
+      "tiers": [
+        "Starter",
+        "Business",
+        "Enterprise"
+      ],
+      "price_anchors": [
+        "$49/mo",
+        "$149/mo",
+        "Custom"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Book a demo"
+      ],
+      "free_tier": true
+    },
+    "Beauty & Wellness \u00d7 Content & Streaming": {
+      "model": "subscription",
+      "tiers": [
+        "Free",
+        "Standard",
+        "Premium"
+      ],
+      "price_anchors": [
+        "Free",
+        "$9.99/mo",
+        "$15.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Standard",
+        "Go Premium"
+      ],
+      "free_tier": true
+    },
+    "Beauty & Wellness \u00d7 AI Tool": {
+      "model": "usage-based",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free (limited credits)",
+        "$20/mo",
+        "$50/mo per user"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Beauty & Wellness \u00d7 Developer Tool": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free",
+        "$15/mo",
+        "$35/seat/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Retail & Fashion \u00d7 Dashboard SaaS": {
+      "model": "per-seat",
+      "tiers": [
+        "Starter",
+        "Business",
+        "Enterprise"
+      ],
+      "price_anchors": [
+        "$49/mo",
+        "$149/mo",
+        "Custom"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Book a demo"
+      ],
+      "free_tier": true
+    },
+    "Retail & Fashion \u00d7 Content & Streaming": {
+      "model": "subscription",
+      "tiers": [
+        "Free",
+        "Standard",
+        "Premium"
+      ],
+      "price_anchors": [
+        "Free",
+        "$9.99/mo",
+        "$15.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Standard",
+        "Go Premium"
+      ],
+      "free_tier": true
+    },
+    "Retail & Fashion \u00d7 AI Tool": {
+      "model": "usage-based",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free (limited credits)",
+        "$20/mo",
+        "$50/mo per user"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Retail & Fashion \u00d7 Developer Tool": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free",
+        "$15/mo",
+        "$35/seat/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Food & Beverage \u00d7 Dashboard SaaS": {
+      "model": "per-seat",
+      "tiers": [
+        "Starter",
+        "Business",
+        "Enterprise"
+      ],
+      "price_anchors": [
+        "$49/mo",
+        "$149/mo",
+        "Custom"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Book a demo"
+      ],
+      "free_tier": true
+    },
+    "Food & Beverage \u00d7 Content & Streaming": {
+      "model": "subscription",
+      "tiers": [
+        "Free",
+        "Standard",
+        "Premium"
+      ],
+      "price_anchors": [
+        "Free",
+        "$9.99/mo",
+        "$15.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Standard",
+        "Go Premium"
+      ],
+      "free_tier": true
+    },
+    "Food & Beverage \u00d7 AI Tool": {
+      "model": "usage-based",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free (limited credits)",
+        "$20/mo",
+        "$50/mo per user"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Food & Beverage \u00d7 Developer Tool": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free",
+        "$15/mo",
+        "$35/seat/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Healthcare \u00d7 Content & Streaming": {
+      "model": "subscription",
+      "tiers": [
+        "Free",
+        "Standard",
+        "Premium"
+      ],
+      "price_anchors": [
+        "Free",
+        "$9.99/mo",
+        "$15.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Standard",
+        "Go Premium"
+      ],
+      "free_tier": true
+    },
+    "Healthcare \u00d7 AI Tool": {
+      "model": "usage-based",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free (limited credits)",
+        "$20/mo",
+        "$50/mo per user"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Healthcare \u00d7 Developer Tool": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free",
+        "$15/mo",
+        "$35/seat/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Finance \u00d7 Content & Streaming": {
+      "model": "subscription",
+      "tiers": [
+        "Free",
+        "Standard",
+        "Premium"
+      ],
+      "price_anchors": [
+        "Free",
+        "$9.99/mo",
+        "$15.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Standard",
+        "Go Premium"
+      ],
+      "free_tier": true
+    },
+    "Finance \u00d7 AI Tool": {
+      "model": "usage-based",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free (limited credits)",
+        "$20/mo",
+        "$50/mo per user"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Finance \u00d7 Developer Tool": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free",
+        "$15/mo",
+        "$35/seat/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Education \u00d7 AI Tool": {
+      "model": "usage-based",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free (limited credits)",
+        "$20/mo",
+        "$50/mo per user"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Education \u00d7 Developer Tool": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free",
+        "$15/mo",
+        "$35/seat/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Fitness & Sport \u00d7 Dashboard SaaS": {
+      "model": "per-seat",
+      "tiers": [
+        "Starter",
+        "Business",
+        "Enterprise"
+      ],
+      "price_anchors": [
+        "$49/mo",
+        "$149/mo",
+        "Custom"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Book a demo"
+      ],
+      "free_tier": true
+    },
+    "Fitness & Sport \u00d7 AI Tool": {
+      "model": "usage-based",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free (limited credits)",
+        "$20/mo",
+        "$50/mo per user"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Fitness & Sport \u00d7 Developer Tool": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free",
+        "$15/mo",
+        "$35/seat/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Travel & Lifestyle \u00d7 Dashboard SaaS": {
+      "model": "per-seat",
+      "tiers": [
+        "Starter",
+        "Business",
+        "Enterprise"
+      ],
+      "price_anchors": [
+        "$49/mo",
+        "$149/mo",
+        "Custom"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Book a demo"
+      ],
+      "free_tier": true
+    },
+    "Travel & Lifestyle \u00d7 Content & Streaming": {
+      "model": "subscription",
+      "tiers": [
+        "Free",
+        "Standard",
+        "Premium"
+      ],
+      "price_anchors": [
+        "Free",
+        "$9.99/mo",
+        "$15.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Standard",
+        "Go Premium"
+      ],
+      "free_tier": true
+    },
+    "Travel & Lifestyle \u00d7 AI Tool": {
+      "model": "usage-based",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free (limited credits)",
+        "$20/mo",
+        "$50/mo per user"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Travel & Lifestyle \u00d7 Developer Tool": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free",
+        "$15/mo",
+        "$35/seat/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Real Estate \u00d7 Content & Streaming": {
+      "model": "subscription",
+      "tiers": [
+        "Free",
+        "Standard",
+        "Premium"
+      ],
+      "price_anchors": [
+        "Free",
+        "$9.99/mo",
+        "$15.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Standard",
+        "Go Premium"
+      ],
+      "free_tier": true
+    },
+    "Real Estate \u00d7 AI Tool": {
+      "model": "usage-based",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free (limited credits)",
+        "$20/mo",
+        "$50/mo per user"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Real Estate \u00d7 Developer Tool": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free",
+        "$15/mo",
+        "$35/seat/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Transport & Logistics \u00d7 Content & Streaming": {
+      "model": "subscription",
+      "tiers": [
+        "Free",
+        "Standard",
+        "Premium"
+      ],
+      "price_anchors": [
+        "Free",
+        "$9.99/mo",
+        "$15.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Standard",
+        "Go Premium"
+      ],
+      "free_tier": true
+    },
+    "Transport & Logistics \u00d7 AI Tool": {
+      "model": "usage-based",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free (limited credits)",
+        "$20/mo",
+        "$50/mo per user"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Transport & Logistics \u00d7 Developer Tool": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free",
+        "$15/mo",
+        "$35/seat/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Events & Ticketing \u00d7 Dashboard SaaS": {
+      "model": "per-seat",
+      "tiers": [
+        "Starter",
+        "Business",
+        "Enterprise"
+      ],
+      "price_anchors": [
+        "$49/mo",
+        "$149/mo",
+        "Custom"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Book a demo"
+      ],
+      "free_tier": true
+    },
+    "Events & Ticketing \u00d7 Content & Streaming": {
+      "model": "subscription",
+      "tiers": [
+        "Free",
+        "Standard",
+        "Premium"
+      ],
+      "price_anchors": [
+        "Free",
+        "$9.99/mo",
+        "$15.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Standard",
+        "Go Premium"
+      ],
+      "free_tier": true
+    },
+    "Events & Ticketing \u00d7 AI Tool": {
+      "model": "usage-based",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free (limited credits)",
+        "$20/mo",
+        "$50/mo per user"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Events & Ticketing \u00d7 Developer Tool": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free",
+        "$15/mo",
+        "$35/seat/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Entertainment & Media \u00d7 Dashboard SaaS": {
+      "model": "per-seat",
+      "tiers": [
+        "Starter",
+        "Business",
+        "Enterprise"
+      ],
+      "price_anchors": [
+        "$49/mo",
+        "$149/mo",
+        "Custom"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Book a demo"
+      ],
+      "free_tier": true
+    },
+    "Entertainment & Media \u00d7 AI Tool": {
+      "model": "usage-based",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free (limited credits)",
+        "$20/mo",
+        "$50/mo per user"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Entertainment & Media \u00d7 Developer Tool": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free",
+        "$15/mo",
+        "$35/seat/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "AI & Technology \u00d7 Content & Streaming": {
+      "model": "subscription",
+      "tiers": [
+        "Free",
+        "Standard",
+        "Premium"
+      ],
+      "price_anchors": [
+        "Free",
+        "$9.99/mo",
+        "$15.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Standard",
+        "Go Premium"
+      ],
+      "free_tier": true
+    },
+    "AI & Technology \u00d7 Developer Tool": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free",
+        "$15/mo",
+        "$35/seat/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Developer Tools \u00d7 Content & Streaming": {
+      "model": "subscription",
+      "tiers": [
+        "Free",
+        "Standard",
+        "Premium"
+      ],
+      "price_anchors": [
+        "Free",
+        "$9.99/mo",
+        "$15.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Standard",
+        "Go Premium"
+      ],
+      "free_tier": true
+    },
+    "Developer Tools \u00d7 AI Tool": {
+      "model": "usage-based",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "price_anchors": [
+        "Free (limited credits)",
+        "$20/mo",
+        "$50/mo per user"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free",
+        "Go Pro",
+        "Get Team"
+      ],
+      "free_tier": true
+    },
+    "Finance \u00d7 Finance Banking": {
+      "model": "subscription",
+      "tiers": [
+        "Personal",
+        "Premium",
+        "Business"
+      ],
+      "price_anchors": [
+        "Free",
+        "$9.99/mo",
+        "$29.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Open free account",
+        "Go Premium",
+        "Get Business"
+      ],
+      "free_tier": true
+    },
+    "Healthcare \u00d7 Patient App": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Premium",
+        "Family"
+      ],
+      "price_anchors": [
+        "Free",
+        "$9.99/mo",
+        "$19.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Get started free",
+        "Go Premium",
+        "Get Family"
+      ],
+      "free_tier": true
+    },
+    "Fitness & Sport \u00d7 Workout Tracker": {
+      "model": "freemium",
+      "tiers": [
+        "Free",
+        "Pro",
+        "Coach"
+      ],
+      "price_anchors": [
+        "Free",
+        "$9.99/mo",
+        "$29.99/mo"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start for free",
+        "Go Pro",
+        "Get Coach"
+      ],
+      "free_tier": true
+    },
+    "Real Estate \u00d7 Property Management": {
+      "model": "per-seat",
+      "tiers": [
+        "Starter",
+        "Pro",
+        "Enterprise"
+      ],
+      "price_anchors": [
+        "$19/mo up to 5 units",
+        "$59/mo up to 25 units",
+        "Custom"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start free trial",
+        "Start free trial",
+        "Contact sales"
+      ],
+      "free_tier": true
+    },
+    "Education \u00d7 LMS / Course Builder": {
+      "model": "commission",
+      "tiers": [
+        "Free Instructor",
+        "Pro Instructor",
+        "Organisation"
+      ],
+      "price_anchors": [
+        "Free + 10% revenue share",
+        "$39/mo + 5% revenue share",
+        "$199/mo + 2% revenue share"
+      ],
+      "billing": "monthly",
+      "cta": [
+        "Start teaching free",
+        "Go Pro",
+        "Get Organisation"
+      ],
+      "free_tier": true
+    }
+  }
+}

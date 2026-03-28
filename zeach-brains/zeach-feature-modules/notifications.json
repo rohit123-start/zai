@@ -1,0 +1,77 @@
+{
+  "feature_id": "notifications",
+  "feature_name": "Notifications",
+  "description": "Push and in-app notification system with preferences management.",
+  "screens_added": [
+    {
+      "id": "notifications_feed",
+      "name": "Notifications",
+      "purpose": "All activity \u2014 categorised, unread indicator"
+    },
+    {
+      "id": "notification_settings",
+      "name": "Notification Settings",
+      "purpose": "Toggle per notification type and delivery channel"
+    }
+  ],
+  "entities_added": [
+    "Notification",
+    "NotificationPreference"
+  ],
+  "flows_added": [
+    "Event triggers notification \u2192 push sent \u2192 user taps \u2192 deep links to relevant screen",
+    "User opens notification settings \u2192 toggles types \u2192 selects channels (push/email/SMS)"
+  ],
+  "interaction_patterns": [
+    "Push notification tap deep links directly to the relevant screen \u2014 never to notification list",
+    "Unread dot on notification icon \u2014 disappears on open",
+    "Mark all read \u2014 single action",
+    "Notification categories \u2014 activity, updates, promotions \u2014 separately toggleable",
+    "Notification permission prompt \u2014 shown after first meaningful action, never on launch"
+  ],
+  "generates_images": false,
+  "error_flows": [
+    {
+      "trigger": "Push notification permission denied by user",
+      "ui": "No prompt re-shown for 30 days after denial. In-app notification centre still works fully. Settings screen shows 'Enable push notifications' card with direct link to device settings. Never nag."
+    },
+    {
+      "trigger": "Notification deep link points to deleted content",
+      "ui": "Navigate to parent screen instead of crashing. Show toast: 'This content is no longer available'. Never show blank screen or error code. Example: notification for deleted post \u2192 open feed."
+    },
+    {
+      "trigger": "Notification delivery fails silently",
+      "ui": "In-app notification centre always shows all notifications regardless of push delivery status. Badge count reflects unread in-app count, not push delivery count."
+    },
+    {
+      "trigger": "Batch of notifications arrives after long offline period",
+      "ui": "Group notifications by type \u2014 do not flood notification centre. Show: 'You have 12 new activity notifications' as single grouped item. Expand to see all. Never send 12 individual pushes on reconnect."
+    },
+    {
+      "trigger": "Notification settings sync fails across devices",
+      "ui": "Settings saved locally first, synced to server. If sync fails: local preference honoured. Show sync error badge in settings. Retry on next app open. Never lose user preference."
+    }
+  ],
+  "edge_cases": [
+    {
+      "case": "User has notifications enabled but device is in Do Not Disturb",
+      "ui": "No special handling needed \u2014 OS handles DND. Never override OS-level DND for non-critical notifications. Only critical alerts (transaction failures, security alerts) may use high-priority channel."
+    },
+    {
+      "case": "Notification for content the user has already seen",
+      "ui": "Mark notification as read automatically if user has already viewed the linked content. Badge count decrements. Never show notification as unread for already-seen content."
+    },
+    {
+      "case": "User taps notification while already on the linked screen",
+      "ui": "Refresh the current screen content instead of re-navigating. No animation flash or stutter. Subtle refresh indicator only."
+    },
+    {
+      "case": "Notification settings differ between web and mobile",
+      "ui": "Show separate toggles for each platform in notification settings. Changes to one do not affect the other. Clear labels: 'Mobile push' vs 'Email' vs 'In-app'."
+    },
+    {
+      "case": "Notification for action completed by a different device",
+      "ui": "Still show notification if it carries new information (e.g. order shipped). Suppress notification if it is purely confirmatory of an action the user just took on this device (e.g. 'login successful' after login)."
+    }
+  ]
+}

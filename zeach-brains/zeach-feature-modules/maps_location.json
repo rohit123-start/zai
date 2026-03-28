@@ -1,0 +1,99 @@
+{
+  "feature_id": "maps_location",
+  "feature_name": "Maps / Location",
+  "description": "Location awareness \u2014 map views, proximity search, directions, and live tracking.",
+  "screens_added": [
+    {
+      "id": "map_view",
+      "name": "Map View",
+      "purpose": "Full map with pins for relevant entities"
+    },
+    {
+      "id": "location_picker",
+      "name": "Location Picker",
+      "purpose": "User selects or confirms their location"
+    },
+    {
+      "id": "nearby_results",
+      "name": "Nearby Results",
+      "purpose": "List of entities sorted by proximity"
+    },
+    {
+      "id": "live_tracking",
+      "name": "Live Tracking",
+      "purpose": "Real-time position of driver, delivery, or provider"
+    }
+  ],
+  "entities_added": [
+    "Location",
+    "Pin",
+    "Route",
+    "TrackingSession"
+  ],
+  "flows_added": [
+    "Enable location \u2192 map loads at current position \u2192 browse nearby pins \u2192 tap pin \u2192 detail",
+    "Search location \u2192 drop pin \u2192 confirm \u2192 use as address",
+    "Order placed \u2192 tracking screen opens \u2192 driver moves on map \u2192 arrival"
+  ],
+  "interaction_patterns": [
+    "Map pins cluster at low zoom \u2014 expand on zoom in",
+    "Current location button \u2014 always visible, tapping re-centres map",
+    "Detail sheet slides up from bottom \u2014 map stays visible behind",
+    "Live tracking dot pulses \u2014 indicates real-time movement",
+    "ETA chip always visible on tracking screen",
+    "Location permission prompt \u2014 explain why before requesting"
+  ],
+  "generates_images": false,
+  "error_flows": [
+    {
+      "trigger": "Location permission denied",
+      "ui": "Map loads centred on default city or last known location. Banner: 'Enable location to see places near you'. CTA: direct link to device settings. Search still fully functional. Never block app usage."
+    },
+    {
+      "trigger": "GPS signal weak or unavailable",
+      "ui": "Location dot shows with accuracy ring \u2014 larger ring = less accurate. Banner: 'Location accuracy is low'. Indoor location note if relevant. Never show false precision."
+    },
+    {
+      "trigger": "Map tiles fail to load (offline or CDN failure)",
+      "ui": "Show cached tiles for last viewed area if available. Grey placeholder for uncached areas with grid lines. Message: 'Map tiles unavailable \u2014 check your connection'. Search and pins still functional."
+    },
+    {
+      "trigger": "Directions request fails",
+      "ui": "Message: 'Could not calculate route'. Retry button. Fallback: 'Open in Maps' \u2014 opens device native maps app with same destination. Never strand user without navigation option."
+    },
+    {
+      "trigger": "Live tracking connection drops",
+      "ui": "Last known position shown with timestamp: 'Last updated 2 mins ago'. Pulsing amber dot instead of live green. Auto-reconnects in background. Never show stale position as live."
+    },
+    {
+      "trigger": "Place data not found or outdated",
+      "ui": "Show: 'Limited information available for this place'. Display what is known. 'Suggest an edit' CTA. Never show completely blank place detail screen."
+    }
+  ],
+  "edge_cases": [
+    {
+      "case": "User is at exact boundary of two regions/zones",
+      "ui": "Assign to nearest centroid \u2014 never show both zones simultaneously. Do not ask user to choose. Log boundary case for data improvement."
+    },
+    {
+      "case": "User denies location then later grants it",
+      "ui": "Map immediately re-centres on actual location when permission granted. No restart required. Smooth transition \u2014 fly-to animation to actual location."
+    },
+    {
+      "case": "Multiple pins stacked at same coordinates",
+      "ui": "Show cluster circle with count. Tap to zoom in and separate. At max zoom: show stacked list sheet from bottom with all places at that location."
+    },
+    {
+      "case": "User location in a country with map data restrictions",
+      "ui": "Show best available data without exposing restriction reason. Never show 'Content not available in your region' \u2014 show what is available."
+    },
+    {
+      "case": "Offline navigation \u2014 route calculated but data changes en route",
+      "ui": "Offline route followed as downloaded. If recalculation needed and no connection: show 'Route may be outdated' banner. Continue with last known route. Do not stop navigation."
+    },
+    {
+      "case": "Very dense urban area \u2014 hundreds of pins visible",
+      "ui": "Cluster aggressively at low zoom. Max 20 individual pins visible at any zoom level. Performance: never render more than 50 DOM pin elements \u2014 use canvas for overflow."
+    }
+  ]
+}

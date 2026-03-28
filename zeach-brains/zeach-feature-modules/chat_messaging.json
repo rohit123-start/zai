@@ -1,0 +1,99 @@
+{
+  "feature_id": "chat_messaging",
+  "feature_name": "Chat / Messaging",
+  "description": "In-app real-time messaging between users, providers, or support.",
+  "screens_added": [
+    {
+      "id": "inbox",
+      "name": "Inbox",
+      "purpose": "All conversations \u2014 unread indicator, last message preview"
+    },
+    {
+      "id": "chat_thread",
+      "name": "Chat Thread",
+      "purpose": "Full conversation with message input"
+    },
+    {
+      "id": "new_message",
+      "name": "New Message",
+      "purpose": "Start conversation \u2014 contact search"
+    },
+    {
+      "id": "chat_media",
+      "name": "Shared Media",
+      "purpose": "All files and images shared in conversation"
+    }
+  ],
+  "entities_added": [
+    "Conversation",
+    "Message",
+    "Attachment",
+    "Reaction"
+  ],
+  "flows_added": [
+    "Select contact \u2192 open thread \u2192 send message \u2192 receive reply",
+    "Receive notification \u2192 tap \u2192 open thread \u2192 reply",
+    "Long press message \u2192 react / reply / copy / delete"
+  ],
+  "interaction_patterns": [
+    "Typing indicator \u2014 animated dots while other user types",
+    "Read receipts \u2014 single tick sent, double tick delivered, filled = read",
+    "Swipe right on message to reply \u2014 quoted message appears in input",
+    "Message bubbles \u2014 sent right, received left",
+    "Long press for context menu \u2014 react, reply, copy, delete",
+    "Unread count badge on inbox icon"
+  ],
+  "generates_images": false,
+  "error_flows": [
+    {
+      "trigger": "Message fails to send",
+      "ui": "Message bubble shows red warning icon on right edge. Tap: 'Message failed to send \u2014 tap to retry'. Options: Retry, Delete message. Message remains in thread at correct position. Never silently drop. Retry preserves original timestamp."
+    },
+    {
+      "trigger": "File or image fails to send",
+      "ui": "Attachment thumbnail shows red error overlay. Message: 'File failed to send'. File size shown. Options: Retry, Remove. Never show broken image icon in thread permanently."
+    },
+    {
+      "trigger": "User blocked attempts to send message",
+      "ui": "Input disabled with message: 'You can no longer message this person'. No toast \u2014 persistent state shown in thread header. Do not reveal if user was blocked vs account deactivated."
+    },
+    {
+      "trigger": "Message delivery to group fails for some members",
+      "ui": "Delivery receipt shows partial: 'Delivered to 4 of 6'. Tap to see which members. Failed members shown with retry per member option. Never show as fully delivered when not."
+    },
+    {
+      "trigger": "Real-time connection drops mid-conversation",
+      "ui": "Top of chat banner: 'Reconnecting...'. Input disabled during reconnect. Auto-reconnect in background. On reconnect: load missed messages automatically. Banner disappears without user action."
+    },
+    {
+      "trigger": "Message content flagged by moderation",
+      "ui": "Message shows 'Message removed' placeholder in thread. Sender notified privately: 'Your message was removed \u2014 [reason]'. Never silently delete without sender notification."
+    }
+  ],
+  "edge_cases": [
+    {
+      "case": "User sends message to themselves",
+      "ui": "Allow it \u2014 useful as personal notes. Show 'Note to self' label in conversation list. No read receipt shown (would be confusing). No typing indicator."
+    },
+    {
+      "case": "Very long message (1000+ characters)",
+      "ui": "Show first 300 characters with 'Show more' inline. Full message in thread on expand. Search indexes full content. Never truncate in storage."
+    },
+    {
+      "case": "Message sent in wrong conversation",
+      "ui": "Short window (5-10 seconds) to unsend \u2014 'Undo send' toast appears immediately after send. After window: message can be deleted from sender's view only \u2014 recipients see 'Message deleted'."
+    },
+    {
+      "case": "Group chat with only one remaining member (all others left)",
+      "ui": "Show banner: 'You are the only member of this group'. Options: 'Leave group' or 'Invite people'. Input remains active \u2014 allow personal notes use case."
+    },
+    {
+      "case": "Message received while device is offline",
+      "ui": "Push notification queued. On reconnect: messages delivered in order with original timestamps. Badge count accurate. No duplicate notifications."
+    },
+    {
+      "case": "User attempts to re-add a contact they previously blocked",
+      "ui": "Confirm step: 'You previously blocked [name]. Unblocking will allow them to message you again'. Explicit confirmation required. Previous message history restored."
+    }
+  ]
+}

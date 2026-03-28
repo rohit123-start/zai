@@ -1,0 +1,161 @@
+{
+  "industry_id": "beauty_wellness",
+  "industry_name": "Beauty & Wellness",
+  "tone": {
+    "primary": "warm, indulgent, aspirational",
+    "secondary": "trustworthy, personal, empowering",
+    "voice": "friendly and expert \u2014 like a knowledgeable friend who happens to be a beauty professional",
+    "avoid": "clinical, cold, overly technical, masculine-coded language"
+  },
+  "trust_signals": [
+    "star ratings and review count",
+    "before/after results",
+    "certified professional badges",
+    "real customer photos",
+    "booking confirmation and reminders",
+    "secure payment indicators",
+    "cancellation policy visibility"
+  ],
+  "ux_norms": [
+    "image-first layouts \u2014 large beautiful visuals dominate",
+    "soft rounded corners throughout",
+    "feminine-leaning but inclusive visual language",
+    "calendar and time pickers are central UI elements",
+    "wishlist and save functionality expected",
+    "loyalty points and rewards commonly shown",
+    "before/after sliders for product results",
+    "horizontal scroll for categories and products"
+  ],
+  "icons": {
+    "style": "soft duotone or rounded line",
+    "weight": "light to medium",
+    "mood": "elegant, warm, approachable",
+    "library": {
+      "name": "Phosphor Icons",
+      "variant": "Duotone",
+      "url": "https://phosphoricons.com"
+    },
+    "domain_icons": [
+      "flower",
+      "sparkle",
+      "drop",
+      "hand-soap",
+      "scissors",
+      "heart",
+      "star",
+      "leaf",
+      "sun",
+      "bottle",
+      "eye",
+      "palette"
+    ],
+    "nav_icons": [
+      "house",
+      "magnifying-glass",
+      "bag",
+      "heart",
+      "user",
+      "bell",
+      "funnel",
+      "grid-four",
+      "arrow-left",
+      "dots-three"
+    ]
+  },
+  "visual_language": {
+    "primary_type": "real photography",
+    "style": "soft, warm, high-key lighting \u2014 lifestyle and product focused",
+    "photography_rules": [
+      "always show real people and real results",
+      "warm skin tones, natural lighting preferred",
+      "product closeups with soft shadows",
+      "never use cold or harsh lighting",
+      "diverse representation expected"
+    ],
+    "background_treatment": "soft warm whites, blush tones, subtle gradients \u2014 never harsh black",
+    "empty_state_style": "soft SVG illustration \u2014 flower, sparkle, or mirror motif with warm copy",
+    "onboarding_visual": "warm flat vector illustration or soft watercolor style",
+    "illustration_style": "when used: soft watercolor or flat pastel vector \u2014 never geometric or techy"
+  },
+  "themes": {
+    "pack": [
+      "Sakura",
+      "Luxe",
+      "Fresh",
+      "Glow",
+      "Petal"
+    ]
+  },
+  "fonts": {
+    "ai_pick_heading": "Playfair Display",
+    "ai_pick_body": "DM Sans"
+  },
+  "valid_app_types": [
+    "Marketplace",
+    "Booking & Appointments",
+    "E-commerce",
+    "Social & Community",
+    "Dashboard SaaS",
+    "Content & Streaming",
+    "Chat / Messaging",
+    "Map & Location-Based",
+    "AI Tool",
+    "Developer Tool"
+  ],
+  "monetization_models": [
+    "commission per booking",
+    "subscription for premium listings",
+    "product sales margin",
+    "loyalty/rewards program",
+    "featured placement fees"
+  ],
+  "compliance_notes": [
+    "health claims must be carefully worded \u2014 avoid medical language",
+    "before/after imagery must be authentic",
+    "GDPR-compliant data handling for personal beauty profiles"
+  ],
+  "constraints": {
+    "avoid": [
+      "Never use harsh or clinical language \u2014 warmth and care define this industry's tone",
+      "Never use before/after imagery without explicit consent disclosure",
+      "Never show body measurements or weight in a context that could trigger body image concerns",
+      "Never use red or aggressive colour accents \u2014 softness is the aesthetic",
+      "Never show a provider without their credentials and certifications prominently displayed",
+      "Never use stock photography of models \u2014 real client photography or illustrated placeholders only"
+    ],
+    "enforce": [
+      "Provider photo always shown prominently \u2014 trust is visual in this industry",
+      "Certification badges always visible on provider profile",
+      "Consultation notes always private and never shared without explicit consent",
+      "Cancellation policy always shown before booking confirmation",
+      "Product ingredients always listed where applicable \u2014 allergy awareness is mandatory",
+      "Review authenticity \u2014 verified purchase badge on every review"
+    ]
+  },
+  "copy_by_app_type": {
+    "AI Tool": {
+      "headline": "Your AI beauty advisor",
+      "cta": "Get a recommendation"
+    },
+    "Booking & Appointments": {
+      "headline": "Book the best. Instantly.",
+      "cta": "Find availability"
+    },
+    "E-commerce": {
+      "headline": "Beauty that works for you",
+      "cta": "Shop now"
+    },
+    "Marketplace": {
+      "headline": "Discover beauty from every brand",
+      "cta": "Explore"
+    },
+    "Social & Community": {
+      "headline": "Connect with beauty lovers worldwide",
+      "cta": "Join now"
+    },
+    "default": {
+      "headline": "Feel your best, every day",
+      "cta": "Get started"
+    }
+  }
+}

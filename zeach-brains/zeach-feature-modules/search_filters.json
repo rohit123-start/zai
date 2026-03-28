@@ -1,0 +1,90 @@
+{
+  "feature_id": "search_filters",
+  "feature_name": "Search & Filters",
+  "description": "Full-text search with filtering, sorting, and saved search support.",
+  "screens_added": [
+    {
+      "id": "search_home",
+      "name": "Search",
+      "purpose": "Search bar, recent searches, trending"
+    },
+    {
+      "id": "search_results",
+      "name": "Search Results",
+      "purpose": "Results list with filter and sort controls"
+    },
+    {
+      "id": "filter_panel",
+      "name": "Filter Panel",
+      "purpose": "Advanced filter options \u2014 slides up from bottom"
+    }
+  ],
+  "entities_added": [
+    "SearchQuery",
+    "SearchResult",
+    "Filter",
+    "SavedSearch"
+  ],
+  "flows_added": [
+    "Tap search bar \u2192 type query \u2192 live results \u2192 tap result",
+    "Search results \u2192 open filter panel \u2192 apply filters \u2192 refined results",
+    "Save search \u2192 get notified when new results match"
+  ],
+  "interaction_patterns": [
+    "Live search \u2014 results update as user types, no submit needed",
+    "Recent searches shown on empty state \u2014 tap to re-run",
+    "Filter panel slides up from bottom as sheet",
+    "Active filter chips shown below search bar \u2014 tap to remove",
+    "Result count updates in real time as filters change",
+    "Clear all filters \u2014 single tap resets to unfiltered results"
+  ],
+  "generates_images": false,
+  "error_flows": [
+    {
+      "trigger": "Search returns zero results",
+      "ui": "Illustration of empty search. Query shown in message: 'No results for \"[query]\"'. Suggestions: check spelling, try fewer words, browse categories. Show 3\u20135 related or trending searches. Never show empty white screen."
+    },
+    {
+      "trigger": "Search times out or fails",
+      "ui": "Message: 'Search is taking too long \u2014 please try again'. Retry button. If repeated failure: 'Search is temporarily unavailable'. Show browse categories as fallback. Never show spinner indefinitely."
+    },
+    {
+      "trigger": "Filter combination returns zero results",
+      "ui": "Show count updating in real time as filters are applied. When count reaches zero: warn before applying: 'No results match all these filters'. Highlight which filter is most restrictive. Suggest removing one filter."
+    },
+    {
+      "trigger": "Saved search no longer returns results",
+      "ui": "In saved searches: amber badge 'No current results'. Last result count and date shown. 'Update filters' CTA. Do not delete saved search automatically \u2014 user may want to keep for future."
+    },
+    {
+      "trigger": "Search index temporarily out of sync",
+      "ui": "Show results with note: 'Results may not include the most recent updates'. Timestamp of last index shown. Never show stale data without disclosure."
+    }
+  ],
+  "edge_cases": [
+    {
+      "case": "Search query contains special characters or SQL-like strings",
+      "ui": "Sanitize silently \u2014 never show error for user input. Treat as plain text search. Never expose that sanitization occurred."
+    },
+    {
+      "case": "User applies contradictory filters (e.g. price min > price max)",
+      "ui": "Auto-correct: swap min and max silently. Or: show inline warning on the contradicting field. Never allow search to run with logically impossible filter combination."
+    },
+    {
+      "case": "Very long search query (200+ characters)",
+      "ui": "Accept and search. Truncate display in search bar to last 60 characters with '...' prefix. Full query used for search. Never silently truncate the actual search."
+    },
+    {
+      "case": "User searches immediately after first app open (cold start)",
+      "ui": "Search index may not be warm. Show 'Searching...' with skeleton results for up to 2 seconds before showing empty state. Never flash empty state before results have had time to load."
+    },
+    {
+      "case": "Filter options change after user has saved a filter set",
+      "ui": "On loading saved filter: check each filter option still exists. Silently drop invalid options. Show notice: 'Some saved filters are no longer available and have been removed'."
+    },
+    {
+      "case": "Search with accented characters or non-Latin scripts",
+      "ui": "Normalize search input \u2014 'caf\u00e9' matches 'cafe'. Support right-to-left display for Arabic/Hebrew queries. Results sort correctly regardless of script."
+    }
+  ]
+}

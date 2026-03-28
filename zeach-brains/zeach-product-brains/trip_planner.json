@@ -1,0 +1,987 @@
+{
+  "archetype_id": "trip_planner",
+  "archetype_name": "Trip Planner",
+  "description": "Itinerary builder, day-by-day trip planning, packing lists, travel documents, and group travel coordination. Travel & Lifestyle industry only.",
+  "valid_industries": [
+    "Travel & Lifestyle"
+  ],
+  "icon_pack": {
+    "default_library": {
+      "name": "Lucide",
+      "variant": "Rounded line",
+      "url": "https://lucide.dev"
+    },
+    "industry_overrides": {},
+    "core_nav_icons": [
+      "home",
+      "map",
+      "plus-circle",
+      "heart",
+      "user",
+      "bell",
+      "calendar",
+      "list",
+      "arrow-left",
+      "search"
+    ],
+    "core_domain_icons": [
+      "plane",
+      "map-pin",
+      "calendar",
+      "luggage",
+      "camera",
+      "compass",
+      "sun",
+      "clock",
+      "users",
+      "bookmark"
+    ]
+  },
+  "landing_page": {
+    "sections": [
+      {
+        "id": "hero",
+        "generates_images": true
+      },
+      {
+        "id": "how_it_works",
+        "generates_images": false
+      },
+      {
+        "id": "cta_footer",
+        "generates_images": false
+      }
+    ],
+    "three_js": {
+      "style": "starfield_globe",
+      "description": "Slow starfield depth effect with a faint wireframe globe in the background. Travel and exploration energy. Destination dots appear across the globe.",
+      "intensity": "subtle",
+      "interaction": "mouse_rotate",
+      "avoid": "no status pills, no hero-stat-line, no ticker strips"
+    }
+  },
+  "core_entities": {
+    "entities": [
+      "User",
+      "Trip",
+      "Day",
+      "Activity",
+      "Accommodation",
+      "Flight",
+      "PackingList",
+      "PackingItem",
+      "TravelDocument",
+      "TripMember",
+      "Note"
+    ],
+    "relationships": [
+      "User creates many Trips",
+      "Trip has many Days",
+      "Day has many Activities and an Accommodation",
+      "Trip has Flights (outbound and return)",
+      "Trip has a PackingList with PackingItems",
+      "Trip has TravelDocuments \u2014 visas, insurance, confirmations",
+      "Trip has TripMembers \u2014 for group travel",
+      "Activity has a location, time, cost, and booking reference",
+      "Note belongs to a Trip or Day \u2014 free text observations"
+    ]
+  },
+  "tiers": {
+    "mvp": {
+      "tier": "MVP",
+      "description": "Core trip planner \u2014 create trip, plan days, add activities.",
+      "screen_count": 8,
+      "primary_flows": [
+        "Create trip \u2192 set dates and destination \u2192 add days \u2192 add activities to each day \u2192 view itinerary",
+        "Add accommodation \u2192 add flights \u2192 view full trip overview"
+      ],
+      "secondary_flows": [
+        "Add packing list",
+        "Share trip",
+        "View on map",
+        "Add notes"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "My Trips",
+          "purpose": "All trips \u2014 upcoming, active, past",
+          "visual": "Trip cards with destination photo. Dates. Countdown to departure.",
+          "entities": [
+            "Trip"
+          ],
+          "actions": [
+            "View all trips",
+            "Create new trip",
+            "Tap trip to open",
+            "View countdown"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Trip Planner'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Trip Planner'].cta}}",
+            "empty_state": "No trips yet. Create your first itinerary in seconds."
+          }
+        },
+        {
+          "id": "create_trip",
+          "name": "Create Trip",
+          "purpose": "Set destination, dates, and basic trip details",
+          "visual": "Destination search. Date range picker. Trip name. Cover photo.",
+          "entities": [
+            "Trip"
+          ],
+          "actions": [
+            "Search destination",
+            "Set dates",
+            "Name trip",
+            "Add cover photo",
+            "Create trip"
+          ]
+        },
+        {
+          "id": "trip_overview",
+          "name": "Trip Overview",
+          "purpose": "Full trip at a glance \u2014 days, flights, accommodation",
+          "visual": "Trip header with cover photo. Day tabs. Flights card. Accommodation card. Packing progress.",
+          "entities": [
+            "Trip",
+            "Day",
+            "Flight",
+            "Accommodation"
+          ],
+          "actions": [
+            "View day plan",
+            "Add flight",
+            "Add accommodation",
+            "View packing list",
+            "Share trip"
+          ],
+          "copy": {
+            "headline": "",
+            "cta": "Add activity",
+            "empty_state": "No activities yet. Start adding things to do on each day."
+          }
+        },
+        {
+          "id": "day_plan",
+          "name": "Day Plan",
+          "purpose": "Hour-by-hour activities for a single day",
+          "visual": "Timeline view. Activity cards with time, location, cost. Add activity CTA.",
+          "entities": [
+            "Day",
+            "Activity"
+          ],
+          "actions": [
+            "Add activity",
+            "Reorder activities",
+            "View activity on map",
+            "Edit activity",
+            "Delete activity"
+          ]
+        },
+        {
+          "id": "add_activity",
+          "name": "Add Activity",
+          "purpose": "Add a place, experience, or task to a day",
+          "visual": "Search places. Manual entry. Time selector. Cost. Booking ref. Notes.",
+          "entities": [
+            "Activity"
+          ],
+          "actions": [
+            "Search place",
+            "Set time",
+            "Add cost",
+            "Add booking reference",
+            "Add to day"
+          ]
+        },
+        {
+          "id": "map_view",
+          "name": "Trip Map",
+          "purpose": "All activities plotted on a map for the trip or a day",
+          "visual": "Full map. Day filter chips. Numbered pins in order. Route line.",
+          "entities": [
+            "Activity",
+            "Accommodation"
+          ],
+          "actions": [
+            "Filter by day",
+            "Tap pin for detail",
+            "View route",
+            "Navigate to place"
+          ]
+        },
+        {
+          "id": "packing_list",
+          "name": "Packing List",
+          "purpose": "Checklist of items to pack",
+          "visual": "Category sections. Items with checkboxes. Progress bar. Add item.",
+          "entities": [
+            "PackingList",
+            "PackingItem"
+          ],
+          "actions": [
+            "Add item",
+            "Check off item",
+            "Add category",
+            "View progress",
+            "Share list"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "User profile and app preferences",
+          "visual": "Profile. Currency preference. Units. Notification settings.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Edit profile",
+            "Set default currency",
+            "Notification settings",
+            "Log out"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "Day tabs \u2014 swipe between days on trip overview",
+        "Activity timeline \u2014 drag to reorder",
+        "Countdown chip on trip card \u2014 days until departure",
+        "Packing progress bar \u2014 fills as items checked",
+        "Map pins numbered \u2014 matches day plan order",
+        "Swipe to delete activity"
+      ]
+    },
+    "startup": {
+      "tier": "Startup",
+      "description": "Full trip planner with group travel, documents, budget tracking, and offline access.",
+      "screen_count": 14,
+      "primary_flows": [
+        "All MVP flows",
+        "Invite travel companions \u2192 shared itinerary \u2192 everyone edits \u2192 changes sync",
+        "Add travel documents \u2192 set expiry reminders \u2192 access offline",
+        "Set trip budget \u2192 log expenses \u2192 track remaining"
+      ],
+      "secondary_flows": [
+        "All MVP secondary flows",
+        "Vote on activities in group",
+        "Currency converter",
+        "Emergency contacts",
+        "Trip journal with photos"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "My Trips",
+          "purpose": "Trips with group member avatars and collaboration status",
+          "visual": "Trip cards. Group avatars. Collaboration badge. Active editing indicator.",
+          "entities": [
+            "Trip",
+            "TripMember"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View group members",
+            "See who is editing"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Trip Planner'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Trip Planner'].cta}}",
+            "empty_state": "No trips yet. Create your first itinerary in seconds."
+          }
+        },
+        {
+          "id": "trip_overview",
+          "name": "Trip Overview",
+          "purpose": "Full trip with group activity and budget summary",
+          "visual": "Group avatars. Budget ring. Day tabs. Collaboration feed.",
+          "entities": [
+            "Trip",
+            "Day",
+            "Flight",
+            "Accommodation",
+            "TripMember"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View group activity",
+            "View budget summary",
+            "Invite member"
+          ],
+          "copy": {
+            "headline": "",
+            "cta": "Add activity",
+            "empty_state": "No activities yet. Start adding things to do on each day."
+          }
+        },
+        {
+          "id": "day_plan",
+          "name": "Day Plan",
+          "purpose": "Collaborative day planning with voting",
+          "visual": "Activity cards. Vote indicator. Author avatar. Conflict alert.",
+          "entities": [
+            "Day",
+            "Activity",
+            "TripMember"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Vote on activity",
+            "See who added activity",
+            "Resolve conflict"
+          ]
+        },
+        {
+          "id": "group_members",
+          "name": "Group / Members",
+          "purpose": "Manage trip members and permissions",
+          "visual": "Member list. Role badge. Invite CTA. Remove member.",
+          "entities": [
+            "TripMember",
+            "Trip"
+          ],
+          "actions": [
+            "Invite member",
+            "Set permissions",
+            "Remove member",
+            "View contribution per member"
+          ]
+        },
+        {
+          "id": "documents",
+          "name": "Travel Documents",
+          "purpose": "Store and access all trip documents",
+          "visual": "Document cards. Expiry date badge. Categories \u2014 visa, insurance, booking. Upload CTA.",
+          "entities": [
+            "TravelDocument"
+          ],
+          "actions": [
+            "Upload document",
+            "View document",
+            "Set expiry reminder",
+            "Share document",
+            "Download for offline"
+          ]
+        },
+        {
+          "id": "budget",
+          "name": "Budget Tracker",
+          "purpose": "Set budget, log expenses, split costs",
+          "visual": "Budget ring. Category breakdown. Expense list. Split calculator.",
+          "entities": [
+            "Trip",
+            "TripMember"
+          ],
+          "actions": [
+            "Set budget",
+            "Log expense",
+            "Split expense with group",
+            "View category breakdown",
+            "View who owes what"
+          ]
+        },
+        {
+          "id": "add_activity",
+          "name": "Add Activity",
+          "purpose": "Rich activity creation with booking integration",
+          "visual": "Search places. Time. Cost. Booking ref. Add for group or self. Vote option.",
+          "entities": [
+            "Activity"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Add for whole group",
+            "Add as suggestion for vote"
+          ]
+        },
+        {
+          "id": "map_view",
+          "name": "Trip Map",
+          "purpose": "Full map with all members locations and activities",
+          "visual": "Map. All activities. Member live location opt-in. Route optimiser.",
+          "entities": [
+            "Activity",
+            "Accommodation",
+            "TripMember"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View group member locations",
+            "Optimise day route"
+          ]
+        },
+        {
+          "id": "packing_list",
+          "name": "Packing List",
+          "purpose": "Shared packing list with assignment",
+          "visual": "Items. Assign to member. Checked by indicator. Template suggestions.",
+          "entities": [
+            "PackingList",
+            "PackingItem",
+            "TripMember"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Assign item to member",
+            "View who packed what",
+            "Use packing template"
+          ]
+        },
+        {
+          "id": "journal",
+          "name": "Trip Journal",
+          "purpose": "Day-by-day photo journal and notes",
+          "visual": "Day entries. Photo grid. Notes. Memory timeline.",
+          "entities": [
+            "Note",
+            "Day"
+          ],
+          "actions": [
+            "Add journal entry",
+            "Upload photos",
+            "Write notes",
+            "View memory timeline"
+          ]
+        },
+        {
+          "id": "discover",
+          "name": "Discover",
+          "purpose": "Find things to do at destination",
+          "visual": "Category tabs. Place cards with rating. Save to itinerary CTA.",
+          "entities": [
+            "Activity",
+            "Trip"
+          ],
+          "actions": [
+            "Browse by category",
+            "View place detail",
+            "Save to day",
+            "Get directions"
+          ]
+        },
+        {
+          "id": "offline",
+          "name": "Offline Access",
+          "purpose": "Download trip for offline use",
+          "visual": "Download progress. Trip size. Offline indicator. Last synced.",
+          "entities": [
+            "Trip"
+          ],
+          "actions": [
+            "Download trip",
+            "View offline status",
+            "Manage storage"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "purpose": "Trip reminders and group activity alerts",
+          "visual": "Departure reminder. Document expiry. Group edits. Activity time alerts.",
+          "entities": [
+            "Notification",
+            "Trip"
+          ],
+          "actions": [
+            "View all",
+            "Tap to navigate",
+            "Manage preferences"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Full settings with group and currency preferences",
+          "visual": "Profile. Default currency. Offline maps. Group notification settings.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Currency settings",
+            "Offline settings",
+            "Group notification preferences"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP patterns",
+        "Collaboration cursor \u2014 see other members editing in real time",
+        "Vote chips on suggested activities \u2014 thumbs up count visible",
+        "Budget ring \u2014 turns amber at 80%, red at 100% spent",
+        "Document expiry \u2014 amber 30 days out, red 7 days out",
+        "Route optimiser \u2014 reorders day activities by proximity"
+      ]
+    },
+    "scale": {
+      "tier": "Scale",
+      "description": "Full travel platform with AI recommendations, travel alerts, loyalty integration, and enterprise travel management.",
+      "screen_count": 20,
+      "primary_flows": [
+        "All MVP and Startup flows",
+        "AI suggests activities based on preferences and past trips",
+        "Travel alert fires \u2192 user sees disruption \u2192 AI suggests alternatives",
+        "Corporate travel policy applied \u2192 bookings within policy auto-approved"
+      ],
+      "secondary_flows": [
+        "All previous flows",
+        "Loyalty points tracking",
+        "Travel insurance integration",
+        "Visa requirement checker",
+        "Carbon footprint tracking",
+        "Corporate expense policy"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "My Trips",
+          "purpose": "AI-personalised home with trip recommendations",
+          "visual": "Active trip progress. Upcoming trips. AI suggested next trip. Past memories.",
+          "entities": [
+            "Trip"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View AI trip suggestion",
+            "View past trip memories"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Trip Planner'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Trip Planner'].cta}}",
+            "empty_state": "No trips yet. Create your first itinerary in seconds."
+          }
+        },
+        {
+          "id": "trip_overview",
+          "name": "Trip Overview",
+          "purpose": "Full trip with AI insights and travel alerts",
+          "visual": "Trip overview. Travel alert banner if active. AI insight card. Budget.",
+          "entities": [
+            "Trip",
+            "Day",
+            "Flight",
+            "Accommodation"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View travel alert",
+            "View AI insight",
+            "Accept AI suggestion"
+          ],
+          "copy": {
+            "headline": "",
+            "cta": "Add activity",
+            "empty_state": "No activities yet. Start adding things to do on each day."
+          }
+        },
+        {
+          "id": "ai_suggestions",
+          "name": "AI Recommendations",
+          "purpose": "AI-powered activity and destination suggestions",
+          "visual": "Personalised suggestions grid. Reason shown. Save or dismiss.",
+          "entities": [
+            "Activity",
+            "Trip"
+          ],
+          "actions": [
+            "View AI suggestions",
+            "Save to itinerary",
+            "Dismiss",
+            "View reasoning",
+            "Adjust preferences"
+          ]
+        },
+        {
+          "id": "travel_alerts",
+          "name": "Travel Alerts",
+          "purpose": "Real-time flight, weather, and safety alerts",
+          "visual": "Alert cards. Severity badge. AI alternative suggestion. Acknowledge.",
+          "entities": [
+            "Trip",
+            "Flight"
+          ],
+          "actions": [
+            "View alert detail",
+            "See AI alternative",
+            "Acknowledge alert",
+            "Contact support"
+          ]
+        },
+        {
+          "id": "day_plan",
+          "name": "Day Plan",
+          "purpose": "AI-optimised day plan with real-time adjustments",
+          "visual": "AI optimised badge. Live wait times where available. Route efficiency score.",
+          "entities": [
+            "Day",
+            "Activity"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Accept AI optimisation",
+            "View live wait times"
+          ]
+        },
+        {
+          "id": "discover",
+          "name": "Discover",
+          "purpose": "AI-curated discovery with personalised ranking",
+          "visual": "AI ranked results. Personalisation score. Hidden gems section.",
+          "entities": [
+            "Activity",
+            "Trip"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View AI ranking",
+            "Hidden gems tab",
+            "Filter by preference"
+          ]
+        },
+        {
+          "id": "loyalty",
+          "name": "Loyalty & Rewards",
+          "purpose": "Track loyalty points across airlines and hotels",
+          "visual": "Points balance per program. Redemption options. Status level.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "View all loyalty programs",
+            "Track points",
+            "View redemption options",
+            "Connect program"
+          ]
+        },
+        {
+          "id": "visa_requirements",
+          "name": "Visa & Entry Requirements",
+          "purpose": "Check visa requirements for destination",
+          "visual": "Destination. Passport. Visa requirement card. Processing time. Apply link.",
+          "entities": [
+            "TravelDocument",
+            "Trip"
+          ],
+          "actions": [
+            "Check requirements",
+            "View processing time",
+            "Start application",
+            "Save requirement"
+          ]
+        },
+        {
+          "id": "insurance",
+          "name": "Travel Insurance",
+          "purpose": "Purchase and manage travel insurance",
+          "visual": "Coverage options. Quote. Purchase. Policy card. Claim CTA.",
+          "entities": [
+            "TravelDocument",
+            "Trip"
+          ],
+          "actions": [
+            "Get quote",
+            "Compare coverage",
+            "Purchase policy",
+            "View policy",
+            "Start claim"
+          ]
+        },
+        {
+          "id": "carbon",
+          "name": "Carbon Footprint",
+          "purpose": "Track and offset travel carbon emissions",
+          "visual": "Trip emissions card. Breakdown by transport. Offset options. Total offset.",
+          "entities": [
+            "Trip",
+            "Flight"
+          ],
+          "actions": [
+            "View emissions",
+            "View breakdown",
+            "Purchase offset",
+            "View cumulative offset"
+          ]
+        },
+        {
+          "id": "corporate_travel",
+          "name": "Corporate Travel",
+          "purpose": "Company travel policy management",
+          "visual": "Policy card. Approved suppliers. Expense limit. Pre-approval status.",
+          "entities": [
+            "Trip",
+            "User"
+          ],
+          "actions": [
+            "View travel policy",
+            "Check policy compliance",
+            "Request pre-approval",
+            "Submit corporate expense"
+          ]
+        },
+        {
+          "id": "group_members",
+          "name": "Group Members",
+          "purpose": "Advanced group with permissions and roles",
+          "visual": "Members. Roles \u2014 organiser, editor, viewer. Contribution stats.",
+          "entities": [
+            "TripMember",
+            "Trip"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Set role",
+            "View contribution stats",
+            "Transfer organiser role"
+          ]
+        },
+        {
+          "id": "documents",
+          "name": "Travel Documents",
+          "purpose": "Full document management with auto-extraction",
+          "visual": "Documents. Auto-extracted info badges. Expiry alerts. Shared with group.",
+          "entities": [
+            "TravelDocument"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Auto-extract from photo",
+            "Share with group",
+            "Set renewal reminder"
+          ]
+        },
+        {
+          "id": "budget",
+          "name": "Budget & Expenses",
+          "purpose": "Full expense management with corporate policy",
+          "visual": "Budget. Expenses. Policy compliance. Export for reimbursement.",
+          "entities": [
+            "Trip",
+            "TripMember"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Check policy compliance",
+            "Export for reimbursement"
+          ]
+        },
+        {
+          "id": "journal",
+          "name": "Trip Journal",
+          "purpose": "AI-enhanced journal with auto-captions",
+          "visual": "Journal entries. AI suggested captions. Memory highlights. Share.",
+          "entities": [
+            "Note",
+            "Day"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Use AI caption suggestion",
+            "Create memory highlight",
+            "Share journal"
+          ]
+        },
+        {
+          "id": "admin_corporate",
+          "name": "Corporate Admin",
+          "purpose": "Company travel spend management",
+          "visual": "Spend dashboard. Policy violations. Approval queue. Top destinations.",
+          "entities": [
+            "Trip",
+            "User"
+          ],
+          "actions": [
+            "View spend dashboard",
+            "Review violations",
+            "Approve trips",
+            "Set policy rules"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Full settings with loyalty, corporate, and AI preferences",
+          "visual": "Profile. Loyalty programs. Corporate settings. AI preferences.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Loyalty program settings",
+            "Corporate account settings",
+            "AI preference tuning"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP and Startup patterns",
+        "Travel alert banner \u2014 appears at top of trip when disruption detected",
+        "AI suggestion card \u2014 dismissible, learns from dismissals",
+        "Policy compliance chip \u2014 green approved, amber review, red violation",
+        "Carbon offset \u2014 progress bar toward carbon neutral trip",
+        "Loyalty points \u2014 earned on bookings, shown in real time"
+      ]
+    }
+  },
+  "layout": {
+    "iphone": {
+      "nav": "bottom_tab_4",
+      "nav_items": [
+        "My Trips",
+        "Discover",
+        "Map",
+        "Profile"
+      ],
+      "content": "full_width_single_column_trip_cards",
+      "card_style": "trip_card_full_width_destination_photo",
+      "cta": "create_trip_floating_button_bottom_right",
+      "hero": "active_trip_card_top_with_countdown_then_upcoming",
+      "padding": "16px horizontal",
+      "image_ratio": "16:9 trip cover photo"
+    },
+    "ipad": {
+      "nav": "sidebar_left_with_labels",
+      "nav_items": [
+        "My Trips",
+        "Trip Detail",
+        "Map",
+        "Discover",
+        "Profile"
+      ],
+      "content": "2col_trip_list_left_itinerary_right",
+      "card_style": "day_card_with_activity_timeline",
+      "cta": "add_activity_prominent_in_day_view",
+      "hero": "trip_overview_with_day_tabs_and_map_toggle",
+      "padding": "24px",
+      "image_ratio": "16:9 trip cover 4:3 activity photo"
+    },
+    "desktop": {
+      "nav": "sidebar_left_fixed",
+      "nav_items": [
+        "My Trips",
+        "Itinerary",
+        "Map View",
+        "Documents",
+        "Budget",
+        "Profile"
+      ],
+      "content": "left_anchored_itinerary_max_900px_map_panel_right",
+      "card_style": "activity_timeline_left_map_always_right",
+      "cta": "add_activity_inline_in_timeline",
+      "hero": "split_view_itinerary_left_live_map_right",
+      "padding": "32px itinerary panel",
+      "image_ratio": "16:9 destination photo"
+    },
+    "notes": "On desktop, map and itinerary always visible simultaneously \u2014 never toggle between them. Day tabs are the primary navigation on all form factors once inside a trip."
+  },
+  "constraints": {
+    "avoid": [
+      "Never show a trip without a cover photo \u2014 use a destination stock image as default, never blank",
+      "Never use a modal for activity creation \u2014 always full screen or bottom sheet with map",
+      "Never lock the itinerary to a fixed time grid \u2014 activities should be flexible, time is optional",
+      "Never auto-sort activities by time without user confirmation",
+      "Never show a currency amount without specifying which currency",
+      "Never collapse the day tabs \u2014 always show all days as horizontal scroll tabs",
+      "Never require an account before creating a trip \u2014 allow guest planning with prompt to save"
+    ],
+    "enforce": [
+      "Trip cover photo always full bleed \u2014 no white borders or card containers around hero",
+      "Day tabs always visible as horizontal scroll \u2014 never in a dropdown",
+      "Activity time is optional \u2014 never required to add an activity",
+      "Budget always shows remaining amount prominently \u2014 not just total",
+      "Map view always accessible from any day plan \u2014 one tap",
+      "Offline mode indicator when planning without connection",
+      "Group member changes sync in real time with conflict resolution",
+      "Packing list accessible from trip overview in one tap"
+    ]
+  },
+  "states": {
+    "empty_states": [
+      {
+        "screen": "home",
+        "trigger": "No trips created",
+        "ui": "Destination photography mosaic background. Message: 'Where are you going?' CTA: 'Plan a trip'. Secondary: 'Explore destinations for inspiration'."
+      },
+      {
+        "screen": "day_plan",
+        "trigger": "Day has no activities planned",
+        "ui": "Map view of destination centred. Message: 'Nothing planned for [Day]'. CTA: 'Add activity'. Nearby popular places shown as suggestions below."
+      },
+      {
+        "screen": "packing_list",
+        "trigger": "List is empty",
+        "ui": "Suitcase illustration. Message: 'Your packing list is empty'. CTA: 'Add items'. Secondary: 'Use a template'. Show category suggestions: Clothes, Toiletries, Documents, Tech."
+      }
+    ],
+    "loading_states": [
+      {
+        "screen": "home",
+        "ui": "Trip cards skeleton \u2014 cover photo placeholder full width, trip name and date skeleton below. 2-3 cards shimmer."
+      },
+      {
+        "screen": "day_plan",
+        "ui": "Activity timeline skeleton \u2014 time column left, activity card right. 3 activity skeletons. Map thumbnail skeleton if shown."
+      },
+      {
+        "screen": "discover",
+        "ui": "Place cards grid skeleton \u2014 image top 4:3, name and category below. 6 cards shimmer."
+      }
+    ],
+    "error_flows": [
+      {
+        "trigger": "Activity details fail to load",
+        "ui": "Activity card shows name and time from local data. Details section: 'Details unavailable'. Retry button. Map pin still shows location."
+      },
+      {
+        "trigger": "Group sync conflict (two users edit same day simultaneously)",
+        "ui": "Conflict banner: '[Name] also made changes'. Show diff: their changes vs yours. Options: 'Keep mine', 'Keep theirs', 'See both'. Never silently overwrite."
+      },
+      {
+        "trigger": "Document upload fails",
+        "ui": "Document card shows failed state with red icon. Retry button. Other documents unaffected. Local copy retained for retry."
+      },
+      {
+        "trigger": "Offline during group collaboration",
+        "ui": "Changes saved locally with 'Pending sync' indicator. Banner: 'Offline \u2014 changes will sync when connected'. No data loss."
+      }
+    ],
+    "edge_cases": [
+      {
+        "case": "Trip with only one day",
+        "ui": "Day tabs still shown \u2014 just one tab. Consistent UI regardless of trip length."
+      },
+      {
+        "case": "Activity that spans midnight (late night event)",
+        "ui": "Activity appears at end of Day 1 with 'Ends next day' label. Does not duplicate on Day 2."
+      },
+      {
+        "case": "15+ person group trip",
+        "ui": "Group member list paginated. Activity voting shows top 3 voters then '+N others'. Budget split calculator handles all members."
+      },
+      {
+        "case": "Past trip (all dates in past)",
+        "ui": "Trip marked as 'Completed'. Read-only mode offered. Journal and photo mode prominently surfaced. No 'Add activity' CTA \u2014 only 'Add journal entry'."
+      }
+    ]
+  },
+  "components": [
+    "TripCard",
+    "DayTab",
+    "ActivityCard",
+    "PackingItem",
+    "MapPin",
+    "BudgetRing",
+    "GroupAvatar",
+    "CountdownChip"
+  ],
+  "nav_active_states": {
+    "home": "My Trips",
+    "create_trip": "My Trips",
+    "trip_overview": "My Trips",
+    "day_plan": "My Trips",
+    "add_activity": "My Trips",
+    "map_view": "Map",
+    "packing_list": "My Trips",
+    "profile_settings": "Profile"
+  }
+}

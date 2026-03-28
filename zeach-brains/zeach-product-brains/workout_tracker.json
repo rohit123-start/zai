@@ -1,0 +1,975 @@
+{
+  "archetype_id": "workout_tracker",
+  "archetype_name": "Workout Tracker",
+  "description": "Log workouts, track sets and reps, monitor body metrics, and measure progress over time. Fitness & Sport industry only.",
+  "valid_industries": [
+    "Fitness & Sport"
+  ],
+  "icon_pack": {
+    "default_library": {
+      "name": "Tabler Icons",
+      "variant": "Bold line",
+      "url": "https://tabler.io/icons"
+    },
+    "industry_overrides": {},
+    "core_nav_icons": [
+      "home",
+      "plus-circle",
+      "chart-bar",
+      "calendar",
+      "user",
+      "dumbbell",
+      "activity",
+      "arrow-left",
+      "search",
+      "settings"
+    ],
+    "core_domain_icons": [
+      "dumbbell",
+      "flame",
+      "heart-rate",
+      "trophy",
+      "stopwatch",
+      "barbell",
+      "run",
+      "chart-bar",
+      "medal",
+      "target"
+    ]
+  },
+  "landing_page": {
+    "sections": [
+      {
+        "id": "hero",
+        "generates_images": true
+      },
+      {
+        "id": "how_it_works",
+        "generates_images": false
+      },
+      {
+        "id": "pricing",
+        "generates_images": false
+      },
+      {
+        "id": "cta_footer",
+        "generates_images": false
+      }
+    ],
+    "three_js": {
+      "style": "energy_lines",
+      "description": "Dynamic kinetic lines shooting across the scene like speed lines. Bold and high energy. Lines fade quickly. Pulse syncs to a rhythm.",
+      "intensity": "high",
+      "interaction": "mouse_speed",
+      "avoid": "no status pills, no hero-stat-line, no ticker strips"
+    }
+  },
+  "core_entities": {
+    "entities": [
+      "User",
+      "Workout",
+      "Exercise",
+      "Set",
+      "BodyMetric",
+      "Program",
+      "PersonalRecord",
+      "Goal",
+      "Streak",
+      "Notification"
+    ],
+    "relationships": [
+      "User logs many Workouts",
+      "Workout contains many Exercises",
+      "Exercise has many Sets \u2014 each with reps, weight, duration, or distance",
+      "PersonalRecord belongs to User per Exercise \u2014 auto-updated when beaten",
+      "BodyMetric belongs to User \u2014 weight, measurements, body fat tracked over time",
+      "Program belongs to User or is a template \u2014 contains a schedule of Workouts",
+      "Goal belongs to User \u2014 target weight, PR, or streak",
+      "Streak belongs to User \u2014 consecutive workout days"
+    ]
+  },
+  "tiers": {
+    "mvp": {
+      "tier": "MVP",
+      "description": "Core workout logger \u2014 log workouts, track sets/reps, view history.",
+      "screen_count": 8,
+      "primary_flows": [
+        "Start workout \u2192 select exercises \u2192 log sets \u2192 finish \u2192 view summary",
+        "View exercise history \u2192 see personal records \u2192 track progress"
+      ],
+      "secondary_flows": [
+        "Browse exercise library",
+        "View workout history",
+        "Log body weight",
+        "Share workout"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Home / Dashboard",
+          "purpose": "Today's workout, recent activity, quick start",
+          "visual": "Bold dark UI. Today's plan card. Recent workouts. Quick start CTA. Streak badge.",
+          "entities": [
+            "Workout",
+            "Streak",
+            "Goal"
+          ],
+          "actions": [
+            "Start today's workout",
+            "Log quick workout",
+            "View streak",
+            "View recent workouts"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Workout Tracker'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Workout Tracker'].cta}}",
+            "empty_state": "Log your first workout to start tracking your progress."
+          }
+        },
+        {
+          "id": "active_workout",
+          "name": "Active Workout",
+          "purpose": "Live workout logging \u2014 exercises, sets, reps, weight",
+          "visual": "Exercise name large. Set rows. Weight and reps inputs. Rest timer. Next exercise.",
+          "entities": [
+            "Workout",
+            "Exercise",
+            "Set"
+          ],
+          "actions": [
+            "Log set",
+            "Add exercise",
+            "Start rest timer",
+            "Swap exercise",
+            "Finish workout"
+          ]
+        },
+        {
+          "id": "exercise_library",
+          "name": "Exercise Library",
+          "purpose": "Browse and search all exercises",
+          "visual": "Search bar. Muscle group filter. Exercise cards with muscle diagram.",
+          "entities": [
+            "Exercise"
+          ],
+          "actions": [
+            "Search exercises",
+            "Filter by muscle group",
+            "View exercise detail",
+            "Add to workout"
+          ]
+        },
+        {
+          "id": "exercise_detail",
+          "name": "Exercise Detail",
+          "purpose": "Exercise info, instructions, and personal history",
+          "visual": "Exercise name. Muscle groups. Instructions. PR badge. History chart.",
+          "entities": [
+            "Exercise",
+            "Set",
+            "PersonalRecord"
+          ],
+          "actions": [
+            "View instructions",
+            "View personal record",
+            "View history chart",
+            "Add to current workout"
+          ]
+        },
+        {
+          "id": "workout_history",
+          "name": "Workout History",
+          "purpose": "All past workouts with summary stats",
+          "visual": "Calendar heat map. Workout list below. Volume per session chart.",
+          "entities": [
+            "Workout"
+          ],
+          "actions": [
+            "View calendar heat map",
+            "Tap workout for detail",
+            "Filter by muscle group",
+            "View volume chart"
+          ],
+          "copy": {
+            "headline": "Workout history",
+            "cta": "Log workout",
+            "empty_state": "No workouts logged yet. Your first session starts here."
+          }
+        },
+        {
+          "id": "workout_summary",
+          "name": "Workout Summary",
+          "purpose": "Post-workout summary \u2014 volume, PRs, duration",
+          "visual": "Total volume. Duration. Exercises completed. PR badges. Share CTA.",
+          "entities": [
+            "Workout",
+            "PersonalRecord"
+          ],
+          "actions": [
+            "View summary stats",
+            "View PRs beaten",
+            "Share workout",
+            "Rate workout feel"
+          ]
+        },
+        {
+          "id": "progress",
+          "name": "Progress",
+          "purpose": "Body metrics and strength trends over time",
+          "visual": "Body weight chart. Strength charts per exercise. PR timeline.",
+          "entities": [
+            "BodyMetric",
+            "PersonalRecord"
+          ],
+          "actions": [
+            "Log body weight",
+            "View strength trends",
+            "View PR history",
+            "Set goal"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "User profile, units, and preferences",
+          "visual": "Avatar. Stats. Unit selector (kg/lbs). Rest timer defaults. Settings.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Edit profile",
+            "Set units",
+            "Rest timer settings",
+            "Notification settings",
+            "Log out"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "Active workout \u2014 large easy-to-tap inputs for weight and reps",
+        "Rest timer \u2014 countdown with haptic at zero, auto-starts after set logged",
+        "PR badge \u2014 animates when personal record beaten",
+        "Set row swipe \u2014 swipe to delete set",
+        "Workout heat map \u2014 darker = more volume",
+        "Quick add set \u2014 + button below last set row"
+      ]
+    },
+    "startup": {
+      "tier": "Startup",
+      "description": "Full tracker with programs, body measurements, nutrition basics, and social.",
+      "screen_count": 14,
+      "primary_flows": [
+        "All MVP flows",
+        "Follow program \u2192 workout auto-populated each day \u2192 complete \u2192 track adherence",
+        "Log body measurements \u2192 view trend \u2192 compare to goal"
+      ],
+      "secondary_flows": [
+        "All MVP secondary flows",
+        "Create custom program",
+        "Follow friend workouts",
+        "Log nutrition basics",
+        "1RM calculator"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Home",
+          "purpose": "Personalised dashboard with program progress",
+          "visual": "Program progress bar. Today's workout. Streak. Body metric summary.",
+          "entities": [
+            "Workout",
+            "Program",
+            "Streak",
+            "BodyMetric"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View program progress",
+            "See today's planned workout"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Workout Tracker'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Workout Tracker'].cta}}",
+            "empty_state": "Log your first workout to start tracking your progress."
+          }
+        },
+        {
+          "id": "active_workout",
+          "name": "Active Workout",
+          "purpose": "Full logging with plates calculator and video demos",
+          "visual": "Exercise with demo video thumbnail. Plates calculator. Previous performance shown.",
+          "entities": [
+            "Workout",
+            "Exercise",
+            "Set"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View demo video",
+            "Plates calculator",
+            "See last session performance"
+          ]
+        },
+        {
+          "id": "programs",
+          "name": "Programs",
+          "purpose": "Browse and follow structured training programs",
+          "visual": "Program cards. Duration. Difficulty. Muscle focus. Follow CTA.",
+          "entities": [
+            "Program"
+          ],
+          "actions": [
+            "Browse programs",
+            "Preview program weeks",
+            "Follow program",
+            "View program progress"
+          ]
+        },
+        {
+          "id": "program_detail",
+          "name": "Program Detail",
+          "purpose": "Full program \u2014 weeks, workouts, schedule",
+          "visual": "Program overview. Week view. Workout cards per day. Follow CTA.",
+          "entities": [
+            "Program",
+            "Workout"
+          ],
+          "actions": [
+            "View all weeks",
+            "Preview workouts",
+            "Follow program",
+            "Adjust start date"
+          ]
+        },
+        {
+          "id": "create_workout",
+          "name": "Create Workout",
+          "purpose": "Build custom workout from exercise library",
+          "visual": "Exercise search. Add exercise. Reorder. Set defaults. Save.",
+          "entities": [
+            "Workout",
+            "Exercise"
+          ],
+          "actions": [
+            "Add exercise",
+            "Set default sets/reps",
+            "Reorder exercises",
+            "Save as template"
+          ]
+        },
+        {
+          "id": "body_metrics",
+          "name": "Body Metrics",
+          "purpose": "Full body measurement tracking",
+          "visual": "Body weight chart. Measurement inputs \u2014 chest, waist, hips etc. Progress photos.",
+          "entities": [
+            "BodyMetric"
+          ],
+          "actions": [
+            "Log body weight",
+            "Log measurements",
+            "Add progress photo",
+            "View trends"
+          ]
+        },
+        {
+          "id": "exercise_library",
+          "name": "Exercise Library",
+          "purpose": "Full library with custom exercises",
+          "visual": "Search. Filter. Exercise cards. Create custom exercise CTA.",
+          "entities": [
+            "Exercise"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Create custom exercise",
+            "Mark as favourite"
+          ]
+        },
+        {
+          "id": "personal_records",
+          "name": "Personal Records",
+          "purpose": "All PRs across all exercises",
+          "visual": "PR list. Exercise name. Best weight/reps. Date achieved. History.",
+          "entities": [
+            "PersonalRecord",
+            "Exercise"
+          ],
+          "actions": [
+            "View all PRs",
+            "Filter by muscle group",
+            "View PR history",
+            "Set target"
+          ]
+        },
+        {
+          "id": "social_feed",
+          "name": "Activity Feed",
+          "purpose": "Friend workouts and achievements",
+          "visual": "Friend workout cards. PR badges. Streak milestones. React and comment.",
+          "entities": [
+            "Workout",
+            "User"
+          ],
+          "actions": [
+            "View friend workouts",
+            "React to workout",
+            "Comment",
+            "Follow user"
+          ]
+        },
+        {
+          "id": "workout_history",
+          "name": "Workout History",
+          "purpose": "Full history with volume analytics",
+          "visual": "Calendar. List. Volume chart. Muscle group frequency chart.",
+          "entities": [
+            "Workout"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View muscle frequency",
+            "View volume over time"
+          ],
+          "copy": {
+            "headline": "Workout history",
+            "cta": "Log workout",
+            "empty_state": "No workouts logged yet. Your first session starts here."
+          }
+        },
+        {
+          "id": "workout_summary",
+          "name": "Workout Summary",
+          "purpose": "Detailed post-workout with muscle map",
+          "visual": "Muscle map highlighting worked muscles. Volume. PRs. Rating.",
+          "entities": [
+            "Workout",
+            "PersonalRecord"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View muscle map",
+            "View estimated 1RM"
+          ]
+        },
+        {
+          "id": "progress",
+          "name": "Progress",
+          "purpose": "Full progress with strength and body composition",
+          "visual": "Strength charts. Body composition. PR timeline. Goal progress.",
+          "entities": [
+            "BodyMetric",
+            "PersonalRecord",
+            "Goal"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View body composition",
+            "Compare periods"
+          ]
+        },
+        {
+          "id": "goals",
+          "name": "Goals",
+          "purpose": "Set and track fitness goals",
+          "visual": "Goal cards. Progress bars. Deadline. On track badge.",
+          "entities": [
+            "Goal"
+          ],
+          "actions": [
+            "Create goal",
+            "Link to metric or exercise",
+            "View progress",
+            "Mark complete"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Full profile with social and equipment settings",
+          "visual": "Profile. Stats. Equipment available. Social. Settings.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Set available equipment",
+            "Social settings",
+            "Connect wearable"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP patterns",
+        "Previous performance shown above each set row \u2014 instant comparison",
+        "Plates calculator \u2014 input target weight, shows exact plates to load",
+        "Program day completion \u2014 satisfying check animation",
+        "Muscle map \u2014 body silhouette with worked muscles highlighted post-workout",
+        "Progress photo comparison \u2014 swipe between dates"
+      ]
+    },
+    "scale": {
+      "tier": "Scale",
+      "description": "Full fitness platform with coaching, AI programming, wearable integration, and team features.",
+      "screen_count": 20,
+      "primary_flows": [
+        "All MVP and Startup flows",
+        "Connect wearable \u2192 heart rate syncs during workout \u2192 recovery score calculated",
+        "AI generates program based on goals and history \u2192 user follows \u2192 AI adjusts"
+      ],
+      "secondary_flows": [
+        "All previous flows",
+        "Coach assigns workouts to athletes",
+        "Team leaderboard",
+        "Competition tracking",
+        "Periodisation planner"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Home",
+          "purpose": "AI-powered dashboard with recovery and readiness score",
+          "visual": "Recovery score card. HRV trend. Today's recommendation. Program.",
+          "entities": [
+            "Workout",
+            "Program",
+            "BodyMetric"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View recovery score",
+            "View HRV trend",
+            "View AI recommendation"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Workout Tracker'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Workout Tracker'].cta}}",
+            "empty_state": "Log your first workout to start tracking your progress."
+          }
+        },
+        {
+          "id": "active_workout",
+          "name": "Active Workout",
+          "purpose": "Full logging with live heart rate and auto-progression",
+          "visual": "Live heart rate zone display. Auto-suggested progression. Rest timer.",
+          "entities": [
+            "Workout",
+            "Exercise",
+            "Set"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View live heart rate zone",
+            "Accept auto-progression suggestion"
+          ]
+        },
+        {
+          "id": "ai_program",
+          "name": "AI Programming",
+          "purpose": "AI generates and adjusts personalised training program",
+          "visual": "AI program overview. This week's plan. Adjustment explanation. Feedback.",
+          "entities": [
+            "Program",
+            "User"
+          ],
+          "actions": [
+            "View AI program",
+            "Provide feedback",
+            "Adjust goal",
+            "View progression plan"
+          ]
+        },
+        {
+          "id": "coach_dashboard",
+          "name": "Coach Dashboard",
+          "purpose": "Coach assigns and monitors athlete workouts",
+          "visual": "Athlete list. Compliance rate. Assign workout. Message athlete.",
+          "entities": [
+            "User",
+            "Workout",
+            "Program"
+          ],
+          "actions": [
+            "View athletes",
+            "Assign workout",
+            "View compliance",
+            "Send feedback",
+            "Create program"
+          ]
+        },
+        {
+          "id": "recovery",
+          "name": "Recovery & Readiness",
+          "purpose": "HRV, sleep, and recovery score tracking",
+          "visual": "Recovery score gauge. HRV chart. Sleep quality. Recommendations.",
+          "entities": [
+            "BodyMetric",
+            "User"
+          ],
+          "actions": [
+            "View recovery score",
+            "View HRV history",
+            "Log sleep",
+            "View recommendations"
+          ]
+        },
+        {
+          "id": "wearable_integration",
+          "name": "Wearables & Devices",
+          "purpose": "Connect and manage wearable devices",
+          "visual": "Connected devices list. Sync status. Data permissions per device.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Connect device",
+            "View sync status",
+            "Manage data permissions",
+            "Manual sync"
+          ]
+        },
+        {
+          "id": "programs",
+          "name": "Programs",
+          "purpose": "Full program library with AI and coach programs",
+          "visual": "AI generated badge. Coach program badge. Community programs. Create.",
+          "entities": [
+            "Program"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View AI program",
+            "Follow coach program",
+            "Create and share program"
+          ]
+        },
+        {
+          "id": "team",
+          "name": "Team & Leaderboard",
+          "purpose": "Team workouts and competitive leaderboards",
+          "visual": "Team member cards. Leaderboard. Weekly challenge. Team streak.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "View team leaderboard",
+            "Join challenge",
+            "View team streak",
+            "Create team challenge"
+          ]
+        },
+        {
+          "id": "nutrition",
+          "name": "Nutrition Tracking",
+          "purpose": "Macro and calorie tracking integrated with workouts",
+          "visual": "Calorie ring. Macro bars. Meal log. Workout calorie burn.",
+          "entities": [
+            "User",
+            "BodyMetric"
+          ],
+          "actions": [
+            "Log meal",
+            "View macros",
+            "View calorie burn from workout",
+            "View net calories"
+          ]
+        },
+        {
+          "id": "body_metrics",
+          "name": "Body Metrics",
+          "purpose": "Full body composition with DEXA/scan import",
+          "visual": "Body composition chart. All measurements. Progress photos. Import.",
+          "entities": [
+            "BodyMetric"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Import scan results",
+            "Body composition breakdown",
+            "Long-term trend"
+          ]
+        },
+        {
+          "id": "exercise_library",
+          "name": "Exercise Library",
+          "purpose": "Full library with video demos and biomechanics",
+          "visual": "Search. Filter. Video demo. Biomechanics diagram. Coaching cues.",
+          "entities": [
+            "Exercise"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Watch video demo",
+            "View coaching cues",
+            "View biomechanics"
+          ]
+        },
+        {
+          "id": "personal_records",
+          "name": "Personal Records",
+          "purpose": "PRs with estimated 1RM and strength standards",
+          "visual": "PR list. Estimated 1RM. Strength level badge. World percentile.",
+          "entities": [
+            "PersonalRecord",
+            "Exercise"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View estimated 1RM",
+            "View strength standard level",
+            "See percentile ranking"
+          ]
+        },
+        {
+          "id": "social_feed",
+          "name": "Activity Feed",
+          "purpose": "Social feed with challenges and team activity",
+          "visual": "Feed. Challenge cards. Team activity. PR celebrations.",
+          "entities": [
+            "Workout",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Join challenge",
+            "View team activity",
+            "Celebrate PR"
+          ]
+        },
+        {
+          "id": "progress",
+          "name": "Progress",
+          "purpose": "Full analytics with periodisation view",
+          "visual": "Periodisation chart. Volume load. Intensity distribution. Body comp.",
+          "entities": [
+            "BodyMetric",
+            "PersonalRecord",
+            "Goal"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View periodisation chart",
+            "Volume load analysis",
+            "Intensity distribution"
+          ]
+        },
+        {
+          "id": "goals",
+          "name": "Goals",
+          "purpose": "AI-assisted goal setting with milestone planning",
+          "visual": "Goal cards. AI milestone plan. Progress. Predicted completion date.",
+          "entities": [
+            "Goal"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View AI milestone plan",
+            "View predicted completion date"
+          ]
+        },
+        {
+          "id": "admin_analytics",
+          "name": "Platform Analytics",
+          "purpose": "For gym or team owners \u2014 engagement and compliance stats",
+          "visual": "Active users. Workout frequency. Program completion. Top exercises.",
+          "entities": [
+            "User",
+            "Workout"
+          ],
+          "actions": [
+            "View active users",
+            "View program compliance",
+            "View popular exercises",
+            "Export data"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Full settings with coaching, wearables, and privacy",
+          "visual": "Profile. Coach connection. Wearables. Privacy. Data export.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Connect with coach",
+            "Wearable settings",
+            "Data export",
+            "Privacy controls"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP and Startup patterns",
+        "Recovery score colour coded \u2014 green ready, amber caution, red rest",
+        "Live heart rate zone \u2014 colour changes in real time during workout",
+        "AI progression suggestion \u2014 subtle inline recommendation before each set",
+        "Coach feedback \u2014 notification with vibration, opens message thread",
+        "Team challenge countdown \u2014 live timer on home screen"
+      ]
+    }
+  },
+  "layout": {
+    "iphone": {
+      "nav": "bottom_tab_4",
+      "nav_items": [
+        "Home",
+        "Log",
+        "History",
+        "Profile"
+      ],
+      "content": "full_width_bold_high_contrast",
+      "card_style": "full_width_workout_card_bold",
+      "cta": "start_workout_large_full_width_bottom",
+      "hero": "streak_and_today_workout_card_then_quick_start",
+      "padding": "16px horizontal",
+      "image_ratio": "no_photography_exercise_diagrams_only"
+    },
+    "ipad": {
+      "nav": "sidebar_left_with_labels",
+      "nav_items": [
+        "Home",
+        "Log Workout",
+        "Programs",
+        "Progress",
+        "Profile"
+      ],
+      "content": "2col_workout_list_left_detail_right",
+      "card_style": "exercise_row_with_sets_detail_right",
+      "cta": "start_workout_prominent_top_of_content",
+      "hero": "program_progress_top_then_workout_list",
+      "padding": "24px",
+      "image_ratio": "exercise_diagram_square"
+    },
+    "desktop": {
+      "nav": "sidebar_left_fixed",
+      "nav_items": [
+        "Dashboard",
+        "Log Workout",
+        "Programs",
+        "Exercise Library",
+        "Progress",
+        "Profile"
+      ],
+      "content": "left_anchored_max_1200px_with_sidebar",
+      "card_style": "exercise_table_with_set_history_inline",
+      "cta": "start_workout_top_right_primary",
+      "hero": "progress_charts_full_width_then_recent_workouts",
+      "padding": "32px content",
+      "image_ratio": "exercise_diagram_landscape"
+    },
+    "notes": "During active workout on iPhone \u2014 hide all navigation. Full screen, only exercise name, sets, timer, and finish button. No distractions. On iPad and desktop \u2014 active workout shows in main panel, exercise list remains accessible in sidebar."
+  },
+  "constraints": {
+    "avoid": [
+      "Never use small tap targets during active workout \u2014 minimum 56px for all workout logging actions",
+      "Never require more than 2 taps to log a set during active workout",
+      "Never auto-advance to next exercise without user confirmation",
+      "Never use subtle colours for active workout UI \u2014 high contrast only",
+      "Never show social content during active workout \u2014 dedicated focused mode",
+      "Never lose workout data on app close or phone lock \u2014 always persist in-progress workout",
+      "Never fabricate personal records \u2014 only show PR badge when genuinely beaten",
+      "Never show calorie counts as the primary metric \u2014 they are secondary to performance"
+    ],
+    "enforce": [
+      "Active workout mode: full screen, no distractions, workout controls only",
+      "Rest timer starts automatically after set logged \u2014 user can dismiss or extend",
+      "Previous performance shown above input fields for each exercise \u2014 instant reference",
+      "PR badge animates on screen when personal record beaten \u2014 celebratory moment",
+      "Workout always auto-saved every 30 seconds \u2014 never lose data",
+      "Exercise weight increment buttons \u2014 +2.5kg and -2.5kg \u2014 large tap targets",
+      "Set logged haptic feedback \u2014 subtle but immediate confirmation",
+      "Workout duration timer always visible during active session"
+    ]
+  },
+  "states": {
+    "empty_states": [
+      {
+        "screen": "home",
+        "trigger": "New user, no workout history",
+        "ui": "Start workout prompt centred. Quick start options: 'Upper body / Lower body / Full body / Custom'. No empty stats \u2014 hide stats section until first workout completed."
+      },
+      {
+        "screen": "workout_history",
+        "trigger": "No completed workouts",
+        "ui": "Calendar shows current month with no activity. Message: 'Complete your first workout to see your history'. CTA: 'Start workout'. Heat map hidden until data exists."
+      },
+      {
+        "screen": "personal_records",
+        "trigger": "No PRs set yet",
+        "ui": "Trophy illustration. Message: 'Log your first workout to set your records'. Sub: 'Your personal bests will track here automatically'."
+      }
+    ],
+    "loading_states": [
+      {
+        "screen": "home",
+        "ui": "Streak badge loads from cache immediately. Recent workouts skeleton \u2014 3 rows with exercise count and duration placeholder. Program progress skeleton if applicable."
+      },
+      {
+        "screen": "exercise_library",
+        "ui": "Search field active immediately. Exercise list skeleton \u2014 8 rows with name and muscle group badge placeholder. Filter chips visible."
+      },
+      {
+        "screen": "progress_charts",
+        "ui": "Chart skeleton rectangle. Metric selector chips visible and active. Date range selector visible. Data loads into chart without full page reload."
+      }
+    ],
+    "error_flows": [
+      {
+        "trigger": "Workout fails to save",
+        "ui": "Warning toast: 'Workout save failed'. Auto-retry in background. Local copy preserved. 'Sync when connected' indicator. Never lose the session data."
+      },
+      {
+        "trigger": "Exercise not found in library",
+        "ui": "Search shows: 'No results for [query]'. CTA: 'Create custom exercise'. Suggested similar exercises shown below."
+      },
+      {
+        "trigger": "Wearable sync fails",
+        "ui": "Heart rate shows last known value with 'Disconnected' label. Manual heart rate entry offered. Workout continues \u2014 wearable data is supplementary not blocking."
+      },
+      {
+        "trigger": "PR not saved (sync error)",
+        "ui": "Local PR marked with sync pending icon. 'Will sync when connected' message. PR celebrated locally even before sync confirms."
+      }
+    ],
+    "edge_cases": [
+      {
+        "case": "User attempts to log 0 reps or 0 weight",
+        "ui": "Inline validation: '0 reps cannot be logged'. Prompt to enter valid values. Never log empty sets."
+      },
+      {
+        "case": "Workout longer than 3 hours",
+        "ui": "Gentle check-in at 3h mark: 'Still working out?' with continue and finish options. Prevents accidental all-day timers."
+      },
+      {
+        "case": "Same exercise added twice to one workout",
+        "ui": "Allow it \u2014 some programs use multiple sets of the same exercise with rest between. Show exercise twice with clear set numbering."
+      },
+      {
+        "case": "Rest timer interrupted by phone call",
+        "ui": "Timer pauses during call. Resumes after call ends. Push notification: 'Your rest timer is paused'."
+      }
+    ]
+  },
+  "components": [
+    "ExerciseRow",
+    "SetInput",
+    "RestTimer",
+    "WorkoutSummaryCard",
+    "PRBadge",
+    "MuscleMap",
+    "ProgressChart",
+    "StreakBadge"
+  ],
+  "nav_active_states": {
+    "home": "Home",
+    "active_workout": "Log",
+    "exercise_library": "Log",
+    "exercise_detail": "Log",
+    "workout_history": "History",
+    "workout_summary": "History",
+    "progress": "History",
+    "profile_settings": "Profile"
+  }
+}

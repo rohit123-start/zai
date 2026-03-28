@@ -1,0 +1,90 @@
+{
+  "feature_id": "analytics_dashboard",
+  "feature_name": "Analytics / Dashboard",
+  "description": "Data visualisation \u2014 KPI cards, charts, tables, and exportable reports.",
+  "screens_added": [
+    {
+      "id": "analytics_home",
+      "name": "Analytics Overview",
+      "purpose": "KPI cards + summary charts at a glance"
+    },
+    {
+      "id": "report_detail",
+      "name": "Report Detail",
+      "purpose": "Deep dive into a specific metric or time range"
+    },
+    {
+      "id": "data_table",
+      "name": "Data Table",
+      "purpose": "Tabular data with sort, filter, and export"
+    }
+  ],
+  "entities_added": [
+    "Metric",
+    "Report",
+    "DataPoint",
+    "DateRange"
+  ],
+  "flows_added": [
+    "View dashboard \u2192 spot metric \u2192 tap \u2192 drill into report detail",
+    "Select date range \u2192 data updates \u2192 export as CSV or PDF",
+    "Set metric alert \u2192 threshold fires \u2192 notification sent \u2192 view in dashboard"
+  ],
+  "interaction_patterns": [
+    "KPI cards animate in on load \u2014 counter counts up to current value",
+    "Chart tap \u2014 shows exact value tooltip at tapped point",
+    "Date range picker \u2014 presets (7d, 30d, 90d, custom) as chip row",
+    "Table sort \u2014 tap column header, tap again to reverse",
+    "Export button always accessible \u2014 CSV and PDF",
+    "Empty state on no data \u2014 clear explanation, not just a blank chart"
+  ],
+  "generates_images": false,
+  "error_flows": [
+    {
+      "trigger": "Data fails to load for a metric",
+      "ui": "Individual chart shows error state inline \u2014 not full page error. Icon: warning triangle. Message: 'Could not load [metric name]'. Retry button per chart. Other charts unaffected. Partial dashboard always better than full failure."
+    },
+    {
+      "trigger": "Date range returns no data",
+      "ui": "Chart area shows: 'No data for this period'. Previous period CTA: 'Try last 30 days'. Do not show empty axes \u2014 replace with message. Suggest date ranges that do have data if known."
+    },
+    {
+      "trigger": "Export fails",
+      "ui": "Toast: 'Export failed \u2014 please try again'. If large export: 'File is too large to export at once \u2014 try a shorter date range'. Progress indicator on large exports. Never leave user waiting with no feedback."
+    },
+    {
+      "trigger": "Real-time data stream disconnects",
+      "ui": "Last updated timestamp shown on live metrics. Amber badge: 'Live data paused'. Auto-reconnect in background. On reconnect: refresh all metrics simultaneously, not one by one."
+    },
+    {
+      "trigger": "Metric alert threshold fires but notification fails to deliver",
+      "ui": "Alert still recorded in notification centre. Shown as unread on next app open with timestamp of when threshold was breached. Never silently miss an alert."
+    }
+  ],
+  "edge_cases": [
+    {
+      "case": "All metrics are zero (new account, no activity)",
+      "ui": "Show metrics at zero with onboarding guidance instead of empty charts. 'Your data will appear here once you have [X] activity'. Do not show flat zero lines on charts \u2014 show empty state illustration instead."
+    },
+    {
+      "case": "Single data point in a time series chart",
+      "ui": "Show as a single dot, not a line. Horizontal reference line at value. Label with date and value. Never draw a line chart with one point \u2014 it implies trend where there is none."
+    },
+    {
+      "case": "Metric value exceeds chart scale dramatically (spike)",
+      "ui": "Auto-scale Y axis to include spike. Label the spike point with value and date. Option to 'Exclude outlier' to see underlying trend. Never clip data off the chart."
+    },
+    {
+      "case": "User changes date range while data is still loading",
+      "ui": "Cancel previous request immediately. Start new request for new date range. Never show mixed data from two different date ranges."
+    },
+    {
+      "case": "Comparison period has different number of days (e.g. Feb vs March)",
+      "ui": "Normalise to daily averages for comparison, not raw totals. Label clearly: 'Per day average'. Never compare 28-day February total directly to 31-day March total without disclosure."
+    },
+    {
+      "case": "Negative metric value (returns exceed sales, refunds exceed revenue)",
+      "ui": "Show negative values in red. Allow Y axis to go below zero. Never hide negative values or floor at zero. Negative data is valid and important."
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "industry_id": "entertainment",
+  "industry_name": "Entertainment & Media",
+  "tone": {
+    "primary": "immersive, exciting, bold",
+    "secondary": "dynamic, culturally aware, expressive",
+    "voice": "a passionate culture insider \u2014 energetic, never boring, always in the know",
+    "avoid": "corporate, bland, overly safe, slow"
+  },
+  "trust_signals": [
+    "content quality indicators (HD, 4K badges)",
+    "creator follower count and verification",
+    "view and engagement counts",
+    "critic scores and audience ratings",
+    "secure subscription indicators",
+    "content warnings where appropriate",
+    "licensed and official content badges"
+  ],
+  "ux_norms": [
+    "content is everything \u2014 UI recedes into the background",
+    "autoplay and continuous scroll are default behaviours",
+    "dark mode is the default and expected",
+    "thumbnail quality drives all click decisions",
+    "watch history and continue watching always visible",
+    "social sharing is a primary action",
+    "creator profiles are prominent",
+    "notification system drives re-engagement"
+  ],
+  "icons": {
+    "style": "bold filled, dark UI, high contrast",
+    "weight": "bold filled",
+    "mood": "bold, cinematic, high energy",
+    "library": {
+      "name": "Remix Icons",
+      "variant": "Bold filled",
+      "url": "https://remixicon.com"
+    },
+    "domain_icons": [
+      "play-circle",
+      "film",
+      "tv",
+      "mic",
+      "headphones",
+      "star",
+      "bookmark",
+      "share",
+      "heart",
+      "download",
+      "award",
+      "video"
+    ],
+    "nav_icons": [
+      "home",
+      "compass",
+      "add",
+      "heart",
+      "user",
+      "bell",
+      "search",
+      "library",
+      "arrow-left",
+      "more"
+    ]
+  },
+  "visual_language": {
+    "primary_type": "real photography and video thumbnails",
+    "style": "high contrast, bold, visually dramatic \u2014 dark UI that lets content pop",
+    "photography_rules": [
+      "content art and thumbnails are the primary visual",
+      "high contrast and vibrant colour grading",
+      "creator photos should feel authentic not polished",
+      "never use generic stock imagery"
+    ],
+    "background_treatment": "dark \u2014 near black or pure black \u2014 always. Content provides the colour.",
+    "empty_state_style": "bold SVG \u2014 play button, headphones, or camera with energetic copy",
+    "onboarding_visual": "bold graphic vector or cinematic still \u2014 high energy",
+    "illustration_style": "when used: bold graphic vector \u2014 high contrast, expressive"
+  },
+  "themes": {
+    "pack": [
+      "Stream",
+      "Podcast",
+      "Gaming",
+      "Magazine",
+      "Spotlight"
+    ]
+  },
+  "fonts": {
+    "ai_pick_heading": "Inter",
+    "ai_pick_body": "Inter"
+  },
+  "valid_app_types": [
+    "Marketplace",
+    "Booking & Appointments",
+    "E-commerce",
+    "Social & Community",
+    "Dashboard SaaS",
+    "Content & Streaming",
+    "Chat / Messaging",
+    "Map & Location-Based",
+    "AI Tool",
+    "Developer Tool"
+  ],
+  "monetization_models": [
+    "subscription (monthly/annual)",
+    "ad-supported free tier",
+    "pay per view or rental",
+    "creator revenue share",
+    "tips and super chats",
+    "merchandise integration"
+  ],
+  "compliance_notes": [
+    "age verification for mature content",
+    "content licensing and rights management",
+    "COPPA for platforms accessible to minors",
+    "GDPR for viewing data and preferences",
+    "content moderation requirements",
+    "accessibility captions and audio descriptions"
+  ],
+  "constraints": {
+    "avoid": [
+      "Never auto-play with sound \u2014 always muted by default in browse context",
+      "Never show spoilers in thumbnails or previews without a spoiler warning toggle",
+      "Never interrupt playback with subscription prompts mid-content",
+      "Never use fake view counts or engagement metrics",
+      "Never show content recommendations that ignore the user's viewing history after 5+ watched items",
+      "Never use a content rating without showing what it means"
+    ],
+    "enforce": [
+      "Content rating always visible before playback begins",
+      "Parental controls always available and easy to set",
+      "Creator credit always visible on content",
+      "Download option visible on every content item in paid tier",
+      "Playback speed control always accessible",
+      "Skip intro/credits always offered after first episode"
+    ]
+  },
+  "copy_by_app_type": {
+    "AI Tool": {
+      "headline": "Discover content made for you",
+      "cta": "Start watching"
+    },
+    "Content & Streaming": {
+      "headline": "Watch something great tonight",
+      "cta": "Browse now"
+    },
+    "Social & Community": {
+      "headline": "Share what you love. Find your people.",
+      "cta": "Join now"
+    },
+    "Marketplace": {
+      "headline": "Get tickets to what's happening",
+      "cta": "Browse events"
+    },
+    "default": {
+      "headline": "Entertainment that moves with you",
+      "cta": "Get started"
+    }
+  }
+}

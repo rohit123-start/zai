@@ -1,0 +1,161 @@
+{
+  "industry_id": "retail_fashion",
+  "industry_name": "Retail & Fashion",
+  "tone": {
+    "primary": "aspirational, curated, confident",
+    "secondary": "trend-aware, inclusive, editorial",
+    "voice": "a trusted style editor \u2014 direct, tasteful, never pushy",
+    "avoid": "cluttered, discount-heavy language, overly casual"
+  },
+  "trust_signals": [
+    "verified purchase reviews",
+    "size guide and fit notes",
+    "return and exchange policy visibility",
+    "real customer photos in reviews",
+    "secure checkout badges",
+    "fast shipping indicators",
+    "authenticity guarantees for luxury"
+  ],
+  "ux_norms": [
+    "product photography is everything \u2014 full bleed images dominate",
+    "ultra minimal UI chrome \u2014 let the product breathe",
+    "wishlist / save to list is a primary action",
+    "size selection is a prominent, clear interaction",
+    "filter and sort are always accessible",
+    "quick view on hover/tap",
+    "outfit builder or complete the look sections",
+    "sticky add to cart on product detail"
+  ],
+  "icons": {
+    "style": "ultra-thin line, minimal",
+    "weight": "light",
+    "mood": "aesthetic, curated, fashion-forward",
+    "library": {
+      "name": "Remix Icons",
+      "variant": "Ultra-thin line",
+      "url": "https://remixicon.com"
+    },
+    "domain_icons": [
+      "shirt",
+      "hanger",
+      "gem",
+      "price-tag",
+      "ruler",
+      "palette",
+      "camera",
+      "bag",
+      "star",
+      "recycle",
+      "ribbon",
+      "crown"
+    ],
+    "nav_icons": [
+      "home",
+      "search",
+      "shopping-bag",
+      "heart",
+      "user",
+      "bell",
+      "filter",
+      "grid",
+      "arrow-left",
+      "more"
+    ]
+  },
+  "visual_language": {
+    "primary_type": "real photography",
+    "style": "editorial, high contrast, clean backgrounds \u2014 white or lifestyle",
+    "photography_rules": [
+      "product on white or clean background for listings",
+      "lifestyle photography for hero and editorial sections",
+      "model diversity expected",
+      "flat lay photography for accessories",
+      "never use low-res or stock-feeling imagery"
+    ],
+    "background_treatment": "pure white or off-white \u2014 maximum product focus",
+    "empty_state_style": "ultra minimal \u2014 thin line icon, single short line of copy",
+    "onboarding_visual": "editorial flat illustration or clean typographic layout",
+    "illustration_style": "when used: geometric minimal \u2014 never cute or cartoon"
+  },
+  "themes": {
+    "pack": [
+      "Shopify Clean",
+      "Luxe Retail",
+      "Warm Market",
+      "Flash Sale",
+      "Boutique"
+    ]
+  },
+  "fonts": {
+    "ai_pick_heading": "Inter",
+    "ai_pick_body": "Inter"
+  },
+  "valid_app_types": [
+    "Marketplace",
+    "Booking & Appointments",
+    "E-commerce",
+    "Social & Community",
+    "Dashboard SaaS",
+    "Content & Streaming",
+    "Chat / Messaging",
+    "Map & Location-Based",
+    "AI Tool",
+    "Developer Tool"
+  ],
+  "monetization_models": [
+    "product margin",
+    "marketplace commission",
+    "premium seller listings",
+    "subscription boxes",
+    "affiliate and influencer programs"
+  ],
+  "compliance_notes": [
+    "size and fit claims must be accurate",
+    "sustainability claims require substantiation",
+    "GDPR compliance for style preference tracking"
+  ],
+  "constraints": {
+    "avoid": [
+      "Never show a product without photography \u2014 never a text-only product card",
+      "Never use a dropdown for size selection \u2014 always chips or a size guide",
+      "Never hide the return policy \u2014 it is a purchase conversion factor",
+      "Never use fake countdown timers on sales \u2014 if the sale ends, it ends",
+      "Never show out-of-stock variants as available \u2014 always grey and disable them",
+      "Never use dark patterns on checkout that add items without user consent"
+    ],
+    "enforce": [
+      "Return policy always visible on product detail \u2014 within first scroll",
+      "Size guide always linked near size selector",
+      "Product photography shows multiple angles minimum",
+      "Delivery estimate always shown on product detail and cart",
+      "Sale price always shows original price with strikethrough for context",
+      "Out of stock notification opt-in always available on unavailable items"
+    ]
+  },
+  "copy_by_app_type": {
+    "AI Tool": {
+      "headline": "Your AI styling assistant",
+      "cta": "Discover looks"
+    },
+    "E-commerce": {
+      "headline": "Shop the new collection",
+      "cta": "Shop now"
+    },
+    "Marketplace": {
+      "headline": "Find your style. From anyone.",
+      "cta": "Browse"
+    },
+    "Social & Community": {
+      "headline": "Share your style. Inspire others.",
+      "cta": "Join the community"
+    },
+    "Booking & Appointments": {
+      "headline": "Book your next fitting",
+      "cta": "Find availability"
+    },
+    "default": {
+      "headline": "Style that moves with you",
+      "cta": "Get started"
+    }
+  }
+}

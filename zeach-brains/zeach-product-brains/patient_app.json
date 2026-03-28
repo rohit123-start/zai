@@ -1,0 +1,1011 @@
+{
+  "archetype_id": "patient_app",
+  "archetype_name": "Patient App",
+  "description": "Patient-facing health app \u2014 medical records, prescriptions, appointments, consultations, and health tracking. Healthcare industry only.",
+  "valid_industries": [
+    "Healthcare"
+  ],
+  "icon_pack": {
+    "default_library": {
+      "name": "Material Symbols",
+      "variant": "Rounded",
+      "url": "https://fonts.google.com/icons"
+    },
+    "industry_overrides": {},
+    "core_nav_icons": [
+      "home",
+      "calendar_month",
+      "medication",
+      "favorite",
+      "person",
+      "notifications",
+      "chat",
+      "arrow_back",
+      "search",
+      "settings"
+    ],
+    "core_domain_icons": [
+      "medical_services",
+      "favorite",
+      "calendar_month",
+      "medication",
+      "assignment",
+      "verified_user",
+      "monitor_heart",
+      "science",
+      "healing",
+      "local_hospital"
+    ]
+  },
+  "landing_page": {
+    "sections": [
+      {
+        "id": "hero",
+        "generates_images": false
+      },
+      {
+        "id": "how_it_works",
+        "generates_images": false
+      },
+      {
+        "id": "pricing",
+        "generates_images": false
+      },
+      {
+        "id": "cta_footer",
+        "generates_images": false
+      }
+    ],
+    "three_js": {
+      "style": "soft_particles",
+      "description": "Very slow drifting soft circular particles. Clinical calm. No sharp geometry. Light background with gentle movement. Never dark or aggressive.",
+      "intensity": "minimal",
+      "interaction": "none",
+      "avoid": "no status pills, no hero-stat-line, no ticker strips"
+    }
+  },
+  "core_entities": {
+    "entities": [
+      "Patient",
+      "Doctor",
+      "Appointment",
+      "Prescription",
+      "MedicalRecord",
+      "HealthMetric",
+      "Insurance",
+      "Notification",
+      "Consultation",
+      "LabResult"
+    ],
+    "relationships": [
+      "Patient has many Appointments with Doctors",
+      "Patient has many Prescriptions",
+      "Patient has a MedicalRecord",
+      "MedicalRecord contains LabResults and health history",
+      "Appointment can be in-person or virtual Consultation",
+      "HealthMetric belongs to Patient \u2014 tracked over time",
+      "Insurance belongs to Patient",
+      "Notification belongs to Patient \u2014 reminders, results, updates"
+    ]
+  },
+  "tiers": {
+    "mvp": {
+      "tier": "MVP",
+      "description": "Core patient app \u2014 appointments, records, prescriptions.",
+      "screen_count": 9,
+      "primary_flows": [
+        "Sign up \u2192 complete health profile \u2192 book appointment \u2192 receive confirmation \u2192 attend \u2192 view summary",
+        "View prescription \u2192 set medication reminder \u2192 mark as taken",
+        "View medical records \u2192 download or share with doctor"
+      ],
+      "secondary_flows": [
+        "View lab results",
+        "Message doctor",
+        "Update health metrics",
+        "View insurance details"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Health Dashboard",
+          "purpose": "Health overview \u2014 upcoming appointments, active prescriptions, recent metrics",
+          "visual": "Clean light UI. Health summary cards. Upcoming appointment card. Quick actions.",
+          "entities": [
+            "Patient",
+            "Appointment",
+            "Prescription",
+            "HealthMetric"
+          ],
+          "actions": [
+            "View upcoming appointment",
+            "View active prescriptions",
+            "Log health metric",
+            "Quick book appointment"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Patient App'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Patient App'].cta}}",
+            "empty_state": "Complete your health profile to get personalised insights."
+          }
+        },
+        {
+          "id": "appointments",
+          "name": "Appointments",
+          "purpose": "Book, view, and manage appointments",
+          "visual": "Upcoming and past tabs. Appointment cards with doctor info and status.",
+          "entities": [
+            "Appointment",
+            "Doctor"
+          ],
+          "actions": [
+            "Book new appointment",
+            "View appointment detail",
+            "Cancel appointment",
+            "Reschedule",
+            "Join virtual consultation"
+          ],
+          "copy": {
+            "headline": "Your appointments",
+            "cta": "Book now",
+            "empty_state": "No upcoming appointments. Book one with a provider near you."
+          }
+        },
+        {
+          "id": "book_appointment",
+          "name": "Book Appointment",
+          "purpose": "Find doctor and select time slot",
+          "visual": "Doctor search. Specialty filter. Available slots calendar.",
+          "entities": [
+            "Doctor",
+            "Appointment"
+          ],
+          "actions": [
+            "Search doctors",
+            "Filter by specialty",
+            "Select date and time",
+            "Confirm booking"
+          ]
+        },
+        {
+          "id": "prescriptions",
+          "name": "Prescriptions",
+          "purpose": "Active and past prescriptions with refill tracking",
+          "visual": "Prescription cards. Active vs expired. Refill reminder badge.",
+          "entities": [
+            "Prescription"
+          ],
+          "actions": [
+            "View prescription detail",
+            "Set medication reminder",
+            "Request refill",
+            "Mark as taken"
+          ]
+        },
+        {
+          "id": "medical_records",
+          "name": "Medical Records",
+          "purpose": "Full health history \u2014 diagnoses, procedures, allergies",
+          "visual": "Timeline view. Category tabs \u2014 diagnoses, procedures, allergies, vaccinations.",
+          "entities": [
+            "MedicalRecord",
+            "LabResult"
+          ],
+          "actions": [
+            "View record",
+            "Download PDF",
+            "Share with provider",
+            "View lab results"
+          ]
+        },
+        {
+          "id": "health_metrics",
+          "name": "Health Metrics",
+          "purpose": "Track vitals and health data over time",
+          "visual": "Metric cards. Trend charts. Log new reading CTA.",
+          "entities": [
+            "HealthMetric"
+          ],
+          "actions": [
+            "View metric history",
+            "Log new reading",
+            "View trend chart",
+            "Set target range"
+          ]
+        },
+        {
+          "id": "doctor_profile",
+          "name": "Doctor Profile",
+          "purpose": "Doctor credentials, reviews, and availability",
+          "visual": "Doctor photo. Credentials. Rating. Specialties. Book CTA.",
+          "entities": [
+            "Doctor"
+          ],
+          "actions": [
+            "View credentials",
+            "Read reviews",
+            "Book appointment",
+            "Message doctor"
+          ]
+        },
+        {
+          "id": "messages",
+          "name": "Messages",
+          "purpose": "Secure patient-doctor messaging",
+          "visual": "Conversation list. Chat thread. HIPAA compliance badge.",
+          "entities": [
+            "Consultation",
+            "Doctor",
+            "Patient"
+          ],
+          "actions": [
+            "Send message",
+            "Attach file",
+            "View conversation history"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Health profile, insurance, and notification settings",
+          "visual": "Profile. Insurance card. Emergency contacts. Notification settings.",
+          "entities": [
+            "Patient",
+            "Insurance"
+          ],
+          "actions": [
+            "Edit health profile",
+            "Update insurance",
+            "Emergency contacts",
+            "Notification settings",
+            "Log out"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "Appointment status badge \u2014 confirmed green, pending amber, cancelled red",
+        "Medication reminder \u2014 push at scheduled time",
+        "Lab result notification \u2014 tap to view",
+        "Health metric out of range \u2014 amber warning badge",
+        "Virtual consultation \u2014 video call launches in-app"
+      ]
+    },
+    "startup": {
+      "tier": "Startup",
+      "description": "Full patient app with telehealth, family accounts, and insurance claims.",
+      "screen_count": 15,
+      "primary_flows": [
+        "All MVP flows",
+        "Start telehealth consultation \u2192 video call with doctor \u2192 receive prescription \u2192 track",
+        "Add family member \u2192 manage their health profile \u2192 book on their behalf",
+        "Submit insurance claim \u2192 track status \u2192 receive reimbursement"
+      ],
+      "secondary_flows": [
+        "All MVP secondary flows",
+        "Second opinion request",
+        "Specialist referral tracking",
+        "Wearable device sync",
+        "Vaccination record"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Health Dashboard",
+          "purpose": "Personalised health overview with family members",
+          "visual": "Family member switcher. Health summary. Upcoming. Active prescriptions.",
+          "entities": [
+            "Patient",
+            "Appointment",
+            "Prescription"
+          ],
+          "actions": [
+            "Switch family member",
+            "View health summary",
+            "Quick actions"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Patient App'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Patient App'].cta}}",
+            "empty_state": "Complete your health profile to get personalised insights."
+          }
+        },
+        {
+          "id": "telehealth",
+          "name": "Telehealth",
+          "purpose": "On-demand virtual consultations",
+          "visual": "Available doctors now. Estimated wait time. Start consultation CTA.",
+          "entities": [
+            "Doctor",
+            "Consultation"
+          ],
+          "actions": [
+            "Start on-demand consultation",
+            "Schedule telehealth",
+            "View past consultations"
+          ]
+        },
+        {
+          "id": "consultation_active",
+          "name": "Active Consultation",
+          "purpose": "Live video consultation with doctor",
+          "visual": "Video call full screen. Doctor view. Controls. Chat sidebar.",
+          "entities": [
+            "Consultation",
+            "Doctor"
+          ],
+          "actions": [
+            "Video call controls",
+            "Chat during call",
+            "Share screen or document",
+            "End consultation"
+          ]
+        },
+        {
+          "id": "appointments",
+          "name": "Appointments",
+          "purpose": "Full appointment management with telehealth",
+          "visual": "Upcoming. Past. Telehealth badge on virtual appointments.",
+          "entities": [
+            "Appointment",
+            "Doctor"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Start telehealth from appointment"
+          ],
+          "copy": {
+            "headline": "Your appointments",
+            "cta": "Book now",
+            "empty_state": "No upcoming appointments. Book one with a provider near you."
+          }
+        },
+        {
+          "id": "prescriptions",
+          "name": "Prescriptions",
+          "purpose": "Prescriptions with pharmacy integration",
+          "visual": "Prescription cards. Pharmacy selector. Delivery status.",
+          "entities": [
+            "Prescription"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Select pharmacy",
+            "Track delivery",
+            "Digital prescription"
+          ]
+        },
+        {
+          "id": "medical_records",
+          "name": "Medical Records",
+          "purpose": "Full records with specialist reports",
+          "visual": "Timeline. Specialist reports. Lab results. Imaging.",
+          "entities": [
+            "MedicalRecord",
+            "LabResult"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View imaging results",
+            "Specialist reports"
+          ]
+        },
+        {
+          "id": "health_metrics",
+          "name": "Health Metrics",
+          "purpose": "Wearable sync and comprehensive tracking",
+          "visual": "Connected devices. All metrics. Trend charts. Anomaly alerts.",
+          "entities": [
+            "HealthMetric"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Sync wearable",
+            "View anomaly alerts"
+          ]
+        },
+        {
+          "id": "insurance",
+          "name": "Insurance & Claims",
+          "purpose": "Insurance coverage and claims management",
+          "visual": "Insurance card. Coverage summary. Claims list. Submit claim CTA.",
+          "entities": [
+            "Insurance"
+          ],
+          "actions": [
+            "View coverage",
+            "Submit claim",
+            "Track claim status",
+            "View reimbursements"
+          ]
+        },
+        {
+          "id": "family",
+          "name": "Family Accounts",
+          "purpose": "Manage health for family members",
+          "visual": "Family member cards. Add member CTA. Switch member.",
+          "entities": [
+            "Patient"
+          ],
+          "actions": [
+            "Add family member",
+            "Switch to family member",
+            "Manage permissions",
+            "Book for family member"
+          ]
+        },
+        {
+          "id": "medications",
+          "name": "Medications",
+          "purpose": "Full medication management with reminders",
+          "visual": "Active medications. Schedule. Adherence tracker. Refill alerts.",
+          "entities": [
+            "Prescription"
+          ],
+          "actions": [
+            "View all medications",
+            "Set reminder schedule",
+            "Track adherence",
+            "Request refill"
+          ]
+        },
+        {
+          "id": "find_care",
+          "name": "Find Care",
+          "purpose": "Search doctors, clinics, and specialists",
+          "visual": "Search. Specialty filter. Map view. Distance. Rating.",
+          "entities": [
+            "Doctor"
+          ],
+          "actions": [
+            "Search by specialty",
+            "Filter by insurance",
+            "Map view",
+            "Book from results"
+          ]
+        },
+        {
+          "id": "doctor_profile",
+          "name": "Doctor Profile",
+          "purpose": "Full profile with telehealth availability",
+          "visual": "Photo. Credentials. Reviews. Telehealth available badge.",
+          "entities": [
+            "Doctor"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Start telehealth",
+            "View availability"
+          ]
+        },
+        {
+          "id": "messages",
+          "name": "Messages",
+          "purpose": "Full secure messaging with attachments",
+          "visual": "Conversations. Chat thread. File attachments. Read receipts.",
+          "entities": [
+            "Consultation",
+            "Doctor",
+            "Patient"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Attach medical document",
+            "Mark urgent"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "purpose": "All health alerts and reminders",
+          "visual": "Notification list. Medication reminders. Lab results. Appointment reminders.",
+          "entities": [
+            "Notification"
+          ],
+          "actions": [
+            "View all",
+            "Mark read",
+            "Manage preferences"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Full profile with family and privacy settings",
+          "visual": "Profile. Family. Insurance. Privacy. Notification settings.",
+          "entities": [
+            "Patient",
+            "Insurance"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Family settings",
+            "Privacy controls",
+            "Data sharing preferences"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP patterns",
+        "Telehealth waiting room \u2014 estimated time, doctor preparing indicator",
+        "Family member switcher \u2014 avatar row at top of dashboard",
+        "Medication adherence ring \u2014 fills as doses taken",
+        "Insurance card \u2014 tap to reveal full details",
+        "Lab result trend \u2014 previous vs current comparison"
+      ]
+    },
+    "scale": {
+      "tier": "Scale",
+      "description": "Enterprise patient platform with EHR integration, care teams, chronic condition management, and admin.",
+      "screen_count": 22,
+      "primary_flows": [
+        "All MVP and Startup flows",
+        "EHR integration \u2192 patient records sync automatically \u2192 doctor sees full history",
+        "Care team assigned \u2192 patient messages any team member \u2192 coordinated care",
+        "Chronic condition program \u2192 enrolled \u2192 regular check-ins \u2192 progress tracked"
+      ],
+      "secondary_flows": [
+        "All previous flows",
+        "Clinical trial matching",
+        "Mental health module",
+        "Nutrition and diet tracking",
+        "Care plan adherence"
+      ],
+      "screens": [
+        {
+          "id": "home",
+          "name": "Health Dashboard",
+          "purpose": "Comprehensive health command centre",
+          "visual": "Care team overview. Health score. All metrics. Upcoming care plan tasks.",
+          "entities": [
+            "Patient",
+            "Appointment",
+            "Prescription"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View care plan",
+            "Contact care team"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Patient App'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Patient App'].cta}}",
+            "empty_state": "Complete your health profile to get personalised insights."
+          }
+        },
+        {
+          "id": "care_plan",
+          "name": "Care Plan",
+          "purpose": "Personalised care plan with goals and tasks",
+          "visual": "Active plan. Goals list. Task checklist. Progress tracking.",
+          "entities": [
+            "Patient",
+            "Doctor"
+          ],
+          "actions": [
+            "View care plan",
+            "Complete task",
+            "View goal progress",
+            "Message care coordinator"
+          ]
+        },
+        {
+          "id": "care_team",
+          "name": "Care Team",
+          "purpose": "All assigned providers in one view",
+          "visual": "Team member cards. Role badge. Last contact. Message CTA.",
+          "entities": [
+            "Doctor",
+            "Patient"
+          ],
+          "actions": [
+            "View team members",
+            "Message provider",
+            "Book with team member",
+            "View care notes"
+          ]
+        },
+        {
+          "id": "chronic_conditions",
+          "name": "Condition Management",
+          "purpose": "Ongoing chronic condition tracking and programs",
+          "visual": "Condition cards. Program progress. Check-in prompts. Trend data.",
+          "entities": [
+            "Patient",
+            "HealthMetric"
+          ],
+          "actions": [
+            "View condition detail",
+            "Complete check-in",
+            "View trend",
+            "Enrol in program"
+          ]
+        },
+        {
+          "id": "telehealth",
+          "name": "Telehealth",
+          "purpose": "Full telehealth with group sessions",
+          "visual": "On-demand. Scheduled. Group sessions. Mental health tab.",
+          "entities": [
+            "Doctor",
+            "Consultation"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Join group session",
+            "Mental health consultation"
+          ]
+        },
+        {
+          "id": "mental_health",
+          "name": "Mental Health",
+          "purpose": "Therapy, mood tracking, and wellbeing programs",
+          "visual": "Mood tracker. Therapy sessions. Guided exercises. Crisis resources.",
+          "entities": [
+            "Patient",
+            "Consultation"
+          ],
+          "actions": [
+            "Log mood",
+            "Book therapy session",
+            "Guided exercise",
+            "View crisis resources"
+          ]
+        },
+        {
+          "id": "appointments",
+          "name": "Appointments",
+          "purpose": "Full appointment management with care team",
+          "visual": "All appointments. Care team filter. EHR sync badge.",
+          "entities": [
+            "Appointment",
+            "Doctor"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Filter by care team member",
+            "View EHR-synced appointments"
+          ],
+          "copy": {
+            "headline": "Your appointments",
+            "cta": "Book now",
+            "empty_state": "No upcoming appointments. Book one with a provider near you."
+          }
+        },
+        {
+          "id": "prescriptions",
+          "name": "Prescriptions",
+          "purpose": "Prescriptions with drug interaction checking",
+          "visual": "All prescriptions. Drug interaction alert badge. Auto-refill toggle.",
+          "entities": [
+            "Prescription"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View drug interactions",
+            "Toggle auto-refill"
+          ]
+        },
+        {
+          "id": "medical_records",
+          "name": "Medical Records",
+          "purpose": "EHR-integrated full medical history",
+          "visual": "EHR sync status. Complete timeline. All providers history.",
+          "entities": [
+            "MedicalRecord",
+            "LabResult"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View EHR sync status",
+            "Request records from other providers"
+          ]
+        },
+        {
+          "id": "health_metrics",
+          "name": "Health Metrics",
+          "purpose": "Clinical-grade metric tracking with provider sharing",
+          "visual": "All metrics. Clinical ranges. Share with provider toggle.",
+          "entities": [
+            "HealthMetric"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Share metrics with provider",
+            "View clinical range indicators"
+          ]
+        },
+        {
+          "id": "insurance",
+          "name": "Insurance & Benefits",
+          "purpose": "Full benefits management with pre-auth",
+          "visual": "Coverage. Prior auth status. Claims. EOB documents.",
+          "entities": [
+            "Insurance"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View prior auth status",
+            "Download EOB",
+            "Estimate cost"
+          ]
+        },
+        {
+          "id": "family",
+          "name": "Family & Dependants",
+          "purpose": "Multi-generational family health management",
+          "visual": "Family tree view. Dependency levels. Permissions.",
+          "entities": [
+            "Patient"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Set dependency level",
+            "Manage legal guardianship"
+          ]
+        },
+        {
+          "id": "nutrition",
+          "name": "Nutrition & Diet",
+          "purpose": "Diet tracking and nutritional care plans",
+          "visual": "Daily log. Macro tracking. Meal suggestions. Dietitian chat.",
+          "entities": [
+            "Patient",
+            "HealthMetric"
+          ],
+          "actions": [
+            "Log meal",
+            "View macros",
+            "View care plan diet",
+            "Message dietitian"
+          ]
+        },
+        {
+          "id": "find_care",
+          "name": "Find Care",
+          "purpose": "Insurance-filtered provider search",
+          "visual": "Search. In-network filter. Telehealth filter. Availability.",
+          "entities": [
+            "Doctor"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Filter in-network only",
+            "See cost estimate before booking"
+          ]
+        },
+        {
+          "id": "messages",
+          "name": "Messages",
+          "purpose": "Care team unified messaging",
+          "visual": "All providers in one inbox. Priority flag. Urgent badge.",
+          "entities": [
+            "Consultation",
+            "Doctor",
+            "Patient"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Flag message urgent",
+            "View all providers in one inbox"
+          ]
+        },
+        {
+          "id": "admin_dashboard",
+          "name": "Admin \u2014 Patient Management",
+          "purpose": "Provider or clinic admin view",
+          "visual": "Patient list. Active care plans. Appointment queue. Alerts.",
+          "entities": [
+            "Patient",
+            "Doctor",
+            "Appointment"
+          ],
+          "actions": [
+            "View all patients",
+            "View care plan status",
+            "Manage appointments",
+            "Send broadcast notification"
+          ]
+        },
+        {
+          "id": "notifications",
+          "name": "Notifications",
+          "purpose": "Smart health alerts with priority",
+          "visual": "Priority health alerts. Medication. Lab results. Care plan.",
+          "entities": [
+            "Notification"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Priority alerts at top",
+            "Smart grouping by type"
+          ]
+        },
+        {
+          "id": "profile_settings",
+          "name": "Profile & Settings",
+          "purpose": "Full settings with EHR, privacy, and care team",
+          "visual": "Comprehensive settings. EHR connections. Privacy. Care team.",
+          "entities": [
+            "Patient",
+            "Insurance"
+          ],
+          "actions": [
+            "All Startup actions",
+            "EHR connection settings",
+            "Research participation settings"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP and Startup patterns",
+        "Care plan task completion \u2014 checkbox with confetti on milestone",
+        "EHR sync indicator \u2014 last synced timestamp + manual sync",
+        "Drug interaction alert \u2014 amber banner before prescription confirmed",
+        "Mental health check-in \u2014 gentle daily prompt, never intrusive",
+        "Clinical metric out of range \u2014 escalates to care team automatically"
+      ]
+    }
+  },
+  "layout": {
+    "iphone": {
+      "nav": "bottom_tab_5",
+      "nav_items": [
+        "Home",
+        "Appointments",
+        "Prescriptions",
+        "Records",
+        "Profile"
+      ],
+      "content": "full_width_single_column_health_cards",
+      "card_style": "full_width_appointment_and_metric_cards",
+      "cta": "book_appointment_sticky_bottom_on_home",
+      "hero": "upcoming_appointment_card_top_then_health_metrics",
+      "padding": "16px horizontal",
+      "image_ratio": "1:1 doctor avatar no_full_bleed_photography"
+    },
+    "ipad": {
+      "nav": "sidebar_left_with_labels",
+      "nav_items": [
+        "Home",
+        "Appointments",
+        "Prescriptions",
+        "Records",
+        "Messages",
+        "Profile"
+      ],
+      "content": "2col_health_summary_left_detail_right",
+      "card_style": "health_summary_card_with_trend_chart",
+      "cta": "book_appointment_prominent_in_sidebar",
+      "hero": "health_dashboard_2col_metrics_and_appointments",
+      "padding": "24px",
+      "image_ratio": "1:1 doctor avatar"
+    },
+    "desktop": {
+      "nav": "sidebar_left_fixed",
+      "nav_items": [
+        "Dashboard",
+        "Appointments",
+        "Prescriptions",
+        "Records",
+        "Messages",
+        "Settings"
+      ],
+      "content": "left_anchored_max_1100px_with_sidebar",
+      "card_style": "health_metric_cards_3col_then_detail_list",
+      "cta": "book_appointment_top_right",
+      "hero": "health_kpi_row_then_upcoming_appointments_table",
+      "padding": "32px content",
+      "image_ratio": "1:1 doctor avatar no_photography"
+    },
+    "notes": "Light background always \u2014 clinical trust. Never dark mode by default. Accessibility first \u2014 minimum 16px body, high contrast on all medical information."
+  },
+  "constraints": {
+    "avoid": [
+      "Never use dark mode as the default \u2014 healthcare requires high contrast light UI for readability",
+      "Never use red for branding or decorative elements \u2014 red means urgency or danger in this context",
+      "Never truncate medical information \u2014 always show full prescription name, dosage, and instructions",
+      "Never use informal language in medical contexts \u2014 always precise and clinical",
+      "Never show another patient's data \u2014 role separation is absolute",
+      "Never allow appointment booking without confirming insurance coverage where applicable",
+      "Never hide cancellation policy \u2014 always shown before booking confirmed",
+      "Never use gamification elements (streaks, badges, points) for medication adherence \u2014 trivialises compliance"
+    ],
+    "enforce": [
+      "Medication instructions always shown in full \u2014 never truncated",
+      "Doctor credentials always verified badge visible",
+      "Appointment status always colour-coded: confirmed green, pending amber, cancelled grey",
+      "Emergency contact and crisis resources always one tap away from profile",
+      "All health data changes logged with timestamp \u2014 audit trail",
+      "HIPAA compliance badge visible on any messaging or data sharing screen",
+      "Prescription expiry date always shown \u2014 amber warning 7 days before expiry",
+      "Lab results always shown with reference range \u2014 never just the value"
+    ]
+  },
+  "states": {
+    "empty_states": [
+      {
+        "screen": "home",
+        "trigger": "New patient, no history",
+        "ui": "Welcome card with profile completion prompt. 'Complete your health profile' progress bar. Upcoming appointments section shows 'Book your first appointment' CTA."
+      },
+      {
+        "screen": "medical_records",
+        "trigger": "No records yet",
+        "ui": "Document illustration. Message: 'Your medical records will appear here'. Sub: 'Records are added after your appointments'. No empty table."
+      },
+      {
+        "screen": "prescriptions",
+        "trigger": "No active prescriptions",
+        "ui": "Pill bottle illustration. Message: 'No active prescriptions'. Sub: 'Prescriptions from your doctor will appear here'. Never show empty rows."
+      }
+    ],
+    "loading_states": [
+      {
+        "screen": "home",
+        "ui": "Health summary card skeleton. Upcoming appointment card skeleton. Active prescription skeleton pills row. All shimmer simultaneously."
+      },
+      {
+        "screen": "medical_records",
+        "ui": "Record list skeleton \u2014 date left, title centre, type badge right. 5 rows shimmer. Category tabs visible and interactive during load."
+      },
+      {
+        "screen": "book_appointment",
+        "ui": "Calendar loads from cache immediately. Doctor availability skeleton chips in time slot grid. Show 'Loading availability...' below calendar."
+      }
+    ],
+    "error_flows": [
+      {
+        "trigger": "Appointment slot no longer available",
+        "ui": "Full screen: 'That slot was just booked'. Next available slots shown immediately \u2014 no extra tap. Pre-selected doctor retained."
+      },
+      {
+        "trigger": "Prescription sync fails",
+        "ui": "Prescription list shows last known state with 'Last updated [time]' label. Warning badge. Retry button. Never show stale data as current without warning."
+      },
+      {
+        "trigger": "Lab results delayed",
+        "ui": "Lab result card shows 'Results pending'. Estimated ready date shown. Push notification promised: 'We'll notify you when results are ready'."
+      },
+      {
+        "trigger": "Telehealth connection fails",
+        "ui": "Waiting room screen: 'Connection issue'. Auto-retry 3 times with countdown. If still failing: 'Switching to phone call' option offered. Appointment not marked as missed."
+      }
+    ],
+    "edge_cases": [
+      {
+        "case": "Medication interaction detected",
+        "ui": "Red warning banner on prescription detail: 'Potential interaction with [medication]'. Full interaction details. 'Contact your doctor' CTA prominent. Never hide this information."
+      },
+      {
+        "case": "Minor patient (under 18)",
+        "ui": "Parent/guardian access controls visible. Sensitive information (mental health, reproductive health) requires explicit minor consent or is hidden from guardian view per regional law."
+      },
+      {
+        "case": "Out of network doctor selected",
+        "ui": "Warning before booking confirmation: 'This provider is out of network. Estimated cost: [amount]'. In-network alternatives shown. User must acknowledge before proceeding."
+      },
+      {
+        "case": "Critical lab value (severely abnormal)",
+        "ui": "Push notification immediately. In-app: red urgent banner on result. Message: 'Please contact your doctor immediately'. Emergency contact shown. Never just show the value without context."
+      }
+    ]
+  },
+  "components": [
+    "AppointmentCard",
+    "PrescriptionRow",
+    "HealthMetricCard",
+    "DoctorCard",
+    "MedicationReminder",
+    "LabResultRow"
+  ],
+  "nav_active_states": {
+    "home": "Home",
+    "appointments": "Appointments",
+    "book_appointment": "Appointments",
+    "prescriptions": "Prescriptions",
+    "medical_records": "Records",
+    "health_metrics": "Home",
+    "doctor_profile": "Appointments",
+    "messages": "Messages",
+    "profile_settings": "Profile"
+  }
+}

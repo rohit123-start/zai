@@ -1,0 +1,155 @@
+{
+  "industry_id": "ai_technology",
+  "industry_name": "AI & Technology",
+  "tone": {
+    "primary": "intelligent, precise, forward-thinking",
+    "secondary": "confident, minimal, empowering",
+    "voice": "a brilliant engineer who communicates clearly \u2014 no hype, just capability",
+    "avoid": "hype-heavy, buzzword-laden, overly casual, corporate fluff"
+  },
+  "trust_signals": [
+    "uptime and reliability stats",
+    "security and SOC2 compliance badges",
+    "API response time and performance metrics",
+    "user and company count",
+    "enterprise customer logos",
+    "open source or transparent model info",
+    "data privacy and no-training guarantees"
+  ],
+  "ux_norms": [
+    "keyboard-first interactions expected",
+    "dark mode is the primary and default mode",
+    "dense information layouts are acceptable \u2014 users are technical",
+    "command palette (CMD+K) expected at scale",
+    "code blocks and syntax highlighting required",
+    "streaming output (typewriter effect) for AI responses",
+    "token and usage counters always visible",
+    "model and configuration selection prominent"
+  ],
+  "icons": {
+    "style": "geometric modern line",
+    "weight": "light to medium",
+    "mood": "technical, forward-thinking, precise",
+    "library": {
+      "name": "Lucide",
+      "variant": "Rounded line",
+      "url": "https://lucide.dev"
+    },
+    "domain_icons": [
+      "cpu",
+      "brain",
+      "zap",
+      "sparkles",
+      "terminal",
+      "layers",
+      "code",
+      "git-branch",
+      "activity",
+      "shield",
+      "globe",
+      "network"
+    ],
+    "nav_icons": [
+      "home",
+      "plus-circle",
+      "clock",
+      "bookmark",
+      "user",
+      "settings",
+      "key",
+      "layers",
+      "arrow-left",
+      "menu"
+    ]
+  },
+  "visual_language": {
+    "primary_type": "SVG vector illustrations and CSS",
+    "style": "abstract geometric \u2014 neural network patterns, gradient meshes, data visualisation",
+    "photography_rules": [
+      "no photography on core product screens",
+      "real team photos only on about/marketing pages",
+      "never use generic tech stock photos (server rooms, handshakes)"
+    ],
+    "background_treatment": "deep dark \u2014 near black with subtle gradient or glow. CSS-driven depth.",
+    "empty_state_style": "minimal abstract SVG \u2014 neural node, terminal cursor, or geometric shape with precise copy",
+    "onboarding_visual": "animated geometric SVG or abstract gradient illustration",
+    "illustration_style": "abstract geometric \u2014 neural nets, data flows, gradient meshes \u2014 never cartoon"
+  },
+  "themes": {
+    "pack": [
+      "Neural",
+      "Clarity",
+      "Terminal",
+      "Gradient",
+      "Pulse"
+    ]
+  },
+  "fonts": {
+    "ai_pick_heading": "Geist",
+    "ai_pick_body": "Geist Mono"
+  },
+  "valid_app_types": [
+    "Marketplace",
+    "Booking & Appointments",
+    "E-commerce",
+    "Social & Community",
+    "Dashboard SaaS",
+    "Content & Streaming",
+    "Chat / Messaging",
+    "Map & Location-Based",
+    "AI Tool",
+    "Developer Tool"
+  ],
+  "monetization_models": [
+    "credit-based usage pricing",
+    "monthly subscription per seat",
+    "API calls per token",
+    "enterprise licensing",
+    "freemium with usage limits",
+    "usage-based scaling tiers"
+  ],
+  "compliance_notes": [
+    "AI output disclaimer required",
+    "data training opt-out must be clear",
+    "GDPR for user conversation data",
+    "SOC2 compliance for enterprise",
+    "model transparency requirements increasing globally",
+    "content moderation for generative outputs"
+  ],
+  "constraints": {
+    "avoid": [
+      "Never use warm photography or human lifestyle imagery in core product screens \u2014 SVG and data viz only",
+      "Never use decorative gradients or mesh backgrounds \u2014 technical aesthetic demands flat precision",
+      "Never use casual or playful language in error messages \u2014 precise technical language always",
+      "Never claim AI capabilities that cannot be demonstrated in the product itself",
+      "Never show an AI 'thinking' animation longer than 2 seconds before first token appears",
+      "Never use dark patterns to obscure token usage, rate limits, or API costs"
+    ],
+    "enforce": [
+      "Model name and version always visible to user \u2014 never hidden",
+      "Data privacy and no-training guarantees surfaced on every data input screen",
+      "API documentation link always one click away from any API-related screen",
+      "Rate limit status always visible before user hits the limit \u2014 not after",
+      "Code blocks always syntax highlighted \u2014 never plain text",
+      "Latency and performance metrics shown honestly \u2014 no cherry-picked benchmarks"
+    ]
+  },
+  "copy_by_app_type": {
+    "AI Tool": {
+      "headline": "What do you want to build?",
+      "cta": "Generate"
+    },
+    "Dashboard SaaS": {
+      "headline": "Your AI command centre",
+      "cta": "Open dashboard"
+    },
+    "Developer Tool": {
+      "headline": "Prompt. Generate. Ship.",
+      "cta": "Start building"
+    },
+    "default": {
+      "headline": "What do you want to build?",
+      "cta": "Get started"
+    }
+  }
+}

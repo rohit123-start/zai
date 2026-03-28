@@ -1,0 +1,1169 @@
+{
+  "archetype_id": "dev_core",
+  "archetype_name": "Developer Tool",
+  "description": "Tool built for developers \u2014 code, APIs, CLIs, and technical workflows. Industry brain defines the development domain. This core defines how developer-first products are experienced.",
+  "valid_industries": [
+    "Beauty & Wellness",
+    "Retail & Fashion",
+    "Food & Beverage",
+    "Healthcare",
+    "Finance",
+    "Education",
+    "Fitness & Sport",
+    "Travel & Lifestyle",
+    "Real Estate",
+    "Transport & Logistics",
+    "Events & Ticketing",
+    "Entertainment & Media",
+    "AI & Technology",
+    "Developer Tools"
+  ],
+  "icon_pack": {
+    "default_library": {
+      "name": "Tabler Icons",
+      "variant": "Sharp line",
+      "url": "https://tabler.io/icons"
+    },
+    "industry_overrides": {
+      "AI & Technology": {
+        "name": "Material Symbols",
+        "variant": "Outlined",
+        "url": "https://fonts.google.com/icons"
+      }
+    },
+    "core_nav_icons": [
+      "home",
+      "code",
+      "git-branch",
+      "terminal",
+      "users",
+      "bell",
+      "settings",
+      "key",
+      "arrow-back",
+      "menu"
+    ],
+    "core_domain_icons": [
+      "terminal",
+      "code",
+      "git-branch",
+      "key",
+      "shield",
+      "package",
+      "rocket",
+      "bug",
+      "activity",
+      "download"
+    ]
+  },
+  "landing_page": {
+    "sections": [
+      {
+        "id": "hero",
+        "generates_images": false
+      },
+      {
+        "id": "code_example",
+        "generates_images": false
+      },
+      {
+        "id": "pricing",
+        "generates_images": false
+      },
+      {
+        "id": "cta_footer",
+        "generates_images": false
+      }
+    ],
+    "three_js": {
+      "style": "code_particles",
+      "description": "Monospace character particles falling slowly like a sparse matrix. Characters are code symbols \u2014 brackets, semicolons, operators. Dark and technical.",
+      "intensity": "subtle",
+      "interaction": "none",
+      "avoid": "no status pills, no hero-stat-line, no ticker strips"
+    }
+  },
+  "core_entities": {
+    "entities": [
+      "User",
+      "Project",
+      "Repository",
+      "File",
+      "Build",
+      "Deployment",
+      "APIKey",
+      "Log",
+      "Environment",
+      "Team",
+      "Integration",
+      "Usage",
+      "Webhook",
+      "Documentation"
+    ],
+    "relationships": [
+      "User belongs to a Team and owns or contributes to Projects",
+      "Project contains Repositories and Environments",
+      "Repository contains Files and has Builds",
+      "Build belongs to Repository, has a Status and Logs",
+      "Deployment belongs to Build, targets an Environment",
+      "APIKey belongs to User or Project \u2014 grants API access",
+      "Log belongs to Build or Deployment",
+      "Environment belongs to Project \u2014 production, staging, development",
+      "Integration connects Project to an external service",
+      "Usage tracks API calls, compute, or storage per Project",
+      "Webhook belongs to Project, fires on events",
+      "Documentation is associated with Project or API"
+    ]
+  },
+  "tiers": {
+    "mvp": {
+      "tier": "MVP",
+      "description": "Core developer tool \u2014 project setup, API access, logs, basic deployment.",
+      "screen_count": 8,
+      "primary_flows": [
+        "Sign up \u2192 create project \u2192 get API key \u2192 integrate \u2192 view usage",
+        "Deploy project \u2192 monitor build \u2192 view logs \u2192 check deployment status",
+        "Browse documentation \u2192 copy code snippet \u2192 integrate in own project"
+      ],
+      "secondary_flows": [
+        "View build history",
+        "Download logs",
+        "Invite team member",
+        "Set environment variable"
+      ],
+      "screens": [
+        {
+          "id": "dashboard",
+          "name": "Dashboard / Projects",
+          "purpose": "All projects \u2014 status, recent builds, quick actions",
+          "visual": "Dark IDE aesthetic. Project cards with build status. Usage summary. Create project CTA.",
+          "entities": [
+            "Project",
+            "Build",
+            "Usage"
+          ],
+          "actions": [
+            "View all projects",
+            "Create new project",
+            "View build status",
+            "View usage summary",
+            "Quick navigate to project"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Developer Tool'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Developer Tool'].cta}}",
+            "empty_state": "No projects yet. Create one to get your first deployment live."
+          }
+        },
+        {
+          "id": "project_detail",
+          "name": "Project Detail",
+          "purpose": "Single project overview \u2014 builds, deployments, usage, settings",
+          "visual": "Project header with status badge. Tabs \u2014 overview, builds, logs, settings. Metrics cards.",
+          "entities": [
+            "Project",
+            "Build",
+            "Deployment",
+            "Usage"
+          ],
+          "actions": [
+            "View overview",
+            "View builds",
+            "View logs",
+            "Trigger deploy",
+            "View usage",
+            "Open settings"
+          ]
+        },
+        {
+          "id": "build_detail",
+          "name": "Build / Deployment Detail",
+          "purpose": "Build status, logs, and deployment info",
+          "visual": "Build status header. Real-time log stream. Step progress. Error highlights.",
+          "entities": [
+            "Build",
+            "Log",
+            "Deployment"
+          ],
+          "actions": [
+            "View build status",
+            "Stream logs",
+            "View build steps",
+            "View error detail",
+            "Redeploy",
+            "Cancel build"
+          ]
+        },
+        {
+          "id": "logs",
+          "name": "Logs",
+          "purpose": "Real-time and historical logs",
+          "visual": "Terminal-style log viewer. Dark background. Monospace font. Filter bar. Search. Download.",
+          "entities": [
+            "Log",
+            "Project",
+            "Build"
+          ],
+          "actions": [
+            "Stream live logs",
+            "Search logs",
+            "Filter by severity",
+            "Filter by time range",
+            "Download logs",
+            "Clear logs"
+          ],
+          "copy": {
+            "headline": "Build logs",
+            "cta": "Trigger build",
+            "empty_state": "No logs yet. Trigger a build to see output here."
+          }
+        },
+        {
+          "id": "api_keys",
+          "name": "API Keys",
+          "purpose": "Generate and manage API keys",
+          "visual": "Key list. Masked by default. Reveal and copy. Created date. Last used. Delete.",
+          "entities": [
+            "APIKey",
+            "User",
+            "Project"
+          ],
+          "actions": [
+            "Generate new key",
+            "Copy key",
+            "Reveal key",
+            "View last used",
+            "Set key permissions",
+            "Delete key"
+          ]
+        },
+        {
+          "id": "documentation",
+          "name": "Documentation",
+          "purpose": "API reference and integration guides",
+          "visual": "Docs sidebar. Content area. Code examples with syntax highlighting. Copy snippets.",
+          "entities": [
+            "Documentation"
+          ],
+          "actions": [
+            "Browse docs",
+            "Search docs",
+            "View API reference",
+            "Copy code snippet",
+            "Select language for code example"
+          ]
+        },
+        {
+          "id": "usage",
+          "name": "Usage & Billing",
+          "purpose": "Usage metrics and billing",
+          "visual": "Usage chart. Breakdown by type. Current period. Billing info. Plan indicator.",
+          "entities": [
+            "Usage",
+            "Project"
+          ],
+          "actions": [
+            "View usage chart",
+            "View breakdown",
+            "View current period",
+            "Update billing info",
+            "View invoices"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "Account and project settings",
+          "visual": "Settings sidebar. Profile. Security. Notifications. Log out.",
+          "entities": [
+            "User",
+            "Project"
+          ],
+          "actions": [
+            "Edit profile",
+            "Security settings",
+            "Notification preferences",
+            "Delete account",
+            "Log out"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "Build status badge \u2014 building spinner, success green, failed red",
+        "Log stream \u2014 monospace font, auto-scroll, new lines append at bottom",
+        "Error lines in logs \u2014 red background highlight",
+        "API key masked \u2014 dots until reveal button tapped \u2014 copy after reveal",
+        "Code examples \u2014 language tabs (JS, Python, curl) \u2014 switch without reload",
+        "Copy code button \u2014 top right of every code block \u2014 changes to tick on copy",
+        "Deploy button \u2014 triggers build \u2014 shows building state immediately",
+        "Empty state \u2014 terminal-style message with command to get started"
+      ]
+    },
+    "startup": {
+      "tier": "Startup",
+      "description": "Full developer tool with environments, team management, integrations, webhooks, and advanced monitoring.",
+      "screen_count": 14,
+      "primary_flows": [
+        "All MVP flows",
+        "Create environment \u2192 deploy to staging \u2192 test \u2192 promote to production",
+        "Set up webhook \u2192 external service receives events \u2192 builds triggered automatically",
+        "Connect integration \u2192 CI/CD pipeline linked \u2192 push to repo \u2192 auto-deploy",
+        "Invite team \u2192 assign roles \u2192 team member deploys \u2192 owner sees activity"
+      ],
+      "secondary_flows": [
+        "All MVP secondary flows",
+        "Set up environment variables per environment",
+        "Configure build commands",
+        "Preview deployments on branch push",
+        "Roll back to previous deployment",
+        "Set up domain and SSL"
+      ],
+      "screens": [
+        {
+          "id": "dashboard",
+          "name": "Dashboard / Projects",
+          "purpose": "Team dashboard with recent activity and build queue",
+          "visual": "Project list. Recent build activity. Build queue. Team member avatars on active builds.",
+          "entities": [
+            "Project",
+            "Build",
+            "Usage",
+            "Team"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View build queue",
+            "View team activity",
+            "Filter by team member"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Developer Tool'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Developer Tool'].cta}}",
+            "empty_state": "No projects yet. Create one to get your first deployment live."
+          }
+        },
+        {
+          "id": "project_detail",
+          "name": "Project Detail",
+          "purpose": "Full project with environments, activity, and team",
+          "visual": "Tabs \u2014 overview, environments, builds, logs, integrations, team, settings.",
+          "entities": [
+            "Project",
+            "Build",
+            "Deployment",
+            "Environment"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Switch environment",
+            "View integrations",
+            "View team",
+            "View activity feed"
+          ]
+        },
+        {
+          "id": "environments",
+          "name": "Environments",
+          "purpose": "Manage production, staging, and development environments",
+          "visual": "Environment cards. Status badge. Last deployed. Variables count. Actions.",
+          "entities": [
+            "Environment",
+            "Project",
+            "Deployment"
+          ],
+          "actions": [
+            "View environments",
+            "Create environment",
+            "View environment variables",
+            "Promote deployment",
+            "View deployment history per environment"
+          ]
+        },
+        {
+          "id": "environment_variables",
+          "name": "Environment Variables",
+          "purpose": "Manage env vars per environment \u2014 add, edit, delete",
+          "visual": "Variable table. Key and masked value. Environment tabs. Add variable form.",
+          "entities": [
+            "Environment",
+            "Project"
+          ],
+          "actions": [
+            "View variables",
+            "Add variable",
+            "Edit variable",
+            "Delete variable",
+            "Copy value",
+            "Bulk import from .env file"
+          ]
+        },
+        {
+          "id": "build_detail",
+          "name": "Build / Deployment Detail",
+          "purpose": "Full build detail with steps, logs, and deploy promotion",
+          "visual": "Step timeline. Log per step. Error details. Promote CTA. Redeploy.",
+          "entities": [
+            "Build",
+            "Log",
+            "Deployment"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Promote to next environment",
+            "Compare with previous build"
+          ]
+        },
+        {
+          "id": "logs",
+          "name": "Logs",
+          "purpose": "Multi-source logs \u2014 build, runtime, and system",
+          "visual": "Log source selector. Real-time stream. Severity filter. Time range. Search.",
+          "entities": [
+            "Log",
+            "Project",
+            "Build",
+            "Environment"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Filter by log source",
+            "Filter by environment",
+            "Set log retention"
+          ],
+          "copy": {
+            "headline": "Build logs",
+            "cta": "Trigger build",
+            "empty_state": "No logs yet. Trigger a build to see output here."
+          }
+        },
+        {
+          "id": "webhooks",
+          "name": "Webhooks",
+          "purpose": "Create and manage webhooks for project events",
+          "visual": "Webhook list. Event types. Endpoint URL. Recent deliveries. Status badge.",
+          "entities": [
+            "Webhook",
+            "Project"
+          ],
+          "actions": [
+            "Create webhook",
+            "Select events",
+            "Set endpoint URL",
+            "View delivery history",
+            "Re-deliver",
+            "Delete webhook"
+          ]
+        },
+        {
+          "id": "integrations",
+          "name": "Integrations",
+          "purpose": "Connect external services \u2014 GitHub, GitLab, Slack, Datadog",
+          "visual": "Integration cards. Connected badge. Configure. Repo selector for git providers.",
+          "entities": [
+            "Integration",
+            "Project"
+          ],
+          "actions": [
+            "Browse integrations",
+            "Connect integration",
+            "Configure",
+            "Select repository",
+            "Disconnect"
+          ]
+        },
+        {
+          "id": "team_management",
+          "name": "Team Management",
+          "purpose": "Invite and manage team members and roles",
+          "visual": "Team table. Role badge. Permissions per role. Invite CTA. Pending invites.",
+          "entities": [
+            "Team",
+            "User"
+          ],
+          "actions": [
+            "Invite member",
+            "Assign role",
+            "Edit permissions",
+            "Remove member",
+            "View pending invites"
+          ]
+        },
+        {
+          "id": "domains",
+          "name": "Domains & SSL",
+          "purpose": "Add custom domains and manage SSL certificates",
+          "visual": "Domain list. SSL status badge. DNS instructions. Add domain form.",
+          "entities": [
+            "Project",
+            "Deployment"
+          ],
+          "actions": [
+            "Add custom domain",
+            "View DNS configuration",
+            "View SSL status",
+            "Remove domain",
+            "Force HTTPS toggle"
+          ]
+        },
+        {
+          "id": "monitoring",
+          "name": "Monitoring & Alerts",
+          "purpose": "Uptime, error rate, and performance monitoring with alerts",
+          "visual": "Uptime chart. Error rate chart. P95 latency. Alert rules list.",
+          "entities": [
+            "Project",
+            "Log"
+          ],
+          "actions": [
+            "View uptime",
+            "View error rate",
+            "View latency",
+            "Create alert rule",
+            "View alert history",
+            "Acknowledge alert"
+          ]
+        },
+        {
+          "id": "api_keys",
+          "name": "API Keys",
+          "purpose": "Keys with scopes, expiry, and rate limits",
+          "visual": "Key list. Scope badges. Expiry date. Rate limit. Usage per key.",
+          "entities": [
+            "APIKey",
+            "User",
+            "Project"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Set scopes",
+            "Set expiry",
+            "Set rate limit",
+            "View usage per key"
+          ]
+        },
+        {
+          "id": "usage",
+          "name": "Usage & Billing",
+          "purpose": "Detailed usage with per-project breakdown and forecast",
+          "visual": "Usage chart. Per-project breakdown. Forecast. Cost estimate. Plan. Invoices.",
+          "entities": [
+            "Usage",
+            "Project"
+          ],
+          "actions": [
+            "All MVP actions",
+            "View per-project usage",
+            "View cost forecast",
+            "Compare plans"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "Full account and org settings",
+          "visual": "Settings sidebar. Profile. Security. Team. Billing. Notifications. Danger zone.",
+          "entities": [
+            "User",
+            "Project"
+          ],
+          "actions": [
+            "All MVP actions",
+            "Two-factor settings",
+            "SSO settings",
+            "Delete project \u2014 danger zone"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP interaction patterns",
+        "Build step timeline \u2014 each step expands to show its logs",
+        "Environment tag on builds \u2014 production red, staging amber, dev blue",
+        "Promote deployment button \u2014 confirm modal with diff summary",
+        "Webhook delivery \u2014 shows request and response body on expand",
+        "Environment variable \u2014 add from .env file \u2014 paste or upload",
+        "Domain SSL badge \u2014 valid green with expiry date, expired red",
+        "Alert fired \u2014 red banner on monitoring page, notification sent",
+        "Roll back button \u2014 previous deployment card \u2014 confirm modal"
+      ]
+    },
+    "scale": {
+      "tier": "Scale",
+      "description": "Enterprise developer platform with SSO, audit logs, custom infra, multi-region, compliance, and white-label.",
+      "screen_count": 22,
+      "primary_flows": [
+        "All MVP and Startup flows",
+        "Enterprise admin configures SSO \u2192 team logs in with company credentials \u2192 roles auto-assigned",
+        "Set up multi-region deployment \u2192 select regions \u2192 traffic routing configured \u2192 monitor per region",
+        "Compliance officer exports audit log \u2192 reviews all deployments and API usage \u2192 satisfies SOC2 audit",
+        "Platform operator creates workspace \u2192 enterprise customer onboards \u2192 isolated environment",
+        "Fine-grained permission policy \u2014 admin creates policy \u2192 assigns to team \u2192 enforced on all actions"
+      ],
+      "secondary_flows": [
+        "All previous secondary flows",
+        "Custom build pipeline configuration",
+        "Private registry integration",
+        "Cost allocation by team or project",
+        "SLA and uptime guarantees management",
+        "Enterprise support ticket from dashboard"
+      ],
+      "screens": [
+        {
+          "id": "dashboard",
+          "name": "Dashboard / Projects",
+          "purpose": "Enterprise dashboard with workspace switcher and org KPIs",
+          "visual": "Workspace switcher. Org health summary. Projects. Build queue. Cost summary.",
+          "entities": [
+            "Project",
+            "Build",
+            "Usage",
+            "Team"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Switch workspace",
+            "View org health summary",
+            "View org cost"
+          ],
+          "copy": {
+            "headline": "{{industry.copy_by_app_type['Developer Tool'].headline}}",
+            "cta": "{{industry.copy_by_app_type['Developer Tool'].cta}}",
+            "empty_state": "No projects yet. Create one to get your first deployment live."
+          }
+        },
+        {
+          "id": "project_detail",
+          "name": "Project Detail",
+          "purpose": "Full project with compliance, cost, and advanced monitoring",
+          "visual": "All Startup tabs plus compliance tab and cost tab.",
+          "entities": [
+            "Project",
+            "Build",
+            "Deployment",
+            "Environment"
+          ],
+          "actions": [
+            "All Startup actions",
+            "View project compliance",
+            "View project cost breakdown"
+          ]
+        },
+        {
+          "id": "environments",
+          "name": "Environments",
+          "purpose": "Multi-region environments with traffic splitting and canary",
+          "visual": "Environment cards. Region indicators. Traffic split control. Canary badge.",
+          "entities": [
+            "Environment",
+            "Project",
+            "Deployment"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Select deployment region",
+            "Set traffic split",
+            "Configure canary deployment"
+          ]
+        },
+        {
+          "id": "multi_region",
+          "name": "Multi-Region Deployment",
+          "purpose": "Deploy to multiple regions and manage traffic routing",
+          "visual": "World map with active regions. Traffic percentage sliders. Latency per region.",
+          "entities": [
+            "Deployment",
+            "Environment"
+          ],
+          "actions": [
+            "Select regions",
+            "Set traffic percentages",
+            "View latency per region",
+            "Failover configuration",
+            "View regional logs"
+          ]
+        },
+        {
+          "id": "environment_variables",
+          "name": "Environment Variables",
+          "purpose": "Advanced env var management with secrets manager integration",
+          "visual": "Variable table. Secret manager badge. Encryption indicator. Audit log per variable.",
+          "entities": [
+            "Environment",
+            "Project"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Link to secrets manager",
+            "View variable change audit log"
+          ]
+        },
+        {
+          "id": "build_detail",
+          "name": "Build / Deployment Detail",
+          "purpose": "Full build with approval gates and compliance checks",
+          "visual": "Step timeline. Approval gate step. Compliance check step. Logs.",
+          "entities": [
+            "Build",
+            "Log",
+            "Deployment"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Approve gate",
+            "View compliance check result"
+          ]
+        },
+        {
+          "id": "pipelines",
+          "name": "Build Pipelines",
+          "purpose": "Custom CI/CD pipeline configuration and visualisation",
+          "visual": "Pipeline canvas. Stage blocks. Connector lines. Status per stage.",
+          "entities": [
+            "Build",
+            "Project"
+          ],
+          "actions": [
+            "View pipeline",
+            "Edit pipeline stages",
+            "Add approval gate",
+            "Add custom step",
+            "View pipeline run history"
+          ]
+        },
+        {
+          "id": "logs",
+          "name": "Logs",
+          "purpose": "Enterprise logs with retention, archival, and compliance export",
+          "visual": "Log viewer. Retention policy indicator. Archive CTA. Compliance export.",
+          "entities": [
+            "Log",
+            "Project",
+            "Build",
+            "Environment"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Set retention policy",
+            "Archive logs",
+            "Export for compliance"
+          ],
+          "copy": {
+            "headline": "Build logs",
+            "cta": "Trigger build",
+            "empty_state": "No logs yet. Trigger a build to see output here."
+          }
+        },
+        {
+          "id": "audit_log",
+          "name": "Audit Log",
+          "purpose": "Full audit trail of all actions \u2014 deployments, key access, setting changes",
+          "visual": "Audit log table. User, action, timestamp, project. Filter and export.",
+          "entities": [
+            "Log",
+            "User",
+            "Project"
+          ],
+          "actions": [
+            "View all actions",
+            "Filter by user or action type",
+            "Filter by project",
+            "Export audit log"
+          ]
+        },
+        {
+          "id": "webhooks",
+          "name": "Webhooks",
+          "purpose": "Enterprise webhooks with signing, retry, and delivery analytics",
+          "visual": "Webhook list. Signing key. Retry config. Delivery success rate.",
+          "entities": [
+            "Webhook",
+            "Project"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Configure signing secret",
+            "Set retry policy",
+            "View delivery success rate"
+          ]
+        },
+        {
+          "id": "integrations",
+          "name": "Integrations",
+          "purpose": "Enterprise integrations with private registry and secrets manager",
+          "visual": "Integration cards. Enterprise tier badge. Private registry. Secrets manager.",
+          "entities": [
+            "Integration",
+            "Project"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Connect private registry",
+            "Connect secrets manager",
+            "Configure enterprise SSO integration"
+          ]
+        },
+        {
+          "id": "permissions",
+          "name": "Permissions & Policies",
+          "purpose": "Fine-grained permission policies with role inheritance",
+          "visual": "Policy list. Role hierarchy. Permission matrix. Create policy form.",
+          "entities": [
+            "Team",
+            "User"
+          ],
+          "actions": [
+            "Create permission policy",
+            "Set resource access rules",
+            "Assign policy to team",
+            "View permission inheritance",
+            "Audit permission changes"
+          ]
+        },
+        {
+          "id": "team_management",
+          "name": "Team Management",
+          "purpose": "Enterprise team management with SSO sync and directory",
+          "visual": "Team table. SSO sync status. Directory groups. Roles. Activity.",
+          "entities": [
+            "Team",
+            "User"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Sync from SSO directory",
+            "Map directory groups to roles",
+            "View member activity"
+          ]
+        },
+        {
+          "id": "cost_management",
+          "name": "Cost Management",
+          "purpose": "Full cost visibility and allocation by project, team, and environment",
+          "visual": "Cost dashboard. By project chart. By team chart. By environment. Budget alerts.",
+          "entities": [
+            "Usage",
+            "Project",
+            "Team"
+          ],
+          "actions": [
+            "View cost by project",
+            "View cost by team",
+            "View cost by environment",
+            "Set budget alert",
+            "Export cost report",
+            "View forecast"
+          ]
+        },
+        {
+          "id": "monitoring",
+          "name": "Monitoring & Observability",
+          "purpose": "Full observability \u2014 traces, metrics, logs, SLOs, alerting",
+          "visual": "SLO compliance gauge. Trace explorer. Metrics dashboard. Error tracking. Alerts.",
+          "entities": [
+            "Project",
+            "Log"
+          ],
+          "actions": [
+            "View SLO compliance",
+            "Explore traces",
+            "View metrics",
+            "View error tracking",
+            "Manage alert policies"
+          ]
+        },
+        {
+          "id": "api_keys",
+          "name": "API Keys",
+          "purpose": "Enterprise key management with IP allowlist and audit",
+          "visual": "Key list. IP allowlist per key. Usage audit. Rotation schedule.",
+          "entities": [
+            "APIKey",
+            "User",
+            "Project"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Set IP allowlist",
+            "View key usage audit",
+            "Set rotation schedule"
+          ]
+        },
+        {
+          "id": "compliance",
+          "name": "Compliance Centre",
+          "purpose": "SOC2, GDPR, and audit report management",
+          "visual": "Compliance status cards. Evidence list. Audit report download. Retention.",
+          "entities": [
+            "Project",
+            "Log",
+            "User"
+          ],
+          "actions": [
+            "View compliance status",
+            "Download audit report",
+            "View evidence",
+            "Set data retention",
+            "View certifications"
+          ]
+        },
+        {
+          "id": "domains",
+          "name": "Domains & Infrastructure",
+          "purpose": "Custom domains, CDN, and infrastructure settings",
+          "visual": "Domain list. CDN config. Custom infrastructure settings. SSL.",
+          "entities": [
+            "Project",
+            "Deployment"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Configure CDN",
+            "Custom infrastructure settings"
+          ]
+        },
+        {
+          "id": "admin_dashboard",
+          "name": "Admin / Super Admin Dashboard",
+          "purpose": "Platform-level \u2014 all workspaces, usage, health, support",
+          "visual": "Workspace table. Platform health. Build queue. Support tickets. Revenue.",
+          "entities": [
+            "Project",
+            "User",
+            "Build"
+          ],
+          "actions": [
+            "View all workspaces",
+            "View platform health",
+            "Access workspace as admin",
+            "View support queue",
+            "View platform revenue"
+          ]
+        },
+        {
+          "id": "sso_settings",
+          "name": "SSO & Security Settings",
+          "purpose": "Enterprise SSO, MFA policy, and session management",
+          "visual": "SSO provider config. MFA enforcement toggle. Session policies. IP restrictions.",
+          "entities": [
+            "User"
+          ],
+          "actions": [
+            "Configure SSO provider",
+            "Enforce MFA org-wide",
+            "Set session timeout",
+            "Configure IP allowlist"
+          ]
+        },
+        {
+          "id": "usage",
+          "name": "Usage & Billing",
+          "purpose": "Enterprise billing with contract and committed use discounts",
+          "visual": "Enterprise plan. Committed use progress. Cost allocation. Invoices. Contact sales.",
+          "entities": [
+            "Usage",
+            "Project"
+          ],
+          "actions": [
+            "View committed use progress",
+            "View cost allocation",
+            "Download invoices",
+            "Contact enterprise sales"
+          ]
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "purpose": "Enterprise settings hub \u2014 all sections",
+          "visual": "Settings sidebar. All enterprise sections. Compliance. SSO. Cost. Infra.",
+          "entities": [
+            "User",
+            "Project"
+          ],
+          "actions": [
+            "All Startup actions",
+            "Compliance settings",
+            "SSO configuration",
+            "Cost allocation settings",
+            "Infrastructure settings"
+          ]
+        }
+      ],
+      "interaction_patterns": [
+        "All MVP and Startup interaction patterns",
+        "Pipeline canvas \u2014 drag stage blocks to reorder \u2014 connect with lines",
+        "Approval gate \u2014 pending state blocks pipeline \u2014 reviewer sees approve or reject",
+        "Multi-region traffic slider \u2014 adjusts in real time \u2014 must total 100%",
+        "Canary deployment indicator \u2014 percentage badge on deployment card",
+        "SLO compliance gauge \u2014 circular gauge \u2014 green above threshold, red below",
+        "Permission matrix \u2014 checkbox grid \u2014 rows resources, columns roles",
+        "Audit log row \u2014 expand to full action JSON \u2014 copy JSON button",
+        "Cost chart \u2014 hover to see exact amount \u2014 click to drill down to project",
+        "SSO sync indicator \u2014 last synced time + manual sync button"
+      ]
+    }
+  },
+  "layout": {
+    "iphone": {
+      "nav": "bottom_tab_4",
+      "nav_items": [
+        "Dashboard",
+        "Projects",
+        "Logs",
+        "Settings"
+      ],
+      "content": "full_width_single_column_data_dense",
+      "card_style": "full_width_project_status_row",
+      "cta": "top_right_action_button",
+      "hero": "status_badges_and_build_list",
+      "padding": "16px horizontal",
+      "image_ratio": "no_photography_status_icons_only"
+    },
+    "ipad": {
+      "nav": "sidebar_left_with_labels",
+      "nav_items": [
+        "Dashboard",
+        "Projects",
+        "Deployments",
+        "Logs",
+        "API Keys",
+        "Settings"
+      ],
+      "content": "2col_layout_list_left_detail_right",
+      "card_style": "compact_project_row_with_status_badge",
+      "cta": "top_right_primary_action",
+      "hero": "project_list_with_detail_panel_right",
+      "padding": "24px",
+      "image_ratio": "no_photography"
+    },
+    "desktop": {
+      "nav": "sidebar_left_fixed_with_section_groups",
+      "nav_items": [
+        "Dashboard",
+        "Projects",
+        "Deployments",
+        "Logs",
+        "Analytics",
+        "API Keys",
+        "Docs",
+        "Settings"
+      ],
+      "content": "left_anchored_max_1440px_with_sidebar",
+      "card_style": "data_table_rows_with_status_and_actions",
+      "cta": "top_right_header_new_project_button",
+      "hero": "full_width_status_overview_then_project_table",
+      "padding": "32px content",
+      "image_ratio": "no_photography_monospace_code_only"
+    },
+    "notes": "Monospace font for all code, logs, and terminal output \u2014 no exceptions. Copy button on every code block, API key, and command. Build status always visible \u2014 never buried."
+  },
+  "constraints": {
+    "avoid": [
+      "Never use photography, illustration, or decorative elements anywhere",
+      "Never use a rounded bubble UI \u2014 developer tools use sharp or minimal radius",
+      "Never paginate logs \u2014 always infinite scroll with search and filter",
+      "Never auto-refresh without showing a refresh indicator and timestamp",
+      "Never hide the raw request/response \u2014 always offer a way to see raw data",
+      "Never use a modal for log viewing \u2014 always navigate to a dedicated log screen",
+      "Never truncate error messages \u2014 full error always accessible",
+      "Never use colour alone to convey status \u2014 always pair with icon and label"
+    ],
+    "enforce": [
+      "Build status: spinner = building, green check = success, red X = failed \u2014 always these exact patterns",
+      "Log lines in monospace font \u2014 always",
+      "Error lines in logs always red background highlight",
+      "New log lines auto-scroll to bottom \u2014 with manual scroll-lock toggle",
+      "API key always partially masked \u2014 first 4 and last 4 chars visible, rest masked",
+      "Copy to clipboard on every code snippet and API key \u2014 keyboard shortcut supported",
+      "Uptime shown as percentage with 2 decimal places \u2014 99.98% not 'high'",
+      "Deploy time shown precisely \u2014 '2m 34s' not 'about 3 minutes'"
+    ]
+  },
+  "states": {
+    "empty_states": [
+      {
+        "screen": "dashboard",
+        "trigger": "No projects created yet",
+        "ui": "Code terminal illustration (minimal SVG). Message: 'No projects yet'. CTA: 'Create your first project'. Show CLI command as alternative: 'or run [command] to get started'."
+      },
+      {
+        "screen": "logs",
+        "trigger": "No logs for this project yet",
+        "ui": "Terminal cursor blinking. Message: 'No logs yet. Logs will appear here once your project is deployed.'"
+      },
+      {
+        "screen": "api_keys",
+        "trigger": "No API keys created",
+        "ui": "Key icon. Message: 'No API keys yet'. CTA: 'Generate API key'. Warning: 'Keep your keys secure. Never share them publicly.'."
+      }
+    ],
+    "loading_states": [
+      {
+        "screen": "dashboard",
+        "ui": "Metrics skeleton \u2014 grey rectangles same size as real values. Build list skeleton rows \u2014 status icon placeholder, project name, timestamp."
+      },
+      {
+        "screen": "logs",
+        "ui": "Log lines appear as they stream \u2014 never batch. First 50 lines from cache immediately. New lines append at bottom with auto-scroll."
+      },
+      {
+        "screen": "build_detail",
+        "ui": "Build steps list skeleton. Active step shows spinner. Completed steps show green check immediately \u2014 never wait for all steps."
+      }
+    ],
+    "error_flows": [
+      {
+        "trigger": "Build fails",
+        "ui": "Build status: red X. Error summary at top of build log. Failing step highlighted. Full error output below. CTA: 'View logs'. Never just 'Build failed' with no detail."
+      },
+      {
+        "trigger": "Deployment fails",
+        "ui": "Deployment status: red. Last successful deployment still live \u2014 shown clearly. Error detail expandable. Rollback CTA prominent."
+      },
+      {
+        "trigger": "API key revoked or expired",
+        "ui": "API calls return 401. Dashboard shows alert: 'Your API key has been revoked'. Instructions to generate new key. Old key not shown."
+      },
+      {
+        "trigger": "Rate limit hit",
+        "ui": "429 response shown in request log with reset time. Dashboard shows rate limit gauge. Warning before hitting limit at 80%."
+      }
+    ],
+    "edge_cases": [
+      {
+        "case": "Build log with 100k+ lines",
+        "ui": "Virtualised list \u2014 only render visible lines. Search within logs. Jump to error shortcut. Download full log option."
+      },
+      {
+        "case": "Simultaneous deploys to multiple environments",
+        "ui": "Each environment shown as separate row with own status. Never collapse into single status when environments differ."
+      },
+      {
+        "case": "API key used from unexpected location",
+        "ui": "Security alert in dashboard: 'Unusual API key usage detected from [country]'. Option to revoke immediately. Never silent."
+      },
+      {
+        "case": "Zero downtime deploy in progress",
+        "ui": "Two rows shown \u2014 old version winding down, new version spinning up. Traffic split shown as progress bar. Both statuses visible simultaneously."
+      }
+    ]
+  },
+  "components": [
+    "BuildStatusBadge",
+    "LogLine",
+    "ProjectRow",
+    "APIKeyCard",
+    "CodeBlock",
+    "DeployButton",
+    "EnvVarRow",
+    "UsageChart"
+  ],
+  "nav_active_states": {
+    "dashboard": "Dashboard",
+    "project_detail": "Projects",
+    "build_detail": "Projects",
+    "logs": "Projects",
+    "api_keys": "Dashboard",
+    "documentation": "Dashboard",
+    "usage": "Dashboard",
+    "settings": "Settings"
+  }
+}

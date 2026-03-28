@@ -1,0 +1,170 @@
+{
+  "industry_id": "real_estate",
+  "industry_name": "Real Estate",
+  "tone": {
+    "primary": "trustworthy, aspirational, professional",
+    "secondary": "approachable, clear, confident",
+    "voice": "an experienced agent who is on your side \u2014 informed, honest, never pushy",
+    "avoid": "overly salesy, jargon-heavy, cold, rushed"
+  },
+  "trust_signals": [
+    "verified agent credentials and photo",
+    "years of experience and sales history",
+    "property listing verification badges",
+    "number of properties sold",
+    "secure enquiry and data handling",
+    "transparent pricing and fees",
+    "real property photography"
+  ],
+  "ux_norms": [
+    "large property photography drives all decisions \u2014 full bleed images on listing and property detail",
+    "map view is a primary navigation mode for property discovery and location browsing",
+    "filter and search are always prominent \u2014 price, location, beds, baths minimum visible filters",
+    "agent contact is always one tap away on any property detail screen",
+    "property management screens: dashboard leads with KPI cards \u2014 occupied units, rent collected, open maintenance \u2014 never a list",
+    "property management screens: rent tracking uses colour coded status always \u2014 green paid, amber due, red overdue \u2014 never text only",
+    "property management screens: maintenance requests show property and unit on every card \u2014 never just a description",
+    "property management screens: tenant detail shows active lease, payment history, and maintenance history on one screen \u2014 never across tabs",
+    "property management screens: financials always show income vs expense chart \u2014 never just a transaction list",
+    "property management screens: lease builder uses template selector first \u2014 never blank form",
+    "property management screens: contractor list shows trade, rating, and last job \u2014 never just a name list",
+    "property management screens: inspection screen uses photo per checklist item \u2014 never text-only inspection report",
+    "mortgage calculator accessible from property detail screens \u2014 always one tap away",
+    "virtual tour integration expected at scale for both listing and property management contexts"
+  ],
+  "icons": {
+    "style": "clean outlined, professional, precise",
+    "weight": "medium",
+    "mood": "professional, trustworthy, precise",
+    "library": {
+      "name": "Material Symbols",
+      "variant": "Outlined",
+      "url": "https://fonts.google.com/icons"
+    },
+    "domain_icons": [
+      "home",
+      "apartment",
+      "location_on",
+      "key",
+      "attach_money",
+      "bar_chart",
+      "straighten",
+      "photo_camera",
+      "calendar_today",
+      "sell",
+      "villa",
+      "garage"
+    ],
+    "nav_icons": [
+      "home",
+      "search",
+      "favorite",
+      "map",
+      "person",
+      "notifications",
+      "tune",
+      "list",
+      "arrow_back",
+      "my_location"
+    ]
+  },
+  "visual_language": {
+    "primary_type": "real photography",
+    "style": "architectural photography \u2014 clean, bright, aspirational",
+    "photography_rules": [
+      "always use high quality property photography",
+      "bright natural light preferred",
+      "wide angle interior shots standard",
+      "exterior shots with clear sky preferred",
+      "never use renders as primary imagery without labelling"
+    ],
+    "background_treatment": "clean white or light grey \u2014 never compete with property imagery",
+    "empty_state_style": "minimal line illustration \u2014 house outline or map pin with helpful copy",
+    "onboarding_visual": "clean flat vector \u2014 house, key, or map theme",
+    "illustration_style": "when used: architectural line illustration \u2014 precise and professional"
+  },
+  "themes": {
+    "pack": [
+      "Estate",
+      "Modern Property",
+      "Warm Home",
+      "Urban",
+      "Luxury"
+    ]
+  },
+  "fonts": {
+    "ai_pick_heading": "Inter",
+    "ai_pick_body": "Inter"
+  },
+  "valid_app_types": [
+    "Marketplace",
+    "Booking & Appointments",
+    "E-commerce",
+    "Social & Community",
+    "Dashboard SaaS",
+    "Content & Streaming",
+    "Chat / Messaging",
+    "Map & Location-Based",
+    "AI Tool",
+    "Developer Tool",
+    "Property Management"
+  ],
+  "monetization_models": [
+    "listing fees for agents",
+    "featured property placement",
+    "lead generation per enquiry",
+    "SaaS per seat for agencies",
+    "mortgage referral commission"
+  ],
+  "compliance_notes": [
+    "fair housing and anti-discrimination laws apply",
+    "property data accuracy and currency must be maintained",
+    "agent licensing verification required",
+    "financial advice disclaimer for mortgage calculators",
+    "GDPR for buyer and seller data"
+  ],
+  "constraints": {
+    "avoid": [
+      "Never show a property without at least one photograph \u2014 use exterior placeholder only if truly unavailable",
+      "Never hide agent commission or transaction fees",
+      "Never show an inaccurate listing status \u2014 sold properties must be marked immediately",
+      "Never use countdown timers on offers without those timers being legally meaningful",
+      "Never fabricate viewing count or interest level indicators",
+      "Never collect personal financial information without clear disclosure of how it is used"
+    ],
+    "enforce": [
+      "Property price always shown with full amount \u2014 no abbreviated formats that obscure the number",
+      "Agent credentials and license number always visible on their profile",
+      "Floor plan always available on property detail where exists",
+      "School ratings and neighbourhood data always sourced and attributed",
+      "Listing date always shown \u2014 buyers need to know how long it has been on market",
+      "Virtual tour or video always offered where available \u2014 never just static photos"
+    ]
+  },
+  "copy_by_app_type": {
+    "AI Tool": {
+      "headline": "Find your perfect property with AI",
+      "cta": "Start searching"
+    },
+    "Marketplace": {
+      "headline": "Find the home you've been looking for",
+      "cta": "Browse listings"
+    },
+    "Property Management": {
+      "headline": "Your portfolio, under control",
+      "cta": "View dashboard"
+    },
+    "Dashboard SaaS": {
+      "headline": "Every deal, every pipeline, one view",
+      "cta": "Open dashboard"
+    },
+    "Booking & Appointments": {
+      "headline": "Schedule a viewing in seconds",
+      "cta": "Find availability"
+    },
+    "default": {
+      "headline": "Property intelligence, built in",
+      "cta": "Get started"
+    }
+  }
+}

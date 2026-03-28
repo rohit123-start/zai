@@ -3,57 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
-  getProject, getThemes, getGlobalTheme, saveVisualDirection,
+  getProject, getThemeByName, getGlobalTheme,
   type Theme,
 } from "@/lib/db";
-import { generateBrain } from "@/lib/brain-generator";
 import { createClient } from "@/lib/supabase/client";
-
-// ─── Font pairings ────────────────────────────────────────────────────────────
-
-type FontPair = {
-  id: string;
-  heading: string;
-  body: string;
-  label: string;
-  mood: string;
-  previewHeading: string;
-  previewBody: string;
-  googleUrl: string;
-};
-
-const FONT_PAIRS: FontPair[] = [
-  {
-    id: "playfair-dm",
-    heading: "Playfair Display",
-    body: "DM Sans",
-    label: "Playfair Display + DM Sans",
-    mood: "Elegant",
-    previewHeading: "Beautiful Design",
-    previewBody: "Clear, modern type that works at any scale.",
-    googleUrl: "family=Playfair+Display:wght@400;600&family=DM+Sans:wght@400;500",
-  },
-  {
-    id: "inter-inter",
-    heading: "Inter",
-    body: "Inter",
-    label: "Inter + Inter",
-    mood: "Clean modern",
-    previewHeading: "Precision & Clarity",
-    previewBody: "The typeface built for screens. Nothing extra.",
-    googleUrl: "family=Inter:wght@400;500;600",
-  },
-  {
-    id: "cormorant-nunito",
-    heading: "Cormorant Garamond",
-    body: "Nunito",
-    label: "Cormorant Garamond + Nunito",
-    mood: "Soft luxury",
-    previewHeading: "Refined & Warm",
-    previewBody: "Gentle curves, inviting and approachable.",
-    googleUrl: "family=Cormorant+Garamond:wght@400;600&family=Nunito:wght@400;500",
-  },
-];
+import {
+  ZEACH_THEMES,
+  ALL_FONT_PAIRS,
+  getIndustryThemes,
+  getRecommendedFontPair,
+  type ZeachTheme,
+  type FontPairDef,
+} from "@/lib/zeach-theme-catalog";
 
 // ─── Upload helper ────────────────────────────────────────────────────────────
 
@@ -76,19 +37,10 @@ async function uploadFile(
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function DropZone({
-  label,
-  sub,
-  icon,
-  files,
-  onFiles,
-  accept,
+  label, sub, icon, files, onFiles, accept,
 }: {
-  label: string;
-  sub: string;
-  icon: React.ReactNode;
-  files: File[];
-  onFiles: (f: File[]) => void;
-  accept: string;
+  label: string; sub: string; icon: React.ReactNode;
+  files: File[]; onFiles: (f: File[]) => void; accept: string;
 }) {
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -96,19 +48,13 @@ function DropZone({
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
     setDragging(false);
-    const dropped = Array.from(e.dataTransfer.files).filter((f) =>
-      f.type.startsWith("image/")
-    );
+    const dropped = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/"));
     if (dropped.length) onFiles([...files, ...dropped]);
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(e.target.files ?? []);
     if (selected.length) onFiles([...files, ...selected]);
-  }
-
-  function removeFile(i: number) {
-    onFiles(files.filter((_, idx) => idx !== i));
   }
 
   return (
@@ -119,17 +65,13 @@ function DropZone({
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
         className="flex flex-col items-center justify-center gap-2 px-6 py-6 rounded-xl cursor-pointer transition-all"
-        style={{
-          border: `1px dashed ${dragging ? "#06b6d4" : "rgba(255,255,255,0.1)"}`,
-          background: dragging ? "rgba(6,182,212,0.1)" : "#0a0a0a",
-        }}
+        style={{ border: `1px dashed ${dragging ? "#06b6d4" : "rgba(255,255,255,0.1)"}`, background: dragging ? "rgba(6,182,212,0.1)" : "#0a0a0a" }}
       >
         <span style={{ color: dragging ? "#06b6d4" : "#3f3f46" }}>{icon}</span>
         <p className="text-sm font-semibold" style={{ color: "#fff" }}>{label}</p>
         <p className="text-xs text-center" style={{ color: "#71717a" }}>{sub}</p>
         <input ref={inputRef} type="file" multiple accept={accept} className="hidden" onChange={handleChange} />
       </div>
-
       {files.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {files.map((f, i) => (
@@ -137,7 +79,7 @@ function DropZone({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={URL.createObjectURL(f)} alt={f.name} className="w-16 h-16 rounded-lg object-cover"
                 style={{ border: "1px solid rgba(255,255,255,0.1)" }} />
-              <button type="button" onClick={() => removeFile(i)}
+              <button type="button" onClick={() => onFiles(files.filter((_, j) => j !== i))}
                 className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                 style={{ background: "#ef4444", color: "#fff" }}>×</button>
             </div>
@@ -148,8 +90,13 @@ function DropZone({
   );
 }
 
-function StylePackCard({ pack, selected, onClick }: { pack: Theme; selected: boolean; onClick: () => void }) {
-  const t = pack.tokens;
+/** Theme card uses hardcoded ZeachTheme tokens for the live preview swatch. */
+function ThemeCard({
+  name, theme, selected, loading, onClick,
+}: {
+  name: string; theme: ZeachTheme; selected: boolean; loading: boolean; onClick: () => void;
+}) {
+  const t = theme;
   return (
     <button
       type="button"
@@ -158,9 +105,10 @@ function StylePackCard({ pack, selected, onClick }: { pack: Theme; selected: boo
       style={{
         border: selected ? "1px solid #06b6d4" : "1px solid rgba(255,255,255,0.08)",
         boxShadow: selected ? "0 0 0 1px #06b6d4" : "none",
+        opacity: loading ? 0.7 : 1,
       }}
     >
-      {/* Preview */}
+      {/* Live preview swatch */}
       <div style={{ height: 80, display: "flex", alignItems: "center", justifyContent: "center", padding: 12, background: t.background, overflow: "hidden" }}>
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 4 }}>
           <div style={{ height: 5, borderRadius: 3, background: t.primary, width: "55%" }} />
@@ -176,22 +124,34 @@ function StylePackCard({ pack, selected, onClick }: { pack: Theme; selected: boo
       </div>
       {/* Info */}
       <div style={{ padding: "10px 12px", background: "#0a0a0a" }}>
-        <p style={{ fontSize: 13, fontWeight: 600, color: "#fff", marginBottom: 1, fontFamily: "var(--font-space-grotesk)" }}>{pack.name}</p>
-        <p style={{ fontSize: 11, color: "#71717a" }}>{t.heading_font}</p>
+        <p style={{ fontSize: 13, fontWeight: 600, color: "#fff", marginBottom: 2, fontFamily: "var(--font-space-grotesk)" }}>{name}</p>
+        <p style={{ fontSize: 10, color: "#52525b", lineHeight: 1.4, marginBottom: 2 }}>{t.desc}</p>
+        <p style={{ fontSize: 10, color: "#3f3f46", fontFamily: "var(--font-dm-mono)" }}>
+          {t.heading_font} · {t.animation_speed}
+        </p>
       </div>
       {selected && (
         <div className="flex items-center gap-1 px-3 py-1" style={{ background: "#06b6d4" }}>
-          <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-            <path d="M2 6l3 3 5-5" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          <span style={{ fontSize: 10, fontWeight: 600, color: "#000", fontFamily: "var(--font-dm-mono)" }}>Selected</span>
+          {loading ? (
+            <svg style={{ animation: "spin 0.6s linear infinite" }} width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5"><circle cx="12" cy="12" r="10" strokeOpacity="0.3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+          ) : (
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          )}
+          <span style={{ fontSize: 10, fontWeight: 600, color: "#000", fontFamily: "var(--font-dm-mono)" }}>
+            {loading ? "Loading…" : "Selected"}
+          </span>
         </div>
       )}
     </button>
   );
 }
 
-function FontCard({ pair, selected, onClick }: { pair: FontPair; selected: boolean; onClick: () => void }) {
+/** Font pairing card with recommended badge and live font preview. */
+function FontCard({
+  pair, selected, recommended, onClick,
+}: {
+  pair: FontPairDef; selected: boolean; recommended: boolean; onClick: () => void;
+}) {
   return (
     <button
       type="button"
@@ -199,15 +159,20 @@ function FontCard({ pair, selected, onClick }: { pair: FontPair; selected: boole
       className="text-left flex items-center justify-between rounded-xl transition-all"
       style={{
         background: selected ? "rgba(6,182,212,0.1)" : "#0a0a0a",
-        border: `1px solid ${selected ? "#06b6d4" : "rgba(255,255,255,0.1)"}`,
+        border: `1px solid ${selected ? "#06b6d4" : recommended ? "rgba(6,182,212,0.25)" : "rgba(255,255,255,0.1)"}`,
         padding: "14px 16px",
       }}
     >
       <div style={{ flex: 1 }}>
         <div className="flex items-center gap-2 mb-1">
-          <p style={{ fontSize: 15, fontWeight: 700, color: "#fff", fontFamily: `"${pair.heading}", serif` }}>
+          <p style={{ fontSize: 15, fontWeight: 700, color: "#fff", fontFamily: `"${pair.heading}", ${pair.body === "Geist Mono" || pair.body === "Courier Prime" ? "monospace" : "sans-serif"}` }}>
             {pair.mood}
           </p>
+          {recommended && (
+            <span style={{ fontSize: 9, fontFamily: "var(--font-dm-mono)", letterSpacing: "0.4px", color: "#06b6d4", background: "rgba(6,182,212,0.12)", padding: "2px 6px", borderRadius: 4, border: "1px solid rgba(6,182,212,0.25)" }}>
+              RECOMMENDED
+            </span>
+          )}
         </div>
         <p style={{ fontSize: 11, color: "#71717a", fontFamily: "var(--font-dm-mono)" }}>
           {pair.heading} · {pair.body}
@@ -216,10 +181,9 @@ function FontCard({ pair, selected, onClick }: { pair: FontPair; selected: boole
       <div
         style={{
           width: 8, height: 8, borderRadius: "50%",
-          background: selected ? "#06b6d4" : "rgba(255,255,255,0.1)",
+          background: selected ? "#06b6d4" : recommended ? "rgba(6,182,212,0.4)" : "rgba(255,255,255,0.1)",
           boxShadow: selected ? "0 0 6px rgba(6,182,212,0.5)" : "none",
-          flexShrink: 0,
-          transition: "all 0.2s",
+          flexShrink: 0, transition: "all 0.2s",
         }}
       />
     </button>
@@ -233,9 +197,8 @@ export default function VisualDirectionPage() {
   const { projectId } = useParams<{ projectId: string }>();
 
   const [project, setProject] = useState<Awaited<ReturnType<typeof getProject>>>(null);
-  const [packs, setPacks] = useState<Theme[]>([]);
-  const [globalTokens, setGlobalTokens] = useState<Awaited<ReturnType<typeof getGlobalTheme>>>(null);
-  const [packsLoading, setPacksLoading] = useState(true);
+  // kept for potential future use in brain fallback
+  const [, setGlobalTokens] = useState<Awaited<ReturnType<typeof getGlobalTheme>>>(null);
 
   // uploads
   const [screenshots, setScreenshots] = useState<File[]>([]);
@@ -247,18 +210,34 @@ export default function VisualDirectionPage() {
   // selections
   const [selectedPack, setSelectedPack] = useState("");
   const [selectedFont, setSelectedFont] = useState("");
+  // DB-fetched tokens for the selected theme (null = use catalog fallback)
+  const [selectedThemeFromDB, setSelectedThemeFromDB] = useState<Theme | null>(null);
+  const [themeLoading, setThemeLoading] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // load Google Fonts
+  // Derived: themes + fonts for this project's industry
+  const industry = project?.industry ?? "";
+  const industryThemes = getIndustryThemes(industry);
+  const recommendedFontPair = getRecommendedFontPair(industry);
+
+  // Ordered font pairs: recommended first, then rest
+  const orderedFontPairs: FontPairDef[] = [
+    recommendedFontPair,
+    ...ALL_FONT_PAIRS.filter((fp) => fp.id !== recommendedFontPair.id),
+  ];
+
+  // Load Google Fonts (only the ones with googleUrl)
   useEffect(() => {
-    const allFonts = FONT_PAIRS.map((p) => p.googleUrl).join("&");
+    const urls = orderedFontPairs.filter((fp) => fp.googleUrl).map((fp) => fp.googleUrl).join("&");
+    if (!urls) return;
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = `https://fonts.googleapis.com/css2?${allFonts}&display=swap`;
+    link.href = `https://fonts.googleapis.com/css2?${urls}&display=swap`;
     document.head.appendChild(link);
     return () => { document.head.removeChild(link); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -266,26 +245,23 @@ export default function VisualDirectionPage() {
     getGlobalTheme().then(setGlobalTokens);
   }, [projectId]);
 
-  // Load style packs for this project's industry
+  // Auto-select recommended font when industry is known
   useEffect(() => {
-    if (!project) return;
-    setPacksLoading(true);
-    getThemes(project.industry ?? undefined)
-      .then(setPacks)
-      .catch(() => setPacks([]))
-      .finally(() => setPacksLoading(false));
-  }, [project?.industry]);
+    if (!industry) return;
+    setSelectedFont(recommendedFontPair.id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [industry]);
 
-  // Auto-select font from chosen pack
+  // Auto-select font from chosen theme (if theme's font is in our pairs list)
   useEffect(() => {
     if (!selectedPack) return;
-    const pack = packs.find((p) => p.name === selectedPack);
-    if (!pack) return;
-    const h = pack.tokens.heading_font;
-    const b = pack.tokens.body_font;
-    const match = FONT_PAIRS.find((fp) => fp.heading === h && fp.body === b);
+    const themeDef = ZEACH_THEMES[selectedPack];
+    if (!themeDef) return;
+    const match = ALL_FONT_PAIRS.find(
+      (fp) => fp.heading === themeDef.heading_font && fp.body === themeDef.body_font
+    );
     if (match) setSelectedFont(match.id);
-  }, [selectedPack, packs]);
+  }, [selectedPack]);
 
   const isExistingApp = project?.project_type === "existing_app";
 
@@ -294,6 +270,21 @@ export default function VisualDirectionPage() {
     if (!url) return;
     setReferenceUrls((prev) => [...prev, url]);
     setReferenceUrl("");
+  }
+
+  /** Click on a theme card — update selection and fetch full tokens from DB. */
+  async function handleThemeClick(name: string) {
+    setSelectedPack(name);
+    setSelectedThemeFromDB(null);
+    setThemeLoading(true);
+    try {
+      const dbTheme = await getThemeByName(name);
+      setSelectedThemeFromDB(dbTheme);
+    } catch {
+      // fall through — will use catalog tokens as fallback
+    } finally {
+      setThemeLoading(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -305,7 +296,7 @@ export default function VisualDirectionPage() {
     setSubmitting(true);
     setError("");
 
-    // Upload files
+    // 1. Upload files
     const screenshotUrls: string[] = [];
     for (const file of screenshots) {
       const url = await uploadFile(projectId, file, "screenshots");
@@ -317,32 +308,76 @@ export default function VisualDirectionPage() {
       if (url) inspirationUrls.push(url);
     }
 
-    const fontPair = FONT_PAIRS.find((f) => f.id === selectedFont);
-    const chosenPack = packs.find((p) => p.name === selectedPack)!;
+    // 2. Get authenticated userId
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setError("Not authenticated. Please sign in again.");
+      setSubmitting(false);
+      return;
+    }
 
-    const brain = generateBrain(
-      project!,
-      chosenPack,
-      globalTokens,
-      {
-        screenshots:        screenshotUrls,
-        inspiration_images: inspirationUrls,
-        reference_urls:     referenceUrls,
-        font_pairing:       fontPair?.label ?? `${chosenPack.tokens.heading_font} + ${chosenPack.tokens.body_font}`,
-      }
-    );
+    const fontPair = orderedFontPairs.find((f) => f.id === selectedFont);
+    const fontPairLabel = fontPair
+      ? `${fontPair.heading} + ${fontPair.body}`
+      : selectedPack;
 
+    // 3. Build S1 + S2 for the pipeline
+    const s1 = {
+      project_name: project!.name,
+      description:  project!.description ?? "",
+      industry:     project!.industry ?? "",
+      app_type:     project!.app_type ?? "",
+      project_type: project!.project_type ?? "new_idea",
+      complexity:   (project!.complexity ?? "MVP") as "MVP" | "Startup" | "Scale",
+      features:     project!.features ?? [],
+      notes:        project!.setup_notes ?? "",
+    };
+
+    const s2 = {
+      style_pack:      selectedPack,
+      font_pairing:    fontPairLabel,
+      screenshot_urls: screenshotUrls,
+      inspiration_urls: inspirationUrls,
+      reference_urls:  referenceUrls,
+    };
+
+    console.log("[pipeline] Starting zeach pipeline v3…");
+    console.log("[pipeline] s1:", s1);
+    console.log("[pipeline] s2:", s2);
+
+    // 4. Run the full pipeline (Steps 01.5 → 09.8) server-side
     try {
-      await saveVisualDirection(projectId, {
-        style_pack: selectedPack,
-        font_pairing: fontPair?.label ?? `${chosenPack.tokens.heading_font} + ${chosenPack.tokens.body_font}`,
-        inspiration_images: inspirationUrls,
-        reference_urls: referenceUrls,
-        brain,
+      const res = await fetch("/api/run-pipeline", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId, userId: user.id, s1, s2 }),
       });
-      router.push(`/projects/${projectId}?init=1`);
+
+      if (!res.ok) {
+        const errData = await res.json() as { error?: string };
+        throw new Error(errData.error ?? `Pipeline failed (${res.status})`);
+      }
+
+      const data = await res.json() as {
+        pipelineRunId: string;
+        screens: string[];
+        qualityScore: number;
+        qualityResult: string;
+        qualityWarnings: string[];
+        durationMs: number;
+      };
+
+      console.log(`[pipeline] ✓ Complete | runId=${data.pipelineRunId} | ${data.screens.length} screens | quality=${data.qualityScore} (${data.qualityResult}) | ${data.durationMs}ms`);
+      if (data.qualityWarnings?.length > 0) {
+        console.warn("[pipeline] Quality warnings:", data.qualityWarnings);
+      }
+
+      // Redirect to project — pages/app.html already saved, no ?init=1 needed
+      router.push(`/projects/${projectId}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save. Try again.");
+      console.error("[pipeline] Error:", err);
+      setError(err instanceof Error ? err.message : "Pipeline failed. Please try again.");
       setSubmitting(false);
     }
   }
@@ -370,7 +405,8 @@ export default function VisualDirectionPage() {
 
       {/* Header */}
       <header className="sticky top-0 z-40 flex items-center justify-between px-6" style={{ height: 56, background: "rgba(0,0,0,0.9)", borderBottom: "1px solid rgba(255,255,255,0.06)", backdropFilter: "blur(14px)" }}>
-        <button onClick={() => router.back()} className="flex items-center gap-1.5 transition-colors" style={{ color: "#71717a", fontFamily: "var(--font-dm-mono)", fontSize: 11, letterSpacing: "0.3px" }}
+        <button onClick={() => router.back()} className="flex items-center gap-1.5 transition-colors"
+          style={{ color: "#71717a", fontFamily: "var(--font-dm-mono)", fontSize: 11, letterSpacing: "0.3px", background: "none", border: "none", cursor: "pointer", padding: 0 }}
           onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#71717a")}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
           Back
@@ -392,19 +428,20 @@ export default function VisualDirectionPage() {
           Set your visual<br />direction
         </h1>
         <p style={{ fontSize: 14, color: "#71717a", lineHeight: 1.6, marginBottom: 8 }}>
-          Upload your app, add inspiration, or let Zeach pick for you.
+          Upload your app, add inspiration, or choose a theme built for your industry.
         </p>
 
-        {project?.industry && (
-          <div className="inline-flex items-center gap-1.5 rounded-full mb-6" style={{ background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.25)", padding: "5px 12px", fontFamily: "var(--font-dm-mono)", fontSize: 11, fontWeight: 500, color: "#06b6d4" }}>
+        {industry && (
+          <div className="inline-flex items-center gap-1.5 rounded-full mb-6"
+            style={{ background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.25)", padding: "5px 12px", fontFamily: "var(--font-dm-mono)", fontSize: 11, fontWeight: 500, color: "#06b6d4" }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            {project.industry} styles shown
+            {industry} — {industryThemes.length} curated themes
           </div>
         )}
 
         <form id="setup-form" onSubmit={handleSubmit} className="flex flex-col" style={{ gap: 28 }}>
 
-          {/* Upload existing */}
+          {/* Upload existing app */}
           {isExistingApp && (
             <div>
               <SectionLabel>Upload Existing App</SectionLabel>
@@ -433,10 +470,8 @@ export default function VisualDirectionPage() {
                 accept="image/*"
               />
               <div className="flex flex-col gap-2.5">
-                <div
-                  className="flex flex-col items-center justify-center gap-2 rounded-xl"
-                  style={{ border: "1px dashed rgba(255,255,255,0.1)", background: "#0a0a0a", padding: "18px 12px", flex: 1 }}
-                >
+                <div className="flex flex-col items-center justify-center gap-2 rounded-xl"
+                  style={{ border: "1px dashed rgba(255,255,255,0.1)", background: "#0a0a0a", padding: "18px 12px", flex: 1 }}>
                   <span style={{ color: "#3f3f46" }}>
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
                   </span>
@@ -463,7 +498,7 @@ export default function VisualDirectionPage() {
                 {referenceUrls.map((url, i) => (
                   <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)" }}>
                     <span style={{ fontSize: 11, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "#71717a" }}>{url}</span>
-                    <button type="button" onClick={() => setReferenceUrls((p) => p.filter((_, j) => j !== i))} style={{ color: "#3f3f46", fontSize: 14, lineHeight: 1 }}>×</button>
+                    <button type="button" onClick={() => setReferenceUrls((p) => p.filter((_, j) => j !== i))} style={{ color: "#3f3f46", fontSize: 14, lineHeight: 1, background: "none", border: "none", cursor: "pointer" }}>×</button>
                   </div>
                 ))}
               </div>
@@ -472,32 +507,44 @@ export default function VisualDirectionPage() {
 
           <OrDivider label="or choose a style" />
 
-          {/* Style Packs */}
+          {/* ── Style Themes — hardcoded from zeach-theme-catalog ── */}
           <div>
-            <SectionLabel>Style Pack</SectionLabel>
-            {packsLoading ? (
-              <div className="grid grid-cols-2 gap-3">
-                {[1,2,3,4].map((i) => (
-                  <div key={i} className="rounded-xl animate-pulse" style={{ height: 120, background: "#0a0a0a", border: "1px solid rgba(255,255,255,0.06)" }} />
-                ))}
-              </div>
-            ) : packs.length === 0 ? (
-              <p style={{ fontSize: 13, color: "#71717a" }}>No themes found. Run migration 004_style_packs.sql in Supabase first.</p>
-            ) : (
-              <div className="grid grid-cols-2 gap-2.5">
-                {packs.map((pack) => (
-                  <StylePackCard key={pack.name} pack={pack} selected={selectedPack === pack.name} onClick={() => setSelectedPack(pack.name)} />
-                ))}
-              </div>
-            )}
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10 }}>
+              <SectionLabel>
+                {industry ? `${industry} Themes` : "Style Themes"}
+              </SectionLabel>
+              {selectedPack && !themeLoading && (
+                <span style={{ fontFamily: "var(--font-dm-mono)", fontSize: 9, color: selectedThemeFromDB ? "#10b981" : "#f59e0b", letterSpacing: "0.3px" }}>
+                  {selectedThemeFromDB ? "✓ tokens from DB" : "⚠ using catalog tokens"}
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-2.5">
+              {industryThemes.map(({ name, theme }) => (
+                <ThemeCard
+                  key={name}
+                  name={name}
+                  theme={theme}
+                  selected={selectedPack === name}
+                  loading={themeLoading && selectedPack === name}
+                  onClick={() => handleThemeClick(name)}
+                />
+              ))}
+            </div>
           </div>
 
-          {/* Font Pairing */}
+          {/* ── Font Pairing — industry-recommended highlighted ── */}
           <div>
             <SectionLabel>Font Pairing</SectionLabel>
             <div className="flex flex-col gap-2">
-              {FONT_PAIRS.map((pair) => (
-                <FontCard key={pair.id} pair={pair} selected={selectedFont === pair.id} onClick={() => setSelectedFont(pair.id)} />
+              {orderedFontPairs.map((pair) => (
+                <FontCard
+                  key={pair.id}
+                  pair={pair}
+                  selected={selectedFont === pair.id}
+                  recommended={pair.id === recommendedFontPair.id}
+                  onClick={() => setSelectedFont(pair.id)}
+                />
               ))}
             </div>
           </div>
@@ -521,18 +568,10 @@ export default function VisualDirectionPage() {
               width: "100%",
               background: submitting || !canSubmit ? "rgba(6,182,212,0.4)" : "#06b6d4",
               color: submitting || !canSubmit ? "rgba(0,0,0,0.4)" : "#000",
-              border: "none",
-              borderRadius: 10,
-              padding: 15,
-              fontFamily: "var(--font-space-grotesk)",
-              fontSize: 15,
-              fontWeight: 700,
-              letterSpacing: "-0.2px",
+              border: "none", borderRadius: 10, padding: 15,
+              fontFamily: "var(--font-space-grotesk)", fontSize: 15, fontWeight: 700, letterSpacing: "-0.2px",
               cursor: submitting || !canSubmit ? "not-allowed" : "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
               transition: "all 0.2s",
               boxShadow: canSubmit && !submitting ? "0 0 24px rgba(6,182,212,0.3)" : "none",
             }}
@@ -543,11 +582,11 @@ export default function VisualDirectionPage() {
                   <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
                   <path d="M12 2a10 10 0 0 1 10 10"/>
                 </svg>
-                Building brain…
+                Running pipeline…
               </>
             ) : (
               <>
-                Generate Project Brain
+                Generate App
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               </>
             )}

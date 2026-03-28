@@ -1,0 +1,163 @@
+{
+  "industry_id": "food_beverage",
+  "industry_name": "Food & Beverage",
+  "tone": {
+    "primary": "warm, appetising, fast, trustworthy",
+    "secondary": "friendly, local, satisfying",
+    "voice": "a hungry friend who knows all the best spots \u2014 enthusiastic and direct",
+    "avoid": "overly formal, cold, clinical, slow-feeling"
+  },
+  "trust_signals": [
+    "star ratings and review count",
+    "delivery time estimate",
+    "live order tracking",
+    "restaurant hygiene ratings",
+    "real food photography",
+    "number of orders placed",
+    "secure payment indicators"
+  ],
+  "ux_norms": [
+    "image-heavy cards \u2014 food photography drives decisions",
+    "sticky cart button always visible",
+    "filter chips for cuisine, rating, delivery time, price",
+    "promo banners prominent on home feed",
+    "add to cart is a one-tap action",
+    "delivery ETA visible on every restaurant card",
+    "reorder previous orders is a prominent shortcut",
+    "live map tracking is a primary screen"
+  ],
+  "icons": {
+    "style": "rounded line with warm filled accents",
+    "weight": "medium",
+    "mood": "warm, appetising, inviting",
+    "library": {
+      "name": "Lucide",
+      "variant": "Rounded line",
+      "url": "https://lucide.dev"
+    },
+    "domain_icons": [
+      "chef-hat",
+      "utensils",
+      "leaf",
+      "apple",
+      "coffee",
+      "flame",
+      "cookie",
+      "package",
+      "star",
+      "truck",
+      "store",
+      "droplet"
+    ],
+    "nav_icons": [
+      "home",
+      "search",
+      "shopping-cart",
+      "heart",
+      "user",
+      "bell",
+      "filter",
+      "list",
+      "arrow-left",
+      "tag"
+    ]
+  },
+  "visual_language": {
+    "primary_type": "real photography",
+    "style": "high contrast, warm tones, food closeups \u2014 mouth-watering",
+    "photography_rules": [
+      "always use high quality food photography",
+      "warm colour grading \u2014 never cold or desaturated",
+      "overhead or 45-degree angle shots for food",
+      "never use stock people imagery for food screens",
+      "restaurant hero images should feel authentic not staged"
+    ],
+    "background_treatment": "dark rich backgrounds for premium feel OR clean warm white \u2014 never busy patterns",
+    "empty_state_style": "simple SVG \u2014 empty bowl, fork, or delivery bag with warm encouraging copy",
+    "onboarding_visual": "warm flat vector illustration \u2014 food characters or cuisine icons",
+    "illustration_style": "when used: bold flat vector \u2014 warm palette, food-focused"
+  },
+  "themes": {
+    "pack": [
+      "Appetite",
+      "Street Food",
+      "Fresh Market",
+      "Bistro",
+      "Dark Kitchen"
+    ]
+  },
+  "fonts": {
+    "ai_pick_heading": "Syne",
+    "ai_pick_body": "DM Sans"
+  },
+  "valid_app_types": [
+    "Marketplace",
+    "Booking & Appointments",
+    "E-commerce",
+    "Social & Community",
+    "Dashboard SaaS",
+    "Content & Streaming",
+    "Chat / Messaging",
+    "Map & Location-Based",
+    "AI Tool",
+    "Developer Tool"
+  ],
+  "monetization_models": [
+    "commission per order",
+    "delivery fee",
+    "promoted restaurant placement",
+    "subscription for free delivery",
+    "surge pricing",
+    "white label for restaurants"
+  ],
+  "compliance_notes": [
+    "allergen information must be accessible",
+    "alcohol delivery requires age verification UI",
+    "health claims on food products must be accurate",
+    "data handling for dietary preferences requires consent"
+  ],
+  "constraints": {
+    "avoid": [
+      "Never show a food item without an image \u2014 use a category illustration placeholder, never blank",
+      "Never hide allergen information \u2014 legal requirement and trust signal",
+      "Never show an estimated delivery time that is not updated in real time",
+      "Never use a dark theme for food ordering \u2014 food photography performs best on light backgrounds",
+      "Never collapse the cart \u2014 always show item count and total in the header",
+      "Never auto-reorder without explicit user confirmation"
+    ],
+    "enforce": [
+      "Allergen information always visible and searchable on every food item",
+      "Live order tracking always available after order placed",
+      "Estimated delivery time updated in real time \u2014 not a static estimate",
+      "Food photography always high quality and accurate to actual product",
+      "Restaurant rating and review count always shown \u2014 never hidden",
+      "Calories and nutritional info shown where available \u2014 never hidden if requested"
+    ]
+  },
+  "copy_by_app_type": {
+    "AI Tool": {
+      "headline": "Your AI sous chef",
+      "cta": "Ask away"
+    },
+    "Marketplace": {
+      "headline": "Order from the best restaurants near you",
+      "cta": "Browse restaurants"
+    },
+    "Booking & Appointments": {
+      "headline": "Reserve your table in seconds",
+      "cta": "Find availability"
+    },
+    "E-commerce": {
+      "headline": "Fresh to your door",
+      "cta": "Shop now"
+    },
+    "Social & Community": {
+      "headline": "Share what you're eating",
+      "cta": "Join the community"
+    },
+    "default": {
+      "headline": "Great food, delivered",
+      "cta": "Get started"
+    }
+  }
+}

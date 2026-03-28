@@ -1,0 +1,175 @@
+{
+  "industry_id": "fitness_sport",
+  "industry_name": "Fitness & Sport",
+  "tone": {
+    "primary": "energetic, motivating, direct",
+    "secondary": "empowering, disciplined, results-focused",
+    "voice": "a great coach who pushes you but believes in you \u2014 no fluff, real results",
+    "avoid": "passive, overly gentle, vague, corporate"
+  },
+  "trust_signals": [
+    "coach credentials and certifications",
+    "before/after transformation results",
+    "member count and active community",
+    "streak and achievement system",
+    "workout completion stats",
+    "verified trainer profiles",
+    "equipment and safety guidance"
+  ],
+  "ux_norms": [
+    "active workout mode is full screen \u2014 zero distractions, only workout controls visible",
+    "all tap targets during active workout minimum 56px \u2014 hands are sweaty, precision is low",
+    "timer is always the most prominent element during workouts \u2014 largest text on screen",
+    "quick start \u2014 maximum 2 taps from home to first set logged",
+    "rest timer starts automatically after set logged \u2014 user can dismiss or extend, never ignore",
+    "personal records (PRs) always celebrated \u2014 animation on PR beaten, badge on summary",
+    "workout tracker screens: home shows today's planned workout if program active \u2014 never generic feed",
+    "workout tracker screens: active workout input for weight and reps always uses large number keypad \u2014 never small text input",
+    "workout tracker screens: previous performance shown above each exercise input row \u2014 instant comparison without navigating away",
+    "workout tracker screens: workout summary always shows total volume, duration, muscles worked, and PRs beaten",
+    "workout tracker screens: exercise library filters by muscle group first \u2014 most common lookup pattern",
+    "workout tracker screens: progress screen leads with strength charts \u2014 body weight is secondary unless goal is weight loss",
+    "wearable integration expected at startup and scale \u2014 heart rate zone visible during active workout when connected",
+    "streaks and achievements drive daily engagement \u2014 streak count always visible on home screen"
+  ],
+  "icons": {
+    "style": "bold line, energetic, dynamic",
+    "weight": "bold",
+    "mood": "energetic, motivating, bold",
+    "library": {
+      "name": "Tabler Icons",
+      "variant": "Bold line",
+      "url": "https://tabler.io/icons"
+    },
+    "domain_icons": [
+      "dumbbell",
+      "run",
+      "flame",
+      "heart-rate",
+      "calendar",
+      "clock",
+      "trophy",
+      "barbell",
+      "yoga",
+      "stopwatch",
+      "medal",
+      "mountain"
+    ],
+    "nav_icons": [
+      "home",
+      "search",
+      "plus-circle",
+      "heart",
+      "user",
+      "bell",
+      "activity",
+      "compass",
+      "arrow-left",
+      "check"
+    ]
+  },
+  "visual_language": {
+    "primary_type": "real photography",
+    "style": "high energy action photography \u2014 powerful, aspirational, diverse",
+    "photography_rules": [
+      "action shots preferred over static poses",
+      "diverse body types and ages \u2014 fitness is for everyone",
+      "high contrast, dramatic lighting",
+      "authentic gym and outdoor settings",
+      "never use overly airbrushed or unrealistic imagery"
+    ],
+    "background_treatment": "dark and powerful OR high contrast light \u2014 never pastel or soft",
+    "empty_state_style": "bold SVG \u2014 dumbbell, fire, or trophy with motivating copy",
+    "onboarding_visual": "bold flat vector or energetic photography \u2014 powerful theme",
+    "illustration_style": "when used: bold geometric vector \u2014 strong shapes, high contrast"
+  },
+  "themes": {
+    "pack": [
+      "Power",
+      "Athletic",
+      "Zen",
+      "Gains",
+      "Track"
+    ]
+  },
+  "fonts": {
+    "ai_pick_heading": "Space Grotesk",
+    "ai_pick_body": "Inter"
+  },
+  "valid_app_types": [
+    "Marketplace",
+    "Booking & Appointments",
+    "E-commerce",
+    "Social & Community",
+    "Dashboard SaaS",
+    "Content & Streaming",
+    "Chat / Messaging",
+    "Map & Location-Based",
+    "AI Tool",
+    "Developer Tool",
+    "Workout Tracker"
+  ],
+  "monetization_models": [
+    "monthly subscription",
+    "per class or session booking",
+    "personal training packages",
+    "equipment or supplement affiliate",
+    "corporate wellness contracts",
+    "freemium with premium plans"
+  ],
+  "compliance_notes": [
+    "medical disclaimer required for fitness advice",
+    "injury risk warnings on high intensity content",
+    "data handling for health metrics (HIPAA adjacent)",
+    "age restrictions for certain training programmes",
+    "GDPR for biometric and health data"
+  ],
+  "constraints": {
+    "avoid": [
+      "Never show weight or body composition data in a context that could trigger body image concerns",
+      "Never use before/after imagery without informed consent framing",
+      "Never gamify injury recovery \u2014 medical guidance supersedes engagement mechanics",
+      "Never fabricate performance benchmarks or calorie burn estimates as precise facts",
+      "Never use aggressive or shaming language in notifications or empty states",
+      "Never make rest days feel like failures \u2014 rest is training"
+    ],
+    "enforce": [
+      "Exercise instructions always include form cues and injury prevention notes",
+      "Rest day suggestions always framed positively \u2014 recovery is progress",
+      "Heart rate zones shown with health context \u2014 not just numbers",
+      "Medical disclaimer on any content that could affect health decisions",
+      "User's own PBs and progress always the primary benchmark \u2014 not others'",
+      "Emergency stop option always visible during any guided workout"
+    ]
+  },
+  "copy_by_app_type": {
+    "AI Tool": {
+      "headline": "Your AI personal trainer",
+      "cta": "Start training"
+    },
+    "Workout Tracker": {
+      "headline": "Ready to train?",
+      "cta": "Start workout"
+    },
+    "Booking & Appointments": {
+      "headline": "Book your next class",
+      "cta": "Find availability"
+    },
+    "Content & Streaming": {
+      "headline": "Train with the world's best coaches",
+      "cta": "Start for free"
+    },
+    "Social & Community": {
+      "headline": "Train harder, together",
+      "cta": "Join the community"
+    },
+    "Dashboard SaaS": {
+      "headline": "Every metric that matters",
+      "cta": "Open dashboard"
+    },
+    "default": {
+      "headline": "Your best performance starts here",
+      "cta": "Get started"
+    }
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "feature_id": "payments",
+  "feature_name": "Payments",
+  "description": "In-app payment collection \u2014 cards, wallets, invoices, and payouts.",
+  "screens_added": [
+    {
+      "id": "payment_method_setup",
+      "name": "Add Payment Method",
+      "purpose": "Card or wallet addition"
+    },
+    {
+      "id": "checkout",
+      "name": "Checkout",
+      "purpose": "Order summary + payment confirmation"
+    },
+    {
+      "id": "payment_success",
+      "name": "Payment Success",
+      "purpose": "Confirmation screen post-payment"
+    },
+    {
+      "id": "transaction_history",
+      "name": "Transaction History",
+      "purpose": "All payments made by user"
+    },
+    {
+      "id": "invoice_detail",
+      "name": "Invoice / Receipt",
+      "purpose": "Single transaction detail and download"
+    },
+    {
+      "id": "payout_settings",
+      "name": "Payout Settings",
+      "purpose": "For seller/provider \u2014 bank account + payout schedule"
+    }
+  ],
+  "entities_added": [
+    "Payment",
+    "Card",
+    "Invoice",
+    "Refund",
+    "Payout",
+    "Subscription"
+  ],
+  "flows_added": [
+    "Add card \u2192 verify \u2192 save \u2192 use at checkout",
+    "Checkout \u2192 select payment method \u2192 confirm \u2192 biometric \u2192 success",
+    "Request refund \u2192 select reason \u2192 submit \u2192 status tracking",
+    "Provider payout \u2192 view earnings \u2192 request payout \u2192 bank transfer"
+  ],
+  "interaction_patterns": [
+    "Biometric confirmation on every payment action",
+    "Card number input \u2014 auto-formats with spaces every 4 digits",
+    "Large numeric keypad for amount entry \u2014 never standard keyboard",
+    "Security confirmation step always before money movement",
+    "Success screen \u2014 confetti or pulse animation on payment complete",
+    "Debit shown in red, credit in green \u2014 always"
+  ],
+  "generates_images": false,
+  "error_flows": [
+    {
+      "trigger": "Card declined",
+      "ui": "Inline error below payment method: 'Card declined \u2014 please check your details or try a different card'. Red border on card fields. Specific decline reason if available (insufficient funds vs card blocked). Order NOT created. Cart fully preserved. Retry without re-entering entire form."
+    },
+    {
+      "trigger": "3DS / bank verification fails",
+      "ui": "Return from bank verification to checkout with message: 'Verification failed \u2014 your bank did not approve this payment'. Try different card CTA. Explain that no charge was made. Never leave user on a blank redirect."
+    },
+    {
+      "trigger": "Payment times out",
+      "ui": "After 30 seconds: spinner replaced with: 'This is taking longer than expected'. After 60 seconds: 'Payment timed out \u2014 please try again'. Show whether charge was made. If unknown: 'Check your bank before retrying to avoid double charge'."
+    },
+    {
+      "trigger": "Payout fails for seller/provider",
+      "ui": "In earnings screen: amber badge 'Payout failed'. Reason shown: invalid bank details, account verification needed. CTA: 'Update bank details'. Retry scheduled automatically once fixed. Funds held safely \u2014 never lost."
+    },
+    {
+      "trigger": "Refund request fails",
+      "ui": "Toast: 'Refund could not be processed at this time'. Estimated retry time shown. Support contact CTA. Never tell user refund was successful before it is confirmed."
+    },
+    {
+      "trigger": "Subscription renewal fails",
+      "ui": "Push notification: 'Payment failed for your subscription'. Grace period shown: 'Your access continues for X days'. CTA: 'Update payment method'. After grace period: downgrade to free, not full lockout."
+    }
+  ],
+  "edge_cases": [
+    {
+      "case": "User attempts to pay with expired card",
+      "ui": "Expired badge on saved card. Expired card cannot be selected as payment method. Prompt to add new card. Never allow selection and fail at confirmation."
+    },
+    {
+      "case": "Partial refund on a multi-item order",
+      "ui": "Show itemised refund breakdown. Clearly show which items are refunded and which are not. Total refund amount prominently displayed. Timeline shown."
+    },
+    {
+      "case": "Payment made in wrong currency",
+      "ui": "Before confirming: show exact amount in user's local currency with exchange rate. Timestamp rate. 'Charged in [currency] \u2014 converted at [rate] on [date]' always visible on receipt."
+    },
+    {
+      "case": "Duplicate payment submitted (double tap)",
+      "ui": "Payment button disabled immediately on first tap. Subsequent taps ignored silently. Idempotency key used on backend. If duplicate charge occurs: auto-refund and notify."
+    },
+    {
+      "case": "Free trial ends while user is mid-session",
+      "ui": "Non-intrusive banner: 'Your free trial has ended'. Do not interrupt current action. On next significant action: paywall shown with upgrade CTA. Never mid-flow modal that blocks current task."
+    },
+    {
+      "case": "Promo code applied but discount not reflected",
+      "ui": "Show code as applied with green tick. If discount not calculating: 'Code applied but no eligible items in cart'. Specific reason if possible. Never silently fail."
+    }
+  ]
+}
