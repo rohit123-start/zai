@@ -92,874 +92,686 @@
       "Announcement belongs to Course, sent to all enrolled Students"
     ]
   },
-  "tiers": {
-    "mvp": {
-      "tier": "MVP",
-      "description": "Core LMS \u2014 create courses, manage students, assignments and grades.",
-      "screen_count": 10,
-      "primary_flows": [
-        "Create course \u2192 add modules \u2192 add lessons \u2192 publish \u2192 students enroll \u2192 complete lessons",
-        "Create assignment \u2192 students submit \u2192 instructor grades \u2192 students receive grade"
+  "screens": [
+    {
+      "id": "instructor_home",
+      "name": "Instructor Dashboard",
+      "priority": "primary",
+      "purpose": "Teaching overview \u2014 active courses, pending grades, recent activity",
+      "visual": "KPI cards \u2014 active courses, enrolled students, pending submissions, completion rate. Course list.",
+      "entities": [
+        "Course",
+        "Enrollment",
+        "Submission",
+        "Grade"
       ],
-      "secondary_flows": [
-        "Send announcement to class",
-        "View course completion rate",
-        "Issue certificate",
-        "View student progress"
+      "actions": [
+        "View active courses",
+        "View pending grades",
+        "Create new course",
+        "View recent activity"
       ],
-      "screens": [
-        {
-          "id": "instructor_home",
-          "name": "Instructor Dashboard",
-          "purpose": "Teaching overview \u2014 active courses, pending grades, recent activity",
-          "visual": "KPI cards \u2014 active courses, enrolled students, pending submissions, completion rate. Course list.",
-          "entities": [
-            "Course",
-            "Enrollment",
-            "Submission",
-            "Grade"
-          ],
-          "actions": [
-            "View active courses",
-            "View pending grades",
-            "Create new course",
-            "View recent activity"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['LMS / Course Builder'].headline}}",
-            "cta": "{{industry.copy_by_app_type['LMS / Course Builder'].cta}}",
-            "empty_state": "No courses yet. Create your first one and publish it in minutes."
-          }
-        },
-        {
-          "id": "courses",
-          "name": "My Courses",
-          "purpose": "All courses with student count and status",
-          "visual": "Course cards. Published/draft badge. Student count. Completion rate. Edit CTA.",
-          "entities": [
-            "Course",
-            "Enrollment"
-          ],
-          "actions": [
-            "View course",
-            "Edit course",
-            "Create new course",
-            "View enrollments",
-            "Publish or unpublish"
-          ]
-        },
-        {
-          "id": "course_builder",
-          "name": "Course Builder",
-          "purpose": "Create and structure course content",
-          "visual": "Module accordion. Drag to reorder. Add lesson. Add assignment. Preview.",
-          "entities": [
-            "Course",
-            "Module",
-            "Lesson",
-            "Assignment"
-          ],
-          "actions": [
-            "Add module",
-            "Add lesson to module",
-            "Reorder modules and lessons",
-            "Add assignment",
-            "Preview as student",
-            "Publish course"
-          ]
-        },
-        {
-          "id": "lesson_editor",
-          "name": "Lesson Editor",
-          "purpose": "Create lesson content \u2014 video, text, quiz",
-          "visual": "Content blocks. Video upload. Text editor. Quiz builder. Save.",
-          "entities": [
-            "Lesson"
-          ],
-          "actions": [
-            "Add video",
-            "Add text block",
-            "Add image",
-            "Add quiz",
-            "Set lesson as free preview",
-            "Save draft",
-            "Publish"
-          ]
-        },
-        {
-          "id": "students",
-          "name": "Students",
-          "purpose": "All enrolled students with progress and grades",
-          "visual": "Student list. Progress percentage. Last active. Grade average. Message CTA.",
-          "entities": [
-            "Student",
-            "Enrollment",
-            "Grade"
-          ],
-          "actions": [
-            "View student detail",
-            "Message student",
-            "View progress",
-            "View grades",
-            "Remove from course"
-          ]
-        },
-        {
-          "id": "student_detail",
-          "name": "Student Detail",
-          "purpose": "Individual student progress, grades, and activity",
-          "visual": "Progress by module. Assignment grades. Last active. Completion status.",
-          "entities": [
-            "Student",
-            "Enrollment",
-            "Submission",
-            "Grade"
-          ],
-          "actions": [
-            "View progress breakdown",
-            "View all grades",
-            "View submission history",
-            "Send message",
-            "Issue certificate"
-          ]
-        },
-        {
-          "id": "assignments",
-          "name": "Assignments",
-          "purpose": "All assignments with submission status",
-          "visual": "Assignment list. Submission count. Graded count. Due date. View submissions CTA.",
-          "entities": [
-            "Assignment",
-            "Submission",
-            "Grade"
-          ],
-          "actions": [
-            "View assignment",
-            "View all submissions",
-            "Grade submissions",
-            "Edit assignment",
-            "Extend deadline"
-          ]
-        },
-        {
-          "id": "grading",
-          "name": "Grading",
-          "purpose": "Review and grade student submissions",
-          "visual": "Submission view. Student name. File attachment. Grade input. Feedback text. Rubric.",
-          "entities": [
-            "Submission",
-            "Grade",
-            "Student"
-          ],
-          "actions": [
-            "View submission",
-            "Enter grade",
-            "Write feedback",
-            "View rubric",
-            "Return to student",
-            "Mark as late"
-          ]
-        },
-        {
-          "id": "gradebook",
-          "name": "Gradebook",
-          "purpose": "All grades in a data table",
-          "visual": "Student rows. Assignment columns. Grade cells. Average row. Export.",
-          "entities": [
-            "Grade",
-            "Student",
-            "Assignment"
-          ],
-          "actions": [
-            "View all grades",
-            "Edit grade",
-            "View average",
-            "Filter by assignment",
-            "Export CSV"
-          ],
-          "copy": {
-            "headline": "Gradebook",
-            "cta": "Export grades",
-            "empty_state": "No submissions to grade yet. Assignments will appear here once students submit."
-          }
-        },
-        {
-          "id": "profile_settings",
-          "name": "Profile & Settings",
-          "purpose": "Instructor profile and course settings",
-          "visual": "Profile. Bio. Payment settings. Notification preferences.",
-          "entities": [
-            "Instructor"
-          ],
-          "actions": [
-            "Edit profile",
-            "Payment settings",
-            "Notification preferences",
-            "Log out"
-          ]
-        }
-      ],
-      "interaction_patterns": [
-        "Course builder drag to reorder \u2014 handle on left of module row",
-        "Lesson editor block-based \u2014 add, remove, reorder blocks",
-        "Grading \u2014 keyboard shortcut to submit grade and move to next submission",
-        "Submission status badge \u2014 not submitted, submitted, graded",
-        "Completion ring on student card \u2014 fills as lessons completed"
-      ]
+      "skeleton": {
+        "hero": "kpi_row",
+        "sections": [
+          "chart",
+          "table"
+        ],
+        "card_count": 0
+      },
+      "copy": {
+        "headline": "{{industry.copy_by_app_type['LMS / Course Builder'].headline}}",
+        "cta": "{{industry.copy_by_app_type['LMS / Course Builder'].cta}}",
+        "empty_state": "No courses yet. Create your first one and publish it in minutes."
+      },
+      "generation_priority": 1
     },
-    "startup": {
-      "tier": "Startup",
-      "description": "Full LMS with discussions, live sessions, certificates, and analytics.",
-      "screen_count": 16,
-      "primary_flows": [
-        "All MVP flows",
-        "Schedule live session \u2192 students get notified \u2192 session runs \u2192 recording saved \u2192 available in course",
-        "Student completes course \u2192 certificate auto-generated \u2192 emailed \u2192 shareable link"
+    {
+      "id": "courses",
+      "name": "My Courses",
+      "priority": "primary",
+      "purpose": "All courses with student count and status",
+      "visual": "Course cards. Published/draft badge. Student count. Completion rate. Edit CTA.",
+      "entities": [
+        "Course",
+        "Enrollment"
       ],
-      "secondary_flows": [
-        "All MVP secondary flows",
-        "Course discussions and Q&A",
-        "Peer review assignments",
-        "Bulk enroll students",
-        "Course bundles"
+      "actions": [
+        "View course",
+        "Edit course",
+        "Create new course",
+        "View enrollments",
+        "Publish or unpublish"
       ],
-      "screens": [
-        {
-          "id": "instructor_home",
-          "name": "Instructor Dashboard",
-          "purpose": "Full dashboard with revenue, completion, and engagement",
-          "visual": "Revenue chart. Completion rate trend. Engagement score. Top performing courses.",
-          "entities": [
-            "Course",
-            "Enrollment",
-            "Submission",
-            "Grade"
-          ],
-          "actions": [
-            "All MVP actions",
-            "View revenue chart",
-            "View engagement score",
-            "View top courses"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['LMS / Course Builder'].headline}}",
-            "cta": "{{industry.copy_by_app_type['LMS / Course Builder'].cta}}",
-            "empty_state": "No courses yet. Create your first one and publish it in minutes."
-          }
-        },
-        {
-          "id": "courses",
-          "name": "My Courses",
-          "purpose": "Courses with revenue and engagement metrics",
-          "visual": "Course cards. Revenue badge. Engagement score. Discussion activity.",
-          "entities": [
-            "Course",
-            "Enrollment"
-          ],
-          "actions": [
-            "All MVP actions",
-            "View revenue per course",
-            "View engagement"
-          ]
-        },
-        {
-          "id": "course_builder",
-          "name": "Course Builder",
-          "purpose": "Full course creation with live sessions and drip content",
-          "visual": "Module structure. Live session scheduling. Drip schedule toggle. Prerequisites.",
-          "entities": [
-            "Course",
-            "Module",
-            "Lesson",
-            "Assignment"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Schedule live session",
-            "Set drip schedule",
-            "Set prerequisites",
-            "Set completion criteria"
-          ]
-        },
-        {
-          "id": "lesson_editor",
-          "name": "Lesson Editor",
-          "purpose": "Rich lesson editor with interactive elements",
-          "visual": "Content blocks. Video. Text. Quiz. Code editor. Downloadable resources.",
-          "entities": [
-            "Lesson"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Add code block",
-            "Add downloadable resource",
-            "Add interactive element",
-            "Set lesson duration estimate"
-          ]
-        },
-        {
-          "id": "live_sessions",
-          "name": "Live Sessions",
-          "purpose": "Schedule, run, and manage live class sessions",
-          "visual": "Upcoming sessions list. Start session CTA. Recording archive. Attendance.",
-          "entities": [
-            "Course",
-            "Student"
-          ],
-          "actions": [
-            "Schedule session",
-            "Start live session",
-            "View attendance",
-            "Access recording",
-            "Share recording link"
-          ]
-        },
-        {
-          "id": "discussions",
-          "name": "Discussions",
-          "purpose": "Course Q&A and discussion forums",
-          "visual": "Discussion threads. Question mark icon on unanswered. Instructor badge. Pin option.",
-          "entities": [
-            "Discussion",
-            "Student",
-            "Instructor"
-          ],
-          "actions": [
-            "View discussions",
-            "Answer question",
-            "Pin discussion",
-            "Mark as resolved",
-            "Create new thread"
-          ]
-        },
-        {
-          "id": "students",
-          "name": "Students",
-          "purpose": "Full student management with cohorts",
-          "visual": "Student list. Cohort badge. Progress. Last active. Bulk action.",
-          "entities": [
-            "Student",
-            "Enrollment",
-            "Grade"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Bulk enroll",
-            "Create cohort",
-            "Bulk message",
-            "Export student data"
-          ]
-        },
-        {
-          "id": "assignments",
-          "name": "Assignments",
-          "purpose": "Assignments with peer review option",
-          "visual": "Assignment list. Peer review badge. Submission queue. Auto-grade indicator.",
-          "entities": [
-            "Assignment",
-            "Submission",
-            "Grade"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Enable peer review",
-            "Set up auto-grade",
-            "View peer review submissions"
-          ]
-        },
-        {
-          "id": "grading",
-          "name": "Grading",
-          "purpose": "Grading with rubric builder and AI assist",
-          "visual": "Submission. Rubric checklist. AI feedback suggestion. Grade. Return.",
-          "entities": [
-            "Submission",
-            "Grade",
-            "Student"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Use rubric",
-            "View AI feedback suggestion",
-            "Bulk grade"
-          ]
-        },
-        {
-          "id": "gradebook",
-          "name": "Gradebook",
-          "purpose": "Full gradebook with weighted grades",
-          "visual": "Grade table. Weight per assignment. Weighted average. Letter grade.",
-          "entities": [
-            "Grade",
-            "Student",
-            "Assignment"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Set assignment weights",
-            "View weighted average",
-            "View letter grades",
-            "Send grade report to students"
-          ],
-          "copy": {
-            "headline": "Gradebook",
-            "cta": "Export grades",
-            "empty_state": "No submissions to grade yet. Assignments will appear here once students submit."
-          }
-        },
-        {
-          "id": "certificates",
-          "name": "Certificates",
-          "purpose": "Design and issue course completion certificates",
-          "visual": "Certificate designer. Template selector. Student name field. Issue CTA. Issued list.",
-          "entities": [
-            "Certificate",
-            "Student",
-            "Course"
-          ],
-          "actions": [
-            "Design certificate",
-            "Select template",
-            "Issue to student",
-            "View issued certificates",
-            "Verify certificate link"
-          ]
-        },
-        {
-          "id": "announcements",
-          "name": "Announcements",
-          "purpose": "Send announcements to enrolled students",
-          "visual": "Announcement composer. Course selector. Schedule option. Sent history.",
-          "entities": [
-            "Announcement",
-            "Course",
-            "Student"
-          ],
-          "actions": [
-            "Write announcement",
-            "Select course",
-            "Schedule send",
-            "Send now",
-            "View sent announcements"
-          ]
-        },
-        {
-          "id": "analytics",
-          "name": "Course Analytics",
-          "purpose": "Completion, engagement, and grade analytics",
-          "visual": "Completion funnel. Lesson drop-off chart. Grade distribution. Engagement heatmap.",
-          "entities": [
-            "Course",
-            "Enrollment",
-            "Grade"
-          ],
-          "actions": [
-            "View completion funnel",
-            "View lesson drop-off",
-            "Grade distribution",
-            "Engagement heatmap",
-            "Export report"
-          ]
-        },
-        {
-          "id": "revenue",
-          "name": "Revenue & Payouts",
-          "purpose": "Course revenue, refunds, and payout management",
-          "visual": "Revenue chart. Per course breakdown. Refund requests. Payout schedule.",
-          "entities": [
-            "Course",
-            "Enrollment"
-          ],
-          "actions": [
-            "View revenue",
-            "View per course breakdown",
-            "Process refund",
-            "View payout schedule",
-            "Download tax document"
-          ]
-        },
-        {
-          "id": "student_detail",
-          "name": "Student Detail",
-          "purpose": "Full student view with engagement and discussion activity",
-          "visual": "Progress. Grades. Discussion posts. Live attendance. Certificate.",
-          "entities": [
-            "Student",
-            "Enrollment",
-            "Submission",
-            "Grade"
-          ],
-          "actions": [
-            "All MVP actions",
-            "View discussion activity",
-            "View live attendance",
-            "Issue certificate manually"
-          ]
-        },
-        {
-          "id": "profile_settings",
-          "name": "Profile & Settings",
-          "purpose": "Full instructor settings with payment and course defaults",
-          "visual": "Profile. Bio. Payment. Course defaults. Notification settings.",
-          "entities": [
-            "Instructor"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Set course defaults",
-            "Payment payout settings",
-            "Notification preferences"
-          ]
-        }
-      ],
-      "interaction_patterns": [
-        "All MVP patterns",
-        "Live session \u2014 join button appears 5 minutes before scheduled time",
-        "Discussion unanswered \u2014 red dot on discussions nav icon until instructor responds",
-        "Certificate issued \u2014 confetti animation, shareable link auto-copied",
-        "Completion funnel \u2014 hover to see exact drop-off count and percentage",
-        "Drip schedule \u2014 calendar visual showing when each module unlocks"
-      ]
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 2
     },
-    "scale": {
-      "tier": "Scale",
-      "description": "Enterprise LMS with multi-instructor, white-label, SCORM, API, and organisation management.",
-      "screen_count": 22,
-      "primary_flows": [
-        "All MVP and Startup flows",
-        "Organisation admin manages all instructors and courses under one account",
-        "SCORM content imported \u2192 renders in LMS \u2192 completion tracked \u2192 grade synced",
-        "SSO login \u2192 organisation members auto-enrolled in assigned courses"
+    {
+      "id": "course_builder",
+      "name": "Course Builder",
+      "priority": "primary",
+      "purpose": "Create and structure course content",
+      "visual": "Module accordion. Drag to reorder. Add lesson. Add assignment. Preview.",
+      "entities": [
+        "Course",
+        "Module",
+        "Lesson",
+        "Assignment"
       ],
-      "secondary_flows": [
-        "All previous flows",
-        "Compliance training tracking",
-        "Custom branding per organisation",
-        "API access for external integrations",
-        "Learning path builder",
-        "Skills and competency tracking"
+      "actions": [
+        "Add module",
+        "Add lesson to module",
+        "Reorder modules and lessons",
+        "Add assignment",
+        "Preview as student",
+        "Publish course"
       ],
-      "screens": [
-        {
-          "id": "instructor_home",
-          "name": "Instructor Dashboard",
-          "purpose": "Multi-instructor platform overview",
-          "visual": "Organisation stats. My courses. Platform-wide metrics. Pending approvals.",
-          "entities": [
-            "Course",
-            "Enrollment",
-            "Submission",
-            "Grade"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View organisation stats",
-            "View platform metrics",
-            "Review pending approvals"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['LMS / Course Builder'].headline}}",
-            "cta": "{{industry.copy_by_app_type['LMS / Course Builder'].cta}}",
-            "empty_state": "No courses yet. Create your first one and publish it in minutes."
-          }
-        },
-        {
-          "id": "organisation_admin",
-          "name": "Organisation Admin",
-          "purpose": "Manage all instructors, courses, and students at org level",
-          "visual": "Instructor list. Course count. Student count. Revenue. Compliance stats.",
-          "entities": [
-            "Instructor",
-            "Course",
-            "Student"
-          ],
-          "actions": [
-            "View all instructors",
-            "View all courses",
-            "Manage enrolments",
-            "View compliance stats",
-            "Set organisation settings"
-          ]
-        },
-        {
-          "id": "learning_paths",
-          "name": "Learning Paths",
-          "purpose": "Chain courses into structured learning paths",
-          "visual": "Path builder. Course sequence. Prerequisites. Completion criteria. Publish.",
-          "entities": [
-            "Course"
-          ],
-          "actions": [
-            "Create learning path",
-            "Add courses to path",
-            "Set prerequisites",
-            "Set completion criteria",
-            "Assign to students"
-          ]
-        },
-        {
-          "id": "skills_competencies",
-          "name": "Skills & Competencies",
-          "purpose": "Map courses to skills and track competency development",
-          "visual": "Skills framework. Course-to-skill mapping. Student skill levels. Gaps.",
-          "entities": [
-            "Course",
-            "Student",
-            "Grade"
-          ],
-          "actions": [
-            "Create skill framework",
-            "Map course to skill",
-            "View student skill level",
-            "Identify skill gaps",
-            "Issue skill badge"
-          ]
-        },
-        {
-          "id": "compliance_tracking",
-          "name": "Compliance Training",
-          "purpose": "Mandatory training tracking and reporting",
-          "visual": "Compliance courses. Completion status per employee. Deadline. Compliance report.",
-          "entities": [
-            "Course",
-            "Enrollment",
-            "Certificate"
-          ],
-          "actions": [
-            "Mark course as mandatory",
-            "Set completion deadline",
-            "View compliance rate",
-            "Send reminder to incomplete",
-            "Generate compliance report"
-          ]
-        },
-        {
-          "id": "scorm_import",
-          "name": "SCORM / Content Import",
-          "purpose": "Import and manage SCORM and xAPI content",
-          "visual": "Import zone. SCORM package list. Compatibility check. Course assignment.",
-          "entities": [
-            "Course",
-            "Lesson"
-          ],
-          "actions": [
-            "Import SCORM package",
-            "Check compatibility",
-            "Assign to course",
-            "View completion tracking",
-            "Update package"
-          ]
-        },
-        {
-          "id": "white_label",
-          "name": "White-Label Settings",
-          "purpose": "Custom branding for organisation",
-          "visual": "Logo upload. Brand colours. Custom domain. Email templates. Preview.",
-          "entities": [
-            "Instructor"
-          ],
-          "actions": [
-            "Upload logo",
-            "Set brand colours",
-            "Configure custom domain",
-            "Set email templates",
-            "Preview white-label"
-          ]
-        },
-        {
-          "id": "sso_settings",
-          "name": "SSO & Authentication",
-          "purpose": "Enterprise SSO configuration",
-          "visual": "SSO provider setup. Auto-enrolment rules. Role mapping.",
-          "entities": [
-            "Student",
-            "Instructor"
-          ],
-          "actions": [
-            "Configure SSO",
-            "Set auto-enrolment rules",
-            "Map roles from directory",
-            "Test SSO login"
-          ]
-        },
-        {
-          "id": "api_access",
-          "name": "API Access",
-          "purpose": "API keys and integration management",
-          "visual": "API key list. Usage stats. Webhook config. Documentation link.",
-          "entities": [
-            "Instructor"
-          ],
-          "actions": [
-            "Generate API key",
-            "View usage",
-            "Configure webhooks",
-            "View documentation",
-            "Revoke key"
-          ]
-        },
-        {
-          "id": "courses",
-          "name": "Courses",
-          "purpose": "Platform course library with approval workflow",
-          "visual": "Course list. Approval status. Featured toggle. Category. Revenue.",
-          "entities": [
-            "Course",
-            "Enrollment"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Submit for approval",
-            "Feature course",
-            "View platform revenue share"
-          ]
-        },
-        {
-          "id": "course_builder",
-          "name": "Course Builder",
-          "purpose": "Full builder with AI content assist and SCORM export",
-          "visual": "All Startup features. AI content assist. SCORM export. Accessibility checker.",
-          "entities": [
-            "Course",
-            "Module",
-            "Lesson",
-            "Assignment"
-          ],
-          "actions": [
-            "All Startup actions",
-            "AI content assist",
-            "Export as SCORM",
-            "Accessibility check"
-          ]
-        },
-        {
-          "id": "analytics",
-          "name": "Platform Analytics",
-          "purpose": "Organisation-wide learning analytics",
-          "visual": "Learner engagement. Course performance. Skills coverage. ROI estimate.",
-          "entities": [
-            "Course",
-            "Enrollment",
-            "Grade"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View organisation engagement",
-            "Skills coverage map",
-            "ROI estimate"
-          ]
-        },
-        {
-          "id": "students",
-          "name": "Students",
-          "purpose": "Organisation student management with bulk operations",
-          "visual": "Student list. Department. Learning path. Compliance status. Bulk actions.",
-          "entities": [
-            "Student",
-            "Enrollment",
-            "Grade"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Filter by department",
-            "Bulk assign learning path",
-            "View compliance status",
-            "Import via CSV"
-          ]
-        },
-        {
-          "id": "assignments",
-          "name": "Assignments",
-          "purpose": "Platform-wide assignment management",
-          "visual": "All assignments. Course filter. AI grading assist. Plagiarism check.",
-          "entities": [
-            "Assignment",
-            "Submission",
-            "Grade"
-          ],
-          "actions": [
-            "All Startup actions",
-            "AI grading assist",
-            "Plagiarism check",
-            "Platform-wide view"
-          ]
-        },
-        {
-          "id": "revenue",
-          "name": "Revenue & Marketplace",
-          "purpose": "Revenue sharing and marketplace management",
-          "visual": "Revenue by instructor. Platform cut. Payout schedule. Marketplace settings.",
-          "entities": [
-            "Course",
-            "Enrollment"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View revenue by instructor",
-            "Set platform revenue share",
-            "Manage marketplace listing"
-          ]
-        },
-        {
-          "id": "certificates",
-          "name": "Certificates",
-          "purpose": "Organisation certificate management with blockchain verification",
-          "visual": "Certificate templates. Issued count. Blockchain verification toggle. Verify link.",
-          "entities": [
-            "Certificate",
-            "Student",
-            "Course"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Enable blockchain verification",
-            "Bulk issue certificates",
-            "Verify certificate externally"
-          ]
-        },
-        {
-          "id": "notifications",
-          "name": "Notifications",
-          "purpose": "Platform-wide notification management",
-          "visual": "Notification types. Audience filter. Schedule. Analytics per notification.",
-          "entities": [
-            "Announcement",
-            "Course",
-            "Student"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Send platform-wide announcement",
-            "View notification analytics"
-          ]
-        },
-        {
-          "id": "profile_settings",
-          "name": "Profile & Settings",
-          "purpose": "Enterprise settings hub",
-          "visual": "All settings. Organisation. White-label. SSO. API. Compliance.",
-          "entities": [
-            "Instructor"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Organisation settings",
-            "White-label settings",
-            "SSO configuration",
-            "Compliance settings"
-          ]
-        }
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "field_stack",
+          "cta"
+        ],
+        "card_count": 0
+      },
+      "generation_priority": 3
+    },
+    {
+      "id": "lesson_editor",
+      "name": "Lesson Editor",
+      "priority": "primary",
+      "purpose": "Create lesson content \u2014 video, text, quiz",
+      "visual": "Content blocks. Video upload. Text editor. Quiz builder. Save.",
+      "entities": [
+        "Lesson"
       ],
-      "interaction_patterns": [
-        "All MVP and Startup patterns",
-        "Learning path progress \u2014 connected dots showing course completion chain",
-        "Compliance deadline \u2014 red banner when overdue, amber 7 days out",
-        "AI content assist \u2014 inline suggestion as instructor types lesson content",
-        "SCORM import \u2014 progress bar with compatibility check results",
-        "Skills radar chart \u2014 hexagonal visualisation of competency coverage"
-      ]
+      "actions": [
+        "Add video",
+        "Add text block",
+        "Add image",
+        "Add quiz",
+        "Set lesson as free preview",
+        "Save draft",
+        "Publish"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 4
+    },
+    {
+      "id": "students",
+      "name": "Students",
+      "priority": "primary",
+      "purpose": "All enrolled students with progress and grades",
+      "visual": "Student list. Progress percentage. Last active. Grade average. Message CTA.",
+      "entities": [
+        "Student",
+        "Enrollment",
+        "Grade"
+      ],
+      "actions": [
+        "View student detail",
+        "Message student",
+        "View progress",
+        "View grades",
+        "Remove from course"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 5
+    },
+    {
+      "id": "student_detail",
+      "name": "Student Detail",
+      "priority": "secondary",
+      "purpose": "Individual student progress, grades, and activity",
+      "visual": "Progress by module. Assignment grades. Last active. Completion status.",
+      "entities": [
+        "Student",
+        "Enrollment",
+        "Submission",
+        "Grade"
+      ],
+      "actions": [
+        "View progress breakdown",
+        "View all grades",
+        "View submission history",
+        "Send message",
+        "Issue certificate"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 6
+    },
+    {
+      "id": "assignments",
+      "name": "Assignments",
+      "priority": "secondary",
+      "purpose": "All assignments with submission status",
+      "visual": "Assignment list. Submission count. Graded count. Due date. View submissions CTA.",
+      "entities": [
+        "Assignment",
+        "Submission",
+        "Grade"
+      ],
+      "actions": [
+        "View assignment",
+        "View all submissions",
+        "Grade submissions",
+        "Edit assignment",
+        "Extend deadline"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 7
+    },
+    {
+      "id": "grading",
+      "name": "Grading",
+      "priority": "secondary",
+      "purpose": "Review and grade student submissions",
+      "visual": "Submission view. Student name. File attachment. Grade input. Feedback text. Rubric.",
+      "entities": [
+        "Submission",
+        "Grade",
+        "Student"
+      ],
+      "actions": [
+        "View submission",
+        "Enter grade",
+        "Write feedback",
+        "View rubric",
+        "Return to student",
+        "Mark as late"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 8
+    },
+    {
+      "id": "gradebook",
+      "name": "Gradebook",
+      "priority": "secondary",
+      "purpose": "All grades in a data table",
+      "visual": "Student rows. Assignment columns. Grade cells. Average row. Export.",
+      "entities": [
+        "Grade",
+        "Student",
+        "Assignment"
+      ],
+      "actions": [
+        "View all grades",
+        "Edit grade",
+        "View average",
+        "Filter by assignment",
+        "Export CSV"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "copy": {
+        "headline": "Gradebook",
+        "cta": "Export grades",
+        "empty_state": "No submissions to grade yet. Assignments will appear here once students submit."
+      },
+      "generation_priority": 9
+    },
+    {
+      "id": "profile_settings",
+      "name": "Profile & Settings",
+      "priority": "secondary",
+      "purpose": "Instructor profile and course settings",
+      "visual": "Profile. Bio. Payment settings. Notification preferences.",
+      "entities": [
+        "Instructor"
+      ],
+      "actions": [
+        "Edit profile",
+        "Payment settings",
+        "Notification preferences",
+        "Log out"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "section_group",
+          "section_group"
+        ],
+        "card_count": 0
+      },
+      "generation_priority": 10
+    },
+    {
+      "id": "live_sessions",
+      "name": "Live Sessions",
+      "priority": "secondary",
+      "purpose": "Schedule, run, and manage live class sessions",
+      "visual": "Upcoming sessions list. Start session CTA. Recording archive. Attendance.",
+      "entities": [
+        "Course",
+        "Student"
+      ],
+      "actions": [
+        "Schedule session",
+        "Start live session",
+        "View attendance",
+        "Access recording",
+        "Share recording link"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 11
+    },
+    {
+      "id": "discussions",
+      "name": "Discussions",
+      "priority": "secondary",
+      "purpose": "Course Q&A and discussion forums",
+      "visual": "Discussion threads. Question mark icon on unanswered. Instructor badge. Pin option.",
+      "entities": [
+        "Discussion",
+        "Student",
+        "Instructor"
+      ],
+      "actions": [
+        "View discussions",
+        "Answer question",
+        "Pin discussion",
+        "Mark as resolved",
+        "Create new thread"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 12
+    },
+    {
+      "id": "certificates",
+      "name": "Certificates",
+      "priority": "secondary",
+      "purpose": "Design and issue course completion certificates",
+      "visual": "Certificate designer. Template selector. Student name field. Issue CTA. Issued list.",
+      "entities": [
+        "Certificate",
+        "Student",
+        "Course"
+      ],
+      "actions": [
+        "Design certificate",
+        "Select template",
+        "Issue to student",
+        "View issued certificates",
+        "Verify certificate link"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 13
+    },
+    {
+      "id": "announcements",
+      "name": "Announcements",
+      "priority": "secondary",
+      "purpose": "Send announcements to enrolled students",
+      "visual": "Announcement composer. Course selector. Schedule option. Sent history.",
+      "entities": [
+        "Announcement",
+        "Course",
+        "Student"
+      ],
+      "actions": [
+        "Write announcement",
+        "Select course",
+        "Schedule send",
+        "Send now",
+        "View sent announcements"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 14
+    },
+    {
+      "id": "analytics",
+      "name": "Course Analytics",
+      "priority": "secondary",
+      "purpose": "Completion, engagement, and grade analytics",
+      "visual": "Completion funnel. Lesson drop-off chart. Grade distribution. Engagement heatmap.",
+      "entities": [
+        "Course",
+        "Enrollment",
+        "Grade"
+      ],
+      "actions": [
+        "View completion funnel",
+        "View lesson drop-off",
+        "Grade distribution",
+        "Engagement heatmap",
+        "Export report"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 15
+    },
+    {
+      "id": "revenue",
+      "name": "Revenue & Payouts",
+      "priority": "secondary",
+      "purpose": "Course revenue, refunds, and payout management",
+      "visual": "Revenue chart. Per course breakdown. Refund requests. Payout schedule.",
+      "entities": [
+        "Course",
+        "Enrollment"
+      ],
+      "actions": [
+        "View revenue",
+        "View per course breakdown",
+        "Process refund",
+        "View payout schedule",
+        "Download tax document"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 16
+    },
+    {
+      "id": "organisation_admin",
+      "name": "Organisation Admin",
+      "priority": "secondary",
+      "purpose": "Manage all instructors, courses, and students at org level",
+      "visual": "Instructor list. Course count. Student count. Revenue. Compliance stats.",
+      "entities": [
+        "Instructor",
+        "Course",
+        "Student"
+      ],
+      "actions": [
+        "View all instructors",
+        "View all courses",
+        "Manage enrolments",
+        "View compliance stats",
+        "Set organisation settings"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 17
+    },
+    {
+      "id": "learning_paths",
+      "name": "Learning Paths",
+      "priority": "secondary",
+      "purpose": "Chain courses into structured learning paths",
+      "visual": "Path builder. Course sequence. Prerequisites. Completion criteria. Publish.",
+      "entities": [
+        "Course"
+      ],
+      "actions": [
+        "Create learning path",
+        "Add courses to path",
+        "Set prerequisites",
+        "Set completion criteria",
+        "Assign to students"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 18
+    },
+    {
+      "id": "skills_competencies",
+      "name": "Skills & Competencies",
+      "priority": "secondary",
+      "purpose": "Map courses to skills and track competency development",
+      "visual": "Skills framework. Course-to-skill mapping. Student skill levels. Gaps.",
+      "entities": [
+        "Course",
+        "Student",
+        "Grade"
+      ],
+      "actions": [
+        "Create skill framework",
+        "Map course to skill",
+        "View student skill level",
+        "Identify skill gaps",
+        "Issue skill badge"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 19
+    },
+    {
+      "id": "compliance_tracking",
+      "name": "Compliance Training",
+      "priority": "secondary",
+      "purpose": "Mandatory training tracking and reporting",
+      "visual": "Compliance courses. Completion status per employee. Deadline. Compliance report.",
+      "entities": [
+        "Course",
+        "Enrollment",
+        "Certificate"
+      ],
+      "actions": [
+        "Mark course as mandatory",
+        "Set completion deadline",
+        "View compliance rate",
+        "Send reminder to incomplete",
+        "Generate compliance report"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 20
+    },
+    {
+      "id": "scorm_import",
+      "name": "SCORM / Content Import",
+      "priority": "secondary",
+      "purpose": "Import and manage SCORM and xAPI content",
+      "visual": "Import zone. SCORM package list. Compatibility check. Course assignment.",
+      "entities": [
+        "Course",
+        "Lesson"
+      ],
+      "actions": [
+        "Import SCORM package",
+        "Check compatibility",
+        "Assign to course",
+        "View completion tracking",
+        "Update package"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 21
+    },
+    {
+      "id": "white_label",
+      "name": "White-Label Settings",
+      "priority": "secondary",
+      "purpose": "Custom branding for organisation",
+      "visual": "Logo upload. Brand colours. Custom domain. Email templates. Preview.",
+      "entities": [
+        "Instructor"
+      ],
+      "actions": [
+        "Upload logo",
+        "Set brand colours",
+        "Configure custom domain",
+        "Set email templates",
+        "Preview white-label"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 22
+    },
+    {
+      "id": "sso_settings",
+      "name": "SSO & Authentication",
+      "priority": "secondary",
+      "purpose": "Enterprise SSO configuration",
+      "visual": "SSO provider setup. Auto-enrolment rules. Role mapping.",
+      "entities": [
+        "Student",
+        "Instructor"
+      ],
+      "actions": [
+        "Configure SSO",
+        "Set auto-enrolment rules",
+        "Map roles from directory",
+        "Test SSO login"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 23
+    },
+    {
+      "id": "api_access",
+      "name": "API Access",
+      "priority": "secondary",
+      "purpose": "API keys and integration management",
+      "visual": "API key list. Usage stats. Webhook config. Documentation link.",
+      "entities": [
+        "Instructor"
+      ],
+      "actions": [
+        "Generate API key",
+        "View usage",
+        "Configure webhooks",
+        "View documentation",
+        "Revoke key"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 24
+    },
+    {
+      "id": "notifications",
+      "name": "Notifications",
+      "priority": "secondary",
+      "purpose": "Platform-wide notification management",
+      "visual": "Notification types. Audience filter. Schedule. Analytics per notification.",
+      "entities": [
+        "Announcement",
+        "Course",
+        "Student"
+      ],
+      "actions": [
+        "All Startup actions",
+        "Send platform-wide announcement",
+        "View notification analytics"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 25
     }
-  },
+  ],
+  "screen_count": 25,
+  "primary_count": 5,
+  "secondary_count": 20,
   "layout": {
     "iphone": {
       "nav": "bottom_tab_4",

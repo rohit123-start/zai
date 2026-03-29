@@ -95,5 +95,9 @@
       "case": "Very dense urban area \u2014 hundreds of pins visible",
       "ui": "Cluster aggressively at low zoom. Max 20 individual pins visible at any zoom level. Performance: never render more than 50 DOM pin elements \u2014 use canvas for overflow."
     }
-  ]
+  ],
+  "priority": "secondary",
+  "default_classification": "on_demand",
+  "always_required": false,
+  "classification_note": "Secondary. Inferred when description mentions 'location', 'nearby', 'map', 'directions', 'delivery'."
 }

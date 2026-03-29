@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useEffect, useRef, useState, Suspense } from "react";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import {
   getProject, getThemeByName, getGlobalTheme,
   type Theme,
@@ -192,9 +192,12 @@ function FontCard({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function VisualDirectionPage() {
+function VisualDirectionPageInner() {
   const router = useRouter();
   const { projectId } = useParams<{ projectId: string }>();
+  const searchParams = useSearchParams();
+  // runId from Screen 1 classify call — passed as ?runId=...
+  const classifyRunId = searchParams.get("runId") ?? "";
 
   const [project, setProject] = useState<Awaited<ReturnType<typeof getProject>>>(null);
   // kept for potential future use in brain fallback
@@ -329,9 +332,7 @@ export default function VisualDirectionPage() {
       industry:     project!.industry ?? "",
       app_type:     project!.app_type ?? "",
       project_type: project!.project_type ?? "new_idea",
-      complexity:   (project!.complexity ?? "MVP") as "MVP" | "Startup" | "Scale",
       features:     project!.features ?? [],
-      notes:        project!.setup_notes ?? "",
     };
 
     const s2 = {
@@ -351,7 +352,14 @@ export default function VisualDirectionPage() {
       const res = await fetch("/api/run-pipeline", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId, userId: user.id, s1, s2 }),
+        body: JSON.stringify({
+          projectId,
+          userId: user.id,
+          s1,
+          s2,
+          // If Screen 1 already ran classify, pass the runId so pipeline skips steps 01–01.5c
+          ...(classifyRunId ? { pipelineRunId: classifyRunId } : {}),
+        }),
       });
 
       if (!res.ok) {
@@ -595,5 +603,13 @@ export default function VisualDirectionPage() {
       </div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
+  );
+}
+
+export default function VisualDirectionPage() {
+  return (
+    <Suspense>
+      <VisualDirectionPageInner />
+    </Suspense>
   );
 }

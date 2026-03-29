@@ -86,5 +86,9 @@
       "case": "Negative metric value (returns exceed sales, refunds exceed revenue)",
       "ui": "Show negative values in red. Allow Y axis to go below zero. Never hide negative values or floor at zero. Negative data is valid and important."
     }
-  ]
+  ],
+  "priority": "secondary",
+  "default_classification": "on_demand",
+  "always_required": false,
+  "classification_note": "Secondary. Inferred when description mentions 'analytics', 'insights', 'reports', 'metrics', 'performance'."
 }

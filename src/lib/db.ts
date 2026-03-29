@@ -278,9 +278,7 @@ export type ProjectSetupStep1 = {
   project_type: "existing_app" | "new_idea";
   app_type: string;
   industry: string;
-  complexity: string;
   features: string[];
-  setup_notes?: string;
 };
 
 export type DBMessage = {
@@ -335,9 +333,7 @@ export async function createProjectWithSetup(
       project_type: setup.project_type,
       app_type: setup.app_type,
       industry: setup.industry,
-      complexity: setup.complexity,
       features: setup.features,
-      setup_notes: setup.setup_notes ?? null,
       setup_complete: false,
     })
     .select()

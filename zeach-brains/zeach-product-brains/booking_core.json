@@ -123,911 +123,616 @@
       "Notification belongs to User, triggered by Appointment status changes"
     ]
   },
-  "tiers": {
-    "mvp": {
-      "tier": "MVP",
-      "description": "Core booking \u2014 discover provider, view services, book appointment, manage bookings.",
-      "screen_count": 9,
-      "primary_flows": [
-        "Browse providers \u2192 view provider detail \u2192 select service \u2192 pick date and time \u2192 confirm booking \u2192 receive confirmation",
-        "View upcoming appointments \u2192 manage or cancel",
-        "Receive reminder notification \u2192 view appointment detail"
+  "screens": [
+    {
+      "id": "home_discover",
+      "name": "Home / Discover",
+      "priority": "primary",
+      "purpose": "Browse and discover providers \u2014 featured, nearby, category filter",
+      "visual": "Industry brain visual. Provider cards with rating and distance. Category chips. Search bar.",
+      "entities": [
+        "Provider",
+        "Service",
+        "Location"
       ],
-      "secondary_flows": [
-        "Search for provider by name or location",
-        "Leave review after completed appointment",
-        "Add appointment to calendar",
-        "Contact provider directly"
+      "actions": [
+        "Search providers",
+        "Browse categories",
+        "Filter by location or rating",
+        "Tap provider card",
+        "View featured providers"
       ],
-      "screens": [
-        {
-          "id": "home_discover",
-          "name": "Home / Discover",
-          "purpose": "Browse and discover providers \u2014 featured, nearby, category filter",
-          "visual": "Industry brain visual. Provider cards with rating and distance. Category chips. Search bar.",
-          "entities": [
-            "Provider",
-            "Service",
-            "Location"
-          ],
-          "actions": [
-            "Search providers",
-            "Browse categories",
-            "Filter by location or rating",
-            "Tap provider card",
-            "View featured providers"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['Booking & Appointments'].headline}}",
-            "cta": "{{industry.copy_by_app_type['Booking & Appointments'].cta}}",
-            "empty_state": "No providers in your area yet \u2014 check back soon."
-          }
-        },
-        {
-          "id": "provider_detail",
-          "name": "Provider Detail",
-          "purpose": "Full provider profile \u2014 services, availability preview, reviews",
-          "visual": "Provider images. Rating and review count. Services list. Book CTA.",
-          "entities": [
-            "Provider",
-            "Service",
-            "Review",
-            "Staff",
-            "Location"
-          ],
-          "actions": [
-            "View provider photos",
-            "View all services",
-            "View reviews",
-            "View location on map",
-            "Select a service to book",
-            "Contact provider",
-            "Save to favourites"
-          ]
-        },
-        {
-          "id": "service_detail",
-          "name": "Service Detail",
-          "purpose": "Service information \u2014 duration, price, description, staff selector",
-          "visual": "Service image. Duration and price prominent. Staff selector. Book CTA.",
-          "entities": [
-            "Service",
-            "Provider",
-            "Staff",
-            "Availability"
-          ],
-          "actions": [
-            "View service details",
-            "Select staff member (if applicable)",
-            "View price breakdown",
-            "Proceed to date and time selection"
-          ]
-        },
-        {
-          "id": "date_time_picker",
-          "name": "Date & Time Selection",
-          "purpose": "Pick available date and time slot",
-          "visual": "Calendar view. Available slots grid below. Selected state highlighted.",
-          "entities": [
-            "Availability",
-            "Appointment"
-          ],
-          "actions": [
-            "Browse available dates",
-            "Select time slot",
-            "View unavailable slots (greyed)",
-            "Join waitlist for fully booked slot",
-            "Proceed to booking confirmation"
-          ]
-        },
-        {
-          "id": "booking_confirmation",
-          "name": "Booking Confirmation",
-          "purpose": "Review and confirm booking details before payment",
-          "visual": "Summary card \u2014 provider, service, date, time, price. Payment method. Confirm CTA.",
-          "entities": [
-            "Appointment",
-            "Service",
-            "Provider",
-            "Payment"
-          ],
-          "actions": [
-            "Review booking summary",
-            "Select or add payment method",
-            "Apply voucher or promo code",
-            "Confirm and pay",
-            "View cancellation policy"
-          ]
-        },
-        {
-          "id": "booking_success",
-          "name": "Booking Success",
-          "purpose": "Confirmation screen post-booking",
-          "visual": "Success animation. Booking summary. Add to calendar CTA. View appointments CTA.",
-          "entities": [
-            "Appointment"
-          ],
-          "actions": [
-            "Add to calendar",
-            "Share booking",
-            "View all appointments",
-            "Return to home"
-          ]
-        },
-        {
-          "id": "appointments",
-          "name": "My Appointments",
-          "purpose": "Upcoming and past appointments",
-          "visual": "Upcoming tab and past tab. Appointment cards with status badges.",
-          "entities": [
-            "Appointment",
-            "Provider",
-            "Service"
-          ],
-          "actions": [
-            "View upcoming appointments",
-            "View past appointments",
-            "Tap appointment for detail",
-            "Cancel appointment",
-            "Reschedule",
-            "Leave review on past appointment"
-          ],
-          "copy": {
-            "headline": "Your appointments",
-            "cta": "Book again",
-            "empty_state": "No upcoming appointments. Book your first one now."
-          }
-        },
-        {
-          "id": "appointment_detail",
-          "name": "Appointment Detail",
-          "purpose": "Full appointment detail \u2014 status, directions, contact",
-          "visual": "Status stepper. Provider info. Service summary. Map. Actions.",
-          "entities": [
-            "Appointment",
-            "Provider",
-            "Service",
-            "Location"
-          ],
-          "actions": [
-            "View appointment status",
-            "Get directions",
-            "Contact provider",
-            "Cancel appointment",
-            "Reschedule",
-            "Add to calendar"
-          ]
-        },
-        {
-          "id": "profile_settings",
-          "name": "Profile & Settings",
-          "purpose": "User profile and app settings",
-          "visual": "Avatar. Profile details. Settings list. Notification preferences.",
-          "entities": [
-            "User"
-          ],
-          "actions": [
-            "Edit profile",
-            "Manage payment methods",
-            "Notification preferences",
-            "View saved providers",
-            "Log out"
-          ]
-        }
-      ],
-      "interaction_patterns": [
-        "Calendar picker highlights available dates in accent colour \u2014 unavailable greyed out",
-        "Time slot grid \u2014 available slots as tappable chips, booked slots greyed",
-        "Booking confirmation has a 5-second cancel window after submit",
-        "Appointment status badge \u2014 pending yellow, confirmed green, cancelled red",
-        "Add to calendar triggers native calendar integration",
-        "Review prompt appears 1 hour after appointment end time",
-        "Provider cards show next available slot time \u2014 not just availability"
-      ]
+      "skeleton": {
+        "hero": "search_bar_full_width",
+        "sections": [
+          "chip_row",
+          "card_stack"
+        ],
+        "card_count": 4
+      },
+      "copy": {
+        "headline": "{{industry.copy_by_app_type['Booking & Appointments'].headline}}",
+        "cta": "{{industry.copy_by_app_type['Booking & Appointments'].cta}}",
+        "empty_state": "No providers in your area yet \u2014 check back soon."
+      },
+      "generation_priority": 1
     },
-    "startup": {
-      "tier": "Startup",
-      "description": "Full booking platform with packages, waitlist, notifications, reviews, and provider management.",
-      "screen_count": 14,
-      "primary_flows": [
-        "All MVP flows",
-        "Browse packages \u2192 select package \u2192 book series of appointments",
-        "Join waitlist \u2192 receive notification when slot opens \u2192 confirm booking",
-        "Provider manages calendar \u2192 blocks time \u2192 sets availability",
-        "Receive review \u2192 respond to review"
+    {
+      "id": "provider_detail",
+      "name": "Provider Detail",
+      "priority": "primary",
+      "purpose": "Full provider profile \u2014 services, availability preview, reviews",
+      "visual": "Provider images. Rating and review count. Services list. Book CTA.",
+      "entities": [
+        "Provider",
+        "Service",
+        "Review",
+        "Staff",
+        "Location"
       ],
-      "secondary_flows": [
-        "All MVP secondary flows",
-        "Recurring appointment setup",
-        "Group booking",
-        "Gift voucher purchase and redemption",
-        "Loyalty points earn and redeem",
-        "Provider sets service promotions"
+      "actions": [
+        "View provider photos",
+        "View all services",
+        "View reviews",
+        "View location on map",
+        "Select a service to book",
+        "Contact provider",
+        "Save to favourites"
       ],
-      "screens": [
-        {
-          "id": "home_discover",
-          "name": "Home / Discover",
-          "purpose": "Personalised discovery with recommended providers and promotions",
-          "visual": "Personalised feed. Saved providers row. Promotions. Categories.",
-          "entities": [
-            "Provider",
-            "Service",
-            "Location",
-            "Promotion"
-          ],
-          "actions": [
-            "Search",
-            "Browse categories",
-            "View saved providers",
-            "Tap promotions",
-            "View recommended"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['Booking & Appointments'].headline}}",
-            "cta": "{{industry.copy_by_app_type['Booking & Appointments'].cta}}",
-            "empty_state": "No providers in your area yet \u2014 check back soon."
-          }
-        },
-        {
-          "id": "search_map",
-          "name": "Search & Map View",
-          "purpose": "Find providers by location with map and list toggle",
-          "visual": "Map with provider pins. List below. Filter bar. Distance radius control.",
-          "entities": [
-            "Provider",
-            "Location"
-          ],
-          "actions": [
-            "Search",
-            "Toggle map or list",
-            "Filter",
-            "Tap map pin",
-            "Set radius",
-            "Sort by distance or rating"
-          ]
-        },
-        {
-          "id": "provider_detail",
-          "name": "Provider Detail",
-          "purpose": "Full provider profile with packages, staff, and reviews",
-          "visual": "Provider gallery. Stats. Services tab. Packages tab. Staff tab. Reviews tab.",
-          "entities": [
-            "Provider",
-            "Service",
-            "Package",
-            "Staff",
-            "Review"
-          ],
-          "actions": [
-            "View services",
-            "View packages",
-            "Select staff",
-            "Read reviews",
-            "Save favourite",
-            "Book service or package"
-          ]
-        },
-        {
-          "id": "service_detail",
-          "name": "Service Detail",
-          "purpose": "Full service detail with staff selection and add-ons",
-          "visual": "Service image. Duration, price, add-ons. Staff selector. Book CTA.",
-          "entities": [
-            "Service",
-            "Provider",
-            "Staff"
-          ],
-          "actions": [
-            "View detail",
-            "Select staff",
-            "Add optional add-ons",
-            "Proceed to booking"
-          ]
-        },
-        {
-          "id": "packages",
-          "name": "Packages",
-          "purpose": "Browse and purchase service packages or bundles",
-          "visual": "Package cards with savings badge. Service list per package. Buy CTA.",
-          "entities": [
-            "Package",
-            "Service",
-            "Provider"
-          ],
-          "actions": [
-            "Browse packages",
-            "View package contents",
-            "View savings",
-            "Purchase package",
-            "Redeem package credit"
-          ]
-        },
-        {
-          "id": "date_time_picker",
-          "name": "Date & Time Selection",
-          "purpose": "Book with waitlist and recurring options",
-          "visual": "Calendar. Time slots. Waitlist CTA on fully booked. Recurring toggle.",
-          "entities": [
-            "Availability",
-            "Appointment",
-            "WaitList"
-          ],
-          "actions": [
-            "Select date and time",
-            "Join waitlist",
-            "Set recurring appointment",
-            "Proceed to confirm"
-          ]
-        },
-        {
-          "id": "booking_confirmation",
-          "name": "Booking Confirmation",
-          "purpose": "Review and confirm with loyalty and voucher support",
-          "visual": "Summary. Payment. Loyalty points applied. Voucher field. Policy. Confirm.",
-          "entities": [
-            "Appointment",
-            "Service",
-            "Provider",
-            "Payment"
-          ],
-          "actions": [
-            "Review summary",
-            "Apply loyalty points",
-            "Apply voucher",
-            "Select payment",
-            "Confirm"
-          ]
-        },
-        {
-          "id": "booking_success",
-          "name": "Booking Success",
-          "purpose": "Confirmation with loyalty points earned",
-          "visual": "Success animation. Points earned badge. Calendar CTA. View appointments CTA.",
-          "entities": [
-            "Appointment"
-          ],
-          "actions": [
-            "Add to calendar",
-            "Share",
-            "View appointments",
-            "Home"
-          ]
-        },
-        {
-          "id": "appointments",
-          "name": "My Appointments",
-          "purpose": "Full appointment management with reschedule and recurring view",
-          "visual": "Upcoming and past tabs. Recurring badge on recurring appointments.",
-          "entities": [
-            "Appointment",
-            "Provider",
-            "Service"
-          ],
-          "actions": [
-            "View upcoming",
-            "View past",
-            "Cancel",
-            "Reschedule",
-            "Manage recurring",
-            "Leave review"
-          ],
-          "copy": {
-            "headline": "Your appointments",
-            "cta": "Book again",
-            "empty_state": "No upcoming appointments. Book your first one now."
-          }
-        },
-        {
-          "id": "appointment_detail",
-          "name": "Appointment Detail",
-          "purpose": "Full detail with check-in and pre-appointment info",
-          "visual": "Status stepper. Provider info. Pre-appointment instructions. Map. Actions.",
-          "entities": [
-            "Appointment",
-            "Provider",
-            "Service",
-            "Location"
-          ],
-          "actions": [
-            "View status",
-            "Directions",
-            "Contact",
-            "Cancel",
-            "Reschedule",
-            "Pre-appointment check-in"
-          ]
-        },
-        {
-          "id": "notifications",
-          "name": "Notifications",
-          "purpose": "All appointment reminders, confirmations, and promotions",
-          "visual": "Categorised list. Reminder indicators. Deep link on tap.",
-          "entities": [
-            "Notification",
-            "Appointment"
-          ],
-          "actions": [
-            "View all",
-            "Tap to navigate",
-            "Mark read",
-            "Manage notification preferences"
-          ]
-        },
-        {
-          "id": "provider_dashboard",
-          "name": "Provider Dashboard",
-          "purpose": "Provider home \u2014 today's schedule, upcoming, earnings snapshot",
-          "visual": "Today's appointments timeline. Earnings card. Quick actions.",
-          "entities": [
-            "Provider",
-            "Appointment",
-            "Service"
-          ],
-          "actions": [
-            "View today's schedule",
-            "View earnings",
-            "Manage availability",
-            "View upcoming",
-            "Create service"
-          ]
-        },
-        {
-          "id": "provider_calendar",
-          "name": "Provider Calendar / Availability",
-          "purpose": "Provider sets working hours, blocks time, manages availability",
-          "visual": "Week calendar view. Blocked time in grey. Booked slots. Availability toggle per day.",
-          "entities": [
-            "Provider",
-            "Availability",
-            "Appointment",
-            "Staff"
-          ],
-          "actions": [
-            "Set working hours",
-            "Block time",
-            "View booked appointments",
-            "Manage staff availability"
-          ]
-        },
-        {
-          "id": "profile_settings",
-          "name": "Profile & Settings",
-          "purpose": "Full profile with loyalty balance and notification settings",
-          "visual": "Profile. Loyalty points balance. Payment methods. Notifications. Settings.",
-          "entities": [
-            "User"
-          ],
-          "actions": [
-            "Edit profile",
-            "View loyalty points",
-            "Payment methods",
-            "Notifications",
-            "Saved providers",
-            "Log out"
-          ]
-        }
-      ],
-      "interaction_patterns": [
-        "All MVP interaction patterns",
-        "Waitlist confirmation \u2014 user gets push notification when slot opens",
-        "Package credit balance visible on booking confirmation screen",
-        "Recurring appointment shows series summary before confirm",
-        "Provider calendar week view \u2014 swipe to navigate weeks",
-        "Loyalty points earned animation on booking success screen",
-        "Review prompt 1 hour post-appointment with one-tap star rating"
-      ]
+      "skeleton": {
+        "hero": "full_bleed_image",
+        "sections": [
+          "info_row",
+          "list"
+        ],
+        "card_count": 0
+      },
+      "generation_priority": 2
     },
-    "scale": {
-      "tier": "Scale",
-      "description": "Multi-location booking platform with staff management, advanced analytics, membership, and white-label support.",
-      "screen_count": 22,
-      "primary_flows": [
-        "All MVP and Startup flows",
-        "Multi-location provider \u2014 user selects location \u2192 books at that branch",
-        "Membership signup \u2192 unlocks unlimited or discounted bookings \u2192 auto-renews",
-        "Provider views advanced analytics \u2192 adjusts pricing and availability \u2192 optimises revenue",
-        "Admin manages all providers \u2192 approves listings \u2192 resolves disputes \u2192 views platform KPIs",
-        "Gift card purchase \u2192 send to recipient \u2192 recipient redeems at checkout"
+    {
+      "id": "service_detail",
+      "name": "Service Detail",
+      "priority": "primary",
+      "purpose": "Service information \u2014 duration, price, description, staff selector",
+      "visual": "Service image. Duration and price prominent. Staff selector. Book CTA.",
+      "entities": [
+        "Service",
+        "Provider",
+        "Staff",
+        "Availability"
       ],
-      "secondary_flows": [
-        "All previous secondary flows",
-        "Dynamic pricing \u2014 peak time pricing set by provider",
-        "Multi-staff booking \u2014 book multiple staff for one appointment",
-        "Corporate accounts \u2014 company books for employees",
-        "Provider payouts and financial reporting",
-        "Custom booking form fields set by provider"
+      "actions": [
+        "View service details",
+        "Select staff member (if applicable)",
+        "View price breakdown",
+        "Proceed to date and time selection"
       ],
-      "screens": [
-        {
-          "id": "home_discover",
-          "name": "Home / Discover",
-          "purpose": "AI-personalised discovery with membership perks and nearby",
-          "visual": "Personalised. Membership banner. Nearby map preview. Categories.",
-          "entities": [
-            "Provider",
-            "Service",
-            "Location",
-            "Promotion"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View membership perks",
-            "Nearby map"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['Booking & Appointments'].headline}}",
-            "cta": "{{industry.copy_by_app_type['Booking & Appointments'].cta}}",
-            "empty_state": "No providers in your area yet \u2014 check back soon."
-          }
-        },
-        {
-          "id": "search_map",
-          "name": "Search & Map",
-          "purpose": "Full map with multi-location provider support",
-          "visual": "Map. Multi-location pins. Cluster view for dense areas. Filters.",
-          "entities": [
-            "Provider",
-            "Location"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View multi-location providers",
-            "Cluster map navigation"
-          ]
-        },
-        {
-          "id": "provider_detail",
-          "name": "Provider Detail",
-          "purpose": "Multi-location provider with location selector",
-          "visual": "Location selector at top. Gallery. Services. Staff. Reviews. Membership deals.",
-          "entities": [
-            "Provider",
-            "Service",
-            "Package",
-            "Staff",
-            "Review",
-            "Location"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Select location",
-            "View membership deals"
-          ]
-        },
-        {
-          "id": "service_detail",
-          "name": "Service Detail",
-          "purpose": "Service with dynamic pricing and custom fields",
-          "visual": "Service detail. Dynamic pricing indicator. Custom booking fields. Book CTA.",
-          "entities": [
-            "Service",
-            "Provider",
-            "Staff"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View dynamic pricing",
-            "Fill custom booking fields"
-          ]
-        },
-        {
-          "id": "packages",
-          "name": "Packages & Memberships",
-          "purpose": "Packages and recurring membership tiers",
-          "visual": "Packages tab. Membership tab. Savings badges. Subscribe CTA.",
-          "entities": [
-            "Package",
-            "Service",
-            "Provider"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Subscribe to membership",
-            "View membership tiers"
-          ]
-        },
-        {
-          "id": "membership",
-          "name": "Membership",
-          "purpose": "Subscribe, manage, and view membership benefits",
-          "visual": "Active membership card. Perks list. Usage progress. Auto-renew toggle.",
-          "entities": [
-            "User"
-          ],
-          "actions": [
-            "View membership",
-            "View perks",
-            "View usage",
-            "Toggle auto-renew",
-            "Upgrade tier",
-            "Cancel"
-          ]
-        },
-        {
-          "id": "date_time_picker",
-          "name": "Date & Time Selection",
-          "purpose": "Booking with dynamic pricing, multi-staff, and peak indicators",
-          "visual": "Calendar. Peak time badges on slots. Multi-staff selector. Recurring.",
-          "entities": [
-            "Availability",
-            "Appointment",
-            "WaitList",
-            "Staff"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View peak pricing",
-            "Select multi-staff",
-            "View availability by staff"
-          ]
-        },
-        {
-          "id": "booking_confirmation",
-          "name": "Booking Confirmation",
-          "purpose": "Full confirmation with membership, gift card, dynamic price summary",
-          "visual": "Full summary. Membership discount applied. Gift card field. Dynamic price breakdown.",
-          "entities": [
-            "Appointment",
-            "Service",
-            "Provider",
-            "Payment"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Apply gift card",
-            "View dynamic price breakdown"
-          ]
-        },
-        {
-          "id": "booking_success",
-          "name": "Booking Success",
-          "purpose": "Confirmation with membership benefit earned",
-          "visual": "Success. Points earned. Membership benefit used. Calendar CTA.",
-          "entities": [
-            "Appointment"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View membership benefit used"
-          ]
-        },
-        {
-          "id": "appointments",
-          "name": "My Appointments",
-          "purpose": "Full appointment list with corporate booking view",
-          "visual": "Personal and corporate tabs. Status. Recurring. Team bookings.",
-          "entities": [
-            "Appointment",
-            "Provider",
-            "Service"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View corporate bookings",
-            "View team appointments"
-          ],
-          "copy": {
-            "headline": "Your appointments",
-            "cta": "Book again",
-            "empty_state": "No upcoming appointments. Book your first one now."
-          }
-        },
-        {
-          "id": "appointment_detail",
-          "name": "Appointment Detail",
-          "purpose": "Full detail with invoice and corporate reference",
-          "visual": "Status stepper. Invoice download. Corporate reference field. Actions.",
-          "entities": [
-            "Appointment",
-            "Provider",
-            "Service",
-            "Location"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Download invoice",
-            "Add corporate reference"
-          ]
-        },
-        {
-          "id": "gift_cards",
-          "name": "Gift Cards",
-          "purpose": "Purchase, send, and redeem gift cards",
-          "visual": "Gift card design selector. Amount input. Recipient details. Send CTA.",
-          "entities": [
-            "User"
-          ],
-          "actions": [
-            "Purchase gift card",
-            "Select amount",
-            "Send to recipient",
-            "Redeem gift card",
-            "View gift card balance"
-          ]
-        },
-        {
-          "id": "notifications",
-          "name": "Notifications",
-          "purpose": "Smart notifications with membership and peak pricing alerts",
-          "visual": "Priority alerts. Membership renewal. Peak pricing warnings. All activity.",
-          "entities": [
-            "Notification",
-            "Appointment"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View membership renewal alert",
-            "Peak pricing notification"
-          ]
-        },
-        {
-          "id": "provider_dashboard",
-          "name": "Provider Dashboard",
-          "purpose": "Multi-location provider home with revenue and staff overview",
-          "visual": "Location selector. Revenue by location. Staff utilisation. Today's schedule.",
-          "entities": [
-            "Provider",
-            "Appointment",
-            "Service",
-            "Staff"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Select location",
-            "View staff utilisation",
-            "View revenue by location"
-          ]
-        },
-        {
-          "id": "provider_calendar",
-          "name": "Provider Calendar",
-          "purpose": "Full multi-staff calendar with dynamic pricing controls",
-          "visual": "Staff columns on calendar. Dynamic pricing overlay. Block and unblock.",
-          "entities": [
-            "Provider",
-            "Availability",
-            "Appointment",
-            "Staff"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Set dynamic pricing by time slot",
-            "View all staff calendars"
-          ]
-        },
-        {
-          "id": "provider_analytics",
-          "name": "Provider Analytics",
-          "purpose": "Revenue, utilisation, customer retention, peak time analysis",
-          "visual": "Revenue trend. Utilisation heat map. Retention cohort. Peak times chart.",
-          "entities": [
-            "Provider",
-            "Appointment",
-            "Service",
-            "Staff"
-          ],
-          "actions": [
-            "View revenue trend",
-            "View utilisation",
-            "View retention",
-            "View peak times",
-            "Export report"
-          ]
-        },
-        {
-          "id": "staff_management",
-          "name": "Staff Management",
-          "purpose": "Manage staff profiles, services, and schedules",
-          "visual": "Staff list. Profile per staff. Services assigned. Schedule per staff.",
-          "entities": [
-            "Staff",
-            "Provider"
-          ],
-          "actions": [
-            "Add staff",
-            "Edit staff profile",
-            "Assign services",
-            "View staff schedule",
-            "Set staff hours"
-          ]
-        },
-        {
-          "id": "payouts",
-          "name": "Payouts & Financials",
-          "purpose": "Provider earnings, payout schedule, and financial reports",
-          "visual": "Earnings summary. Payout schedule. Commission breakdown. Download report.",
-          "entities": [
-            "Provider"
-          ],
-          "actions": [
-            "View earnings",
-            "Request payout",
-            "View commission",
-            "Download financial report",
-            "View payout history"
-          ]
-        },
-        {
-          "id": "admin_dashboard",
-          "name": "Admin Dashboard",
-          "purpose": "Platform KPIs, provider approvals, dispute queue",
-          "visual": "KPI cards. Provider approval queue. Dispute queue. Revenue chart.",
-          "entities": [
-            "User",
-            "Provider",
-            "Appointment"
-          ],
-          "actions": [
-            "View KPIs",
-            "Approve providers",
-            "Resolve disputes",
-            "View platform revenue",
-            "Manage categories"
-          ]
-        },
-        {
-          "id": "corporate_accounts",
-          "name": "Corporate Accounts",
-          "purpose": "Company books for employees \u2014 budget, team management, invoicing",
-          "visual": "Company profile. Team member list. Budget tracker. Invoice list.",
-          "entities": [
-            "User",
-            "Provider",
-            "Appointment"
-          ],
-          "actions": [
-            "Manage team",
-            "Set booking budget",
-            "View team appointments",
-            "Download invoices",
-            "Add team member"
-          ]
-        },
-        {
-          "id": "profile_settings",
-          "name": "Profile & Settings",
-          "purpose": "Full profile with membership, corporate, and privacy settings",
-          "visual": "Comprehensive settings. Membership section. Corporate section.",
-          "entities": [
-            "User"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Membership settings",
-            "Corporate account settings",
-            "Privacy controls"
-          ]
-        },
-        {
-          "id": "help_centre",
-          "name": "Help Centre",
-          "purpose": "Self-serve help and support contact",
-          "visual": "Search. Article categories. Featured articles. Contact CTA.",
-          "entities": [
-            "User"
-          ],
-          "actions": [
-            "Search articles",
-            "Browse",
-            "Read article",
-            "Contact support",
-            "Raise dispute"
-          ]
-        }
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 3
+    },
+    {
+      "id": "date_time_picker",
+      "name": "Date & Time Selection",
+      "priority": "primary",
+      "purpose": "Pick available date and time slot",
+      "visual": "Calendar view. Available slots grid below. Selected state highlighted.",
+      "entities": [
+        "Availability",
+        "Appointment"
       ],
-      "interaction_patterns": [
-        "All MVP and Startup interaction patterns",
-        "Dynamic pricing badge on peak slots \u2014 price shown in amber or red",
-        "Membership discount automatically applied at confirmation \u2014 highlighted in green",
-        "Multi-location map clusters \u2014 tap to expand and select location",
-        "Staff utilisation heat map \u2014 darker = busier \u2014 visual at a glance",
-        "Corporate booking shows company budget remaining \u2014 progress bar",
-        "Gift card design previews as user selects \u2014 live render",
-        "Provider payout pending vs available clearly colour coded"
-      ]
+      "actions": [
+        "Browse available dates",
+        "Select time slot",
+        "View unavailable slots (greyed)",
+        "Join waitlist for fully booked slot",
+        "Proceed to booking confirmation"
+      ],
+      "skeleton": {
+        "hero": "calendar_grid",
+        "sections": [
+          "time_slot_row",
+          "cta"
+        ],
+        "card_count": 0
+      },
+      "generation_priority": 4
+    },
+    {
+      "id": "booking_confirmation",
+      "name": "Booking Confirmation",
+      "priority": "primary",
+      "purpose": "Review and confirm booking details before payment",
+      "visual": "Summary card \u2014 provider, service, date, time, price. Payment method. Confirm CTA.",
+      "entities": [
+        "Appointment",
+        "Service",
+        "Provider",
+        "Payment"
+      ],
+      "actions": [
+        "Review booking summary",
+        "Select or add payment method",
+        "Apply voucher or promo code",
+        "Confirm and pay",
+        "View cancellation policy"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "summary_card",
+          "details",
+          "cta"
+        ],
+        "card_count": 0
+      },
+      "generation_priority": 5
+    },
+    {
+      "id": "booking_success",
+      "name": "Booking Success",
+      "priority": "primary",
+      "purpose": "Confirmation screen post-booking",
+      "visual": "Success animation. Booking summary. Add to calendar CTA. View appointments CTA.",
+      "entities": [
+        "Appointment"
+      ],
+      "actions": [
+        "Add to calendar",
+        "Share booking",
+        "View all appointments",
+        "Return to home"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "summary_card",
+          "details",
+          "cta"
+        ],
+        "card_count": 0
+      },
+      "generation_priority": 6
+    },
+    {
+      "id": "appointments",
+      "name": "My Appointments",
+      "priority": "primary",
+      "purpose": "Upcoming and past appointments",
+      "visual": "Upcoming tab and past tab. Appointment cards with status badges.",
+      "entities": [
+        "Appointment",
+        "Provider",
+        "Service"
+      ],
+      "actions": [
+        "View upcoming appointments",
+        "View past appointments",
+        "Tap appointment for detail",
+        "Cancel appointment",
+        "Reschedule",
+        "Leave review on past appointment"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "copy": {
+        "headline": "Your appointments",
+        "cta": "Book again",
+        "empty_state": "No upcoming appointments. Book your first one now."
+      },
+      "generation_priority": 7
+    },
+    {
+      "id": "appointment_detail",
+      "name": "Appointment Detail",
+      "priority": "secondary",
+      "purpose": "Full appointment detail \u2014 status, directions, contact",
+      "visual": "Status stepper. Provider info. Service summary. Map. Actions.",
+      "entities": [
+        "Appointment",
+        "Provider",
+        "Service",
+        "Location"
+      ],
+      "actions": [
+        "View appointment status",
+        "Get directions",
+        "Contact provider",
+        "Cancel appointment",
+        "Reschedule",
+        "Add to calendar"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 8
+    },
+    {
+      "id": "profile_settings",
+      "name": "Profile & Settings",
+      "priority": "secondary",
+      "purpose": "User profile and app settings",
+      "visual": "Avatar. Profile details. Settings list. Notification preferences.",
+      "entities": [
+        "User"
+      ],
+      "actions": [
+        "Edit profile",
+        "Manage payment methods",
+        "Notification preferences",
+        "View saved providers",
+        "Log out"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "section_group",
+          "section_group"
+        ],
+        "card_count": 0
+      },
+      "generation_priority": 9
+    },
+    {
+      "id": "search_map",
+      "name": "Search & Map View",
+      "priority": "secondary",
+      "purpose": "Find providers by location with map and list toggle",
+      "visual": "Map with provider pins. List below. Filter bar. Distance radius control.",
+      "entities": [
+        "Provider",
+        "Location"
+      ],
+      "actions": [
+        "Search",
+        "Toggle map or list",
+        "Filter",
+        "Tap map pin",
+        "Set radius",
+        "Sort by distance or rating"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 10
+    },
+    {
+      "id": "packages",
+      "name": "Packages",
+      "priority": "secondary",
+      "purpose": "Browse and purchase service packages or bundles",
+      "visual": "Package cards with savings badge. Service list per package. Buy CTA.",
+      "entities": [
+        "Package",
+        "Service",
+        "Provider"
+      ],
+      "actions": [
+        "Browse packages",
+        "View package contents",
+        "View savings",
+        "Purchase package",
+        "Redeem package credit"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 11
+    },
+    {
+      "id": "notifications",
+      "name": "Notifications",
+      "priority": "secondary",
+      "purpose": "All appointment reminders, confirmations, and promotions",
+      "visual": "Categorised list. Reminder indicators. Deep link on tap.",
+      "entities": [
+        "Notification",
+        "Appointment"
+      ],
+      "actions": [
+        "View all",
+        "Tap to navigate",
+        "Mark read",
+        "Manage notification preferences"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 12
+    },
+    {
+      "id": "provider_dashboard",
+      "name": "Provider Dashboard",
+      "priority": "secondary",
+      "purpose": "Provider home \u2014 today's schedule, upcoming, earnings snapshot",
+      "visual": "Today's appointments timeline. Earnings card. Quick actions.",
+      "entities": [
+        "Provider",
+        "Appointment",
+        "Service"
+      ],
+      "actions": [
+        "View today's schedule",
+        "View earnings",
+        "Manage availability",
+        "View upcoming",
+        "Create service"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 13
+    },
+    {
+      "id": "provider_calendar",
+      "name": "Provider Calendar / Availability",
+      "priority": "secondary",
+      "purpose": "Provider sets working hours, blocks time, manages availability",
+      "visual": "Week calendar view. Blocked time in grey. Booked slots. Availability toggle per day.",
+      "entities": [
+        "Provider",
+        "Availability",
+        "Appointment",
+        "Staff"
+      ],
+      "actions": [
+        "Set working hours",
+        "Block time",
+        "View booked appointments",
+        "Manage staff availability"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 14
+    },
+    {
+      "id": "membership",
+      "name": "Membership",
+      "priority": "secondary",
+      "purpose": "Subscribe, manage, and view membership benefits",
+      "visual": "Active membership card. Perks list. Usage progress. Auto-renew toggle.",
+      "entities": [
+        "User"
+      ],
+      "actions": [
+        "View membership",
+        "View perks",
+        "View usage",
+        "Toggle auto-renew",
+        "Upgrade tier",
+        "Cancel"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 15
+    },
+    {
+      "id": "gift_cards",
+      "name": "Gift Cards",
+      "priority": "secondary",
+      "purpose": "Purchase, send, and redeem gift cards",
+      "visual": "Gift card design selector. Amount input. Recipient details. Send CTA.",
+      "entities": [
+        "User"
+      ],
+      "actions": [
+        "Purchase gift card",
+        "Select amount",
+        "Send to recipient",
+        "Redeem gift card",
+        "View gift card balance"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 16
+    },
+    {
+      "id": "provider_analytics",
+      "name": "Provider Analytics",
+      "priority": "secondary",
+      "purpose": "Revenue, utilisation, customer retention, peak time analysis",
+      "visual": "Revenue trend. Utilisation heat map. Retention cohort. Peak times chart.",
+      "entities": [
+        "Provider",
+        "Appointment",
+        "Service",
+        "Staff"
+      ],
+      "actions": [
+        "View revenue trend",
+        "View utilisation",
+        "View retention",
+        "View peak times",
+        "Export report"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 17
+    },
+    {
+      "id": "staff_management",
+      "name": "Staff Management",
+      "priority": "secondary",
+      "purpose": "Manage staff profiles, services, and schedules",
+      "visual": "Staff list. Profile per staff. Services assigned. Schedule per staff.",
+      "entities": [
+        "Staff",
+        "Provider"
+      ],
+      "actions": [
+        "Add staff",
+        "Edit staff profile",
+        "Assign services",
+        "View staff schedule",
+        "Set staff hours"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 18
+    },
+    {
+      "id": "payouts",
+      "name": "Payouts & Financials",
+      "priority": "secondary",
+      "purpose": "Provider earnings, payout schedule, and financial reports",
+      "visual": "Earnings summary. Payout schedule. Commission breakdown. Download report.",
+      "entities": [
+        "Provider"
+      ],
+      "actions": [
+        "View earnings",
+        "Request payout",
+        "View commission",
+        "Download financial report",
+        "View payout history"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 19
+    },
+    {
+      "id": "admin_dashboard",
+      "name": "Admin Dashboard",
+      "priority": "secondary",
+      "purpose": "Platform KPIs, provider approvals, dispute queue",
+      "visual": "KPI cards. Provider approval queue. Dispute queue. Revenue chart.",
+      "entities": [
+        "User",
+        "Provider",
+        "Appointment"
+      ],
+      "actions": [
+        "View KPIs",
+        "Approve providers",
+        "Resolve disputes",
+        "View platform revenue",
+        "Manage categories"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 20
+    },
+    {
+      "id": "corporate_accounts",
+      "name": "Corporate Accounts",
+      "priority": "secondary",
+      "purpose": "Company books for employees \u2014 budget, team management, invoicing",
+      "visual": "Company profile. Team member list. Budget tracker. Invoice list.",
+      "entities": [
+        "User",
+        "Provider",
+        "Appointment"
+      ],
+      "actions": [
+        "Manage team",
+        "Set booking budget",
+        "View team appointments",
+        "Download invoices",
+        "Add team member"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 21
+    },
+    {
+      "id": "help_centre",
+      "name": "Help Centre",
+      "priority": "secondary",
+      "purpose": "Self-serve help and support contact",
+      "visual": "Search. Article categories. Featured articles. Contact CTA.",
+      "entities": [
+        "User"
+      ],
+      "actions": [
+        "Search articles",
+        "Browse",
+        "Read article",
+        "Contact support",
+        "Raise dispute"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 22
     }
-  },
+  ],
+  "screen_count": 22,
+  "primary_count": 7,
+  "secondary_count": 15,
   "layout": {
     "iphone": {
       "nav": "bottom_tab_4",

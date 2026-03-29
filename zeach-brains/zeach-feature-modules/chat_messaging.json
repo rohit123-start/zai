@@ -95,5 +95,9 @@
       "case": "User attempts to re-add a contact they previously blocked",
       "ui": "Confirm step: 'You previously blocked [name]. Unblocking will allow them to message you again'. Explicit confirmation required. Previous message history restored."
     }
-  ]
+  ],
+  "priority": "secondary",
+  "default_classification": "on_demand",
+  "always_required": false,
+  "classification_note": "Secondary by default. Inferred when description mentions 'message', 'chat', 'communicate', 'contact'."
 }

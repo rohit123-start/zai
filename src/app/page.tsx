@@ -453,7 +453,7 @@ export default function Home() {
                 </div>
                 <p className="font-semibold text-sm" style={{ color: "#fff", fontFamily: "var(--font-space-grotesk)", letterSpacing: "-0.2px" }}>New project</p>
                 <p style={{ fontFamily: "var(--font-dm-mono)", fontSize: 11, color: "#71717a", letterSpacing: "0.2px" }}>describe → generate</p>
-              </div>
+      </div>
 
               {filteredProjects.length === 0 && searchQuery ? (
                 <div className="flex flex-col items-center justify-center gap-3 py-16" style={{ gridColumn: "1/-1" }}>

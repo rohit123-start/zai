@@ -86,5 +86,9 @@
       "case": "Search with accented characters or non-Latin scripts",
       "ui": "Normalize search input \u2014 'caf\u00e9' matches 'cafe'. Support right-to-left display for Arabic/Hebrew queries. Results sort correctly regardless of script."
     }
-  ]
+  ],
+  "priority": "secondary",
+  "default_classification": "inferred",
+  "always_required": false,
+  "classification_note": "Secondary. Inferred when description mentions 'browse', 'find', 'search', 'filter', 'discover'."
 }

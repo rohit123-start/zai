@@ -108,5 +108,9 @@
       "case": "Promo code applied but discount not reflected",
       "ui": "Show code as applied with green tick. If discount not calculating: 'Code applied but no eligible items in cart'. Specific reason if possible. Never silently fail."
     }
-  ]
+  ],
+  "priority": "primary",
+  "default_classification": "explicit",
+  "always_required": false,
+  "classification_note": "Primary when selected. Strong signal in description \u2014 'pay', 'checkout', 'purchase', 'subscription'."
 }

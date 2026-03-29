@@ -89,5 +89,9 @@
       "case": "PDF upload with password protection",
       "ui": "Detect password-protected PDF. Show: 'This PDF is password protected and cannot be previewed'. Still allow upload if file type is accepted. Note in file library."
     }
-  ]
+  ],
+  "priority": "secondary",
+  "default_classification": "on_demand",
+  "always_required": false,
+  "classification_note": "Secondary. Inferred when description mentions 'upload', 'documents', 'files', 'attachments', 'photos'."
 }

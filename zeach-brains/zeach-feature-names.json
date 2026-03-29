@@ -1,0 +1,221 @@
+{
+  "version": "1.0",
+  "description": "Flat feature list passed to Step 1.5b for classification. Names and inference keywords only \u2014 not full module files.",
+  "features": [
+    {
+      "id": "authentication",
+      "name": "Authentication",
+      "description": "Login, signup, password reset, biometric, social auth",
+      "inference_keywords": [
+        "login",
+        "signup",
+        "account",
+        "register",
+        "sign in",
+        "onboard"
+      ],
+      "priority": "primary",
+      "default_classification": "explicit"
+    },
+    {
+      "id": "payments",
+      "name": "Payments",
+      "description": "Checkout, payment methods, invoices, payouts, subscriptions",
+      "inference_keywords": [
+        "pay",
+        "payment",
+        "checkout",
+        "purchase",
+        "buy",
+        "subscription",
+        "invoice",
+        "payout",
+        "transaction"
+      ],
+      "priority": "primary",
+      "default_classification": "explicit"
+    },
+    {
+      "id": "chat_messaging",
+      "name": "Chat / Messaging",
+      "description": "Real-time messaging, conversations, group chats",
+      "inference_keywords": [
+        "message",
+        "chat",
+        "communicate",
+        "contact",
+        "inbox",
+        "conversation"
+      ],
+      "priority": "secondary",
+      "default_classification": "on_demand"
+    },
+    {
+      "id": "notifications",
+      "name": "Notifications",
+      "description": "Push notifications, in-app alerts, reminders, email triggers",
+      "inference_keywords": [
+        "notify",
+        "reminder",
+        "alert",
+        "update",
+        "ping",
+        "notification"
+      ],
+      "priority": "secondary",
+      "default_classification": "inferred"
+    },
+    {
+      "id": "search_filters",
+      "name": "Search & Filters",
+      "description": "Search bar, filter panels, sorting, category navigation",
+      "inference_keywords": [
+        "search",
+        "filter",
+        "browse",
+        "find",
+        "discover",
+        "sort",
+        "category"
+      ],
+      "priority": "secondary",
+      "default_classification": "inferred"
+    },
+    {
+      "id": "maps_location",
+      "name": "Maps / Location",
+      "description": "Map view, location search, directions, geofencing",
+      "inference_keywords": [
+        "map",
+        "location",
+        "nearby",
+        "directions",
+        "delivery",
+        "gps",
+        "address",
+        "place"
+      ],
+      "priority": "secondary",
+      "default_classification": "on_demand"
+    },
+    {
+      "id": "analytics_dashboard",
+      "name": "Analytics / Dashboard",
+      "description": "Charts, KPI cards, reports, usage metrics, performance data",
+      "inference_keywords": [
+        "analytics",
+        "insights",
+        "report",
+        "metrics",
+        "performance",
+        "stats",
+        "data",
+        "dashboard"
+      ],
+      "priority": "secondary",
+      "default_classification": "on_demand"
+    },
+    {
+      "id": "file_upload",
+      "name": "File Upload",
+      "description": "Document upload, image upload, file management, attachments",
+      "inference_keywords": [
+        "upload",
+        "document",
+        "file",
+        "attachment",
+        "photo",
+        "image",
+        "portfolio",
+        "scan"
+      ],
+      "priority": "secondary",
+      "default_classification": "on_demand"
+    },
+    {
+      "id": "video_calls",
+      "name": "Video / Calls",
+      "description": "Video calls, live sessions, telehealth consultations, webinars",
+      "inference_keywords": [
+        "video",
+        "call",
+        "virtual",
+        "live",
+        "telehealth",
+        "consultation",
+        "webinar",
+        "session"
+      ],
+      "priority": "secondary",
+      "default_classification": "on_demand"
+    }
+  ],
+  "custom_features": {
+    "description": "Features explicitly described by the user in the notes or description field that do not map to the 9 known feature modules. Extracted by Step 1.5b. Treated as highest priority \u2014 equal to user-selected checkbox features.",
+    "priority": "explicit",
+    "source": "user_notes",
+    "priority_hierarchy": {
+      "1_explicit": "User-selected checkbox features AND custom features from notes \u2014 equal highest priority",
+      "2_inferred": "AI-detected from description keywords",
+      "3_defaults": "Brain archetype defaults",
+      "4_on_demand": "Generate only when user navigates there"
+    },
+    "types": {
+      "screen_needed_false": "Affects existing screens only \u2014 becomes a note_for_generation on relevant screens in the Project Brain screen plan. No new screen added.",
+      "screen_needed_true": "Requires a new screen \u2014 added to project_brain.custom_screens with generation_priority in the primary queue alongside other explicit features."
+    },
+    "example_output": {
+      "custom_features": [
+        {
+          "name": "GST Calculation",
+          "priority": "explicit",
+          "source": "user_notes",
+          "type": "business_logic",
+          "screen_needed": false,
+          "affects_screens": [
+            "checkout",
+            "invoice_detail",
+            "transaction_history"
+          ],
+          "entities_needed": [
+            "TaxRate",
+            "GSTConfig"
+          ],
+          "note_for_generation": "Show GST line item on all invoices and checkout screens. Display tax-inclusive and tax-exclusive amounts."
+        },
+        {
+          "name": "Multi-currency Support",
+          "priority": "explicit",
+          "source": "user_notes",
+          "type": "configuration",
+          "screen_needed": false,
+          "affects_screens": [
+            "home",
+            "checkout",
+            "transaction_history",
+            "invoice_detail"
+          ],
+          "entities_needed": [
+            "Currency",
+            "ExchangeRate"
+          ],
+          "note_for_generation": "Show currency selector on financial screens. Display converted amounts in user's preferred currency."
+        },
+        {
+          "name": "Client Portal",
+          "priority": "explicit",
+          "source": "user_notes",
+          "type": "screen",
+          "screen_needed": true,
+          "suggested_screen_id": "client_portal",
+          "generation_priority": "primary",
+          "entities_needed": [
+            "ClientAccount",
+            "Statement"
+          ],
+          "note_for_generation": "Statement list with download button, filtered by date range. Client login separate from admin login."
+        }
+      ]
+    }
+  }
+}

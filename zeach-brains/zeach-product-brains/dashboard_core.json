@@ -127,920 +127,646 @@
       "Notification belongs to User, triggered by system events or thresholds"
     ]
   },
-  "tiers": {
-    "mvp": {
-      "tier": "MVP",
-      "description": "Core SaaS \u2014 login, dashboard overview, record management, basic reporting.",
-      "screen_count": 8,
-      "primary_flows": [
-        "Sign up \u2192 create organisation \u2192 invite team \u2192 set up project \u2192 add records \u2192 view dashboard",
-        "Log in \u2192 view dashboard \u2192 browse records \u2192 view record detail \u2192 take action",
-        "View dashboard metrics \u2192 identify issue \u2192 navigate to relevant records"
+  "screens": [
+    {
+      "id": "dashboard",
+      "name": "Dashboard / Overview",
+      "priority": "primary",
+      "purpose": "Key metrics at a glance \u2014 the command centre",
+      "visual": "KPI cards at top. Charts below. Recent activity list. Quick action buttons.",
+      "entities": [
+        "Metric",
+        "Record",
+        "Notification"
       ],
-      "secondary_flows": [
-        "Export data as CSV",
-        "Search and filter records",
+      "actions": [
+        "View KPIs",
+        "View charts",
+        "View recent activity",
+        "Quick navigate to records",
+        "View notifications"
+      ],
+      "skeleton": {
+        "hero": "kpi_row",
+        "sections": [
+          "chart",
+          "table"
+        ],
+        "card_count": 0
+      },
+      "copy": {
+        "headline": "{{industry.copy_by_app_type['Dashboard SaaS'].headline}}",
+        "cta": "{{industry.copy_by_app_type['Dashboard SaaS'].cta}}",
+        "empty_state": "Connect your data to see insights here. Setup takes 2 minutes."
+      },
+      "generation_priority": 1
+    },
+    {
+      "id": "records_list",
+      "name": "Records List",
+      "priority": "primary",
+      "purpose": "Browse, search, and filter all records",
+      "visual": "Data table. Search bar. Filter controls. Sort. Row click to detail.",
+      "entities": [
+        "Record",
+        "Project"
+      ],
+      "actions": [
+        "Search records",
+        "Filter by status, date, or type",
+        "Sort columns",
+        "Click row for detail",
+        "Create new record",
+        "Export CSV"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "copy": {
+        "headline": "All records",
+        "cta": "New record",
+        "empty_state": "No records yet. Create your first one to get started."
+      },
+      "generation_priority": 2
+    },
+    {
+      "id": "record_detail",
+      "name": "Record Detail",
+      "priority": "primary",
+      "purpose": "Full record view with all fields and action history",
+      "visual": "Record header. Field sections. Activity timeline on right or below.",
+      "entities": [
+        "Record",
+        "User"
+      ],
+      "actions": [
+        "View all fields",
         "Edit record",
-        "View basic report"
+        "View activity timeline",
+        "Change status",
+        "Delete record",
+        "Add note or comment"
       ],
-      "screens": [
-        {
-          "id": "login",
-          "name": "Login",
-          "purpose": "Secure authentication",
-          "visual": "Dark or clean light. Logo. Email and password. SSO option.",
-          "entities": [
-            "User",
-            "Organisation"
-          ],
-          "actions": [
-            "Email login",
-            "SSO login",
-            "Forgot password",
-            "Sign up"
-          ]
-        },
-        {
-          "id": "onboarding",
-          "name": "Onboarding",
-          "purpose": "Organisation and project setup",
-          "visual": "Step flow. Progress bar. Form inputs. Invite team step.",
-          "entities": [
-            "User",
-            "Organisation",
-            "Project",
-            "Team"
-          ],
-          "actions": [
-            "Set organisation name",
-            "Set up first project",
-            "Invite team members",
-            "Complete setup"
-          ]
-        },
-        {
-          "id": "dashboard",
-          "name": "Dashboard / Overview",
-          "purpose": "Key metrics at a glance \u2014 the command centre",
-          "visual": "KPI cards at top. Charts below. Recent activity list. Quick action buttons.",
-          "entities": [
-            "Metric",
-            "Record",
-            "Notification"
-          ],
-          "actions": [
-            "View KPIs",
-            "View charts",
-            "View recent activity",
-            "Quick navigate to records",
-            "View notifications"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['Dashboard SaaS'].headline}}",
-            "cta": "{{industry.copy_by_app_type['Dashboard SaaS'].cta}}",
-            "empty_state": "Connect your data to see insights here. Setup takes 2 minutes."
-          }
-        },
-        {
-          "id": "records_list",
-          "name": "Records List",
-          "purpose": "Browse, search, and filter all records",
-          "visual": "Data table. Search bar. Filter controls. Sort. Row click to detail.",
-          "entities": [
-            "Record",
-            "Project"
-          ],
-          "actions": [
-            "Search records",
-            "Filter by status, date, or type",
-            "Sort columns",
-            "Click row for detail",
-            "Create new record",
-            "Export CSV"
-          ],
-          "copy": {
-            "headline": "All records",
-            "cta": "New record",
-            "empty_state": "No records yet. Create your first one to get started."
-          }
-        },
-        {
-          "id": "record_detail",
-          "name": "Record Detail",
-          "purpose": "Full record view with all fields and action history",
-          "visual": "Record header. Field sections. Activity timeline on right or below.",
-          "entities": [
-            "Record",
-            "User"
-          ],
-          "actions": [
-            "View all fields",
-            "Edit record",
-            "View activity timeline",
-            "Change status",
-            "Delete record",
-            "Add note or comment"
-          ]
-        },
-        {
-          "id": "create_edit_record",
-          "name": "Create / Edit Record",
-          "purpose": "Form to create or edit a record",
-          "visual": "Clean form. Grouped fields. Validation indicators. Save and cancel.",
-          "entities": [
-            "Record"
-          ],
-          "actions": [
-            "Fill fields",
-            "Validate inputs",
-            "Save record",
-            "Cancel",
-            "Duplicate record"
-          ]
-        },
-        {
-          "id": "reports",
-          "name": "Reports",
-          "purpose": "Basic pre-built reports from record data",
-          "visual": "Report cards. Chart visualisations. Date range picker. Export CTA.",
-          "entities": [
-            "Report",
-            "Metric",
-            "Record"
-          ],
-          "actions": [
-            "View report",
-            "Change date range",
-            "Export PDF or CSV",
-            "Filter report data"
-          ]
-        },
-        {
-          "id": "settings",
-          "name": "Settings",
-          "purpose": "Account and organisation settings",
-          "visual": "Settings sidebar. Profile section. Organisation section.",
-          "entities": [
-            "User",
-            "Organisation"
-          ],
-          "actions": [
-            "Edit profile",
-            "Change password",
-            "Organisation settings",
-            "Notification preferences",
-            "Log out"
-          ]
-        }
-      ],
-      "interaction_patterns": [
-        "KPI cards animate in on dashboard load \u2014 counter counts up to value",
-        "Table row hover highlights \u2014 click to open detail",
-        "Filter panel slides in from right or drops down inline",
-        "Record status badge \u2014 colour coded by status",
-        "Form validation inline \u2014 red border and message on error",
-        "Empty state on records list \u2014 clear CTA to create first record",
-        "Toast notification on save or action success"
-      ]
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 3
     },
-    "startup": {
-      "tier": "Startup",
-      "description": "Full SaaS with team management, notifications, integrations, advanced reporting, and role-based access.",
-      "screen_count": 15,
-      "primary_flows": [
-        "All MVP flows",
-        "Admin invites team member \u2192 assigns role \u2192 member logs in \u2192 sees role-based view",
-        "Connect integration \u2192 authenticate external service \u2192 data syncs \u2192 appears in dashboard",
-        "Set metric threshold \u2192 trigger fires \u2192 notification sent \u2192 user investigates",
-        "Build custom report \u2192 select metrics \u2192 visualise \u2192 share with team"
+    {
+      "id": "reports",
+      "name": "Reports",
+      "priority": "primary",
+      "purpose": "Basic pre-built reports from record data",
+      "visual": "Report cards. Chart visualisations. Date range picker. Export CTA.",
+      "entities": [
+        "Report",
+        "Metric",
+        "Record"
       ],
-      "secondary_flows": [
-        "All MVP secondary flows",
-        "Export report as PDF",
-        "Comment and tag teammate on record",
-        "Set up recurring report email",
-        "View audit log",
-        "Archive record"
+      "actions": [
+        "View report",
+        "Change date range",
+        "Export PDF or CSV",
+        "Filter report data"
       ],
-      "screens": [
-        {
-          "id": "login",
-          "name": "Login",
-          "purpose": "Secure auth with MFA",
-          "visual": "Clean. Logo. Email, password, MFA step.",
-          "entities": [
-            "User",
-            "Organisation"
-          ],
-          "actions": [
-            "Login",
-            "MFA",
-            "SSO",
-            "Forgot password"
-          ]
-        },
-        {
-          "id": "onboarding",
-          "name": "Onboarding",
-          "purpose": "Full org setup with integrations step",
-          "visual": "Steps. Org setup. Project. Team invite. Integration connect. Done.",
-          "entities": [
-            "User",
-            "Organisation",
-            "Project",
-            "Team",
-            "Integration"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Connect integration during onboarding"
-          ]
-        },
-        {
-          "id": "dashboard",
-          "name": "Dashboard / Overview",
-          "purpose": "Role-based dashboard with custom metric widgets",
-          "visual": "KPI cards. Customisable widget grid. Alerts panel. Recent activity.",
-          "entities": [
-            "Metric",
-            "Record",
-            "Notification"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Customise widget layout",
-            "View threshold alerts",
-            "Filter by team or project"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['Dashboard SaaS'].headline}}",
-            "cta": "{{industry.copy_by_app_type['Dashboard SaaS'].cta}}",
-            "empty_state": "Connect your data to see insights here. Setup takes 2 minutes."
-          }
-        },
-        {
-          "id": "records_list",
-          "name": "Records List",
-          "purpose": "Full record management with bulk actions and views",
-          "visual": "Data table. List or Kanban view toggle. Bulk select. Filter. Sort.",
-          "entities": [
-            "Record",
-            "Project"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Toggle list or Kanban",
-            "Bulk select and action",
-            "Save filter as view",
-            "Assign records to team"
-          ],
-          "copy": {
-            "headline": "All records",
-            "cta": "New record",
-            "empty_state": "No records yet. Create your first one to get started."
-          }
-        },
-        {
-          "id": "record_detail",
-          "name": "Record Detail",
-          "purpose": "Full record with comments, mentions, and file attachments",
-          "visual": "Record fields. Comment thread with mentions. File attachments. Activity log.",
-          "entities": [
-            "Record",
-            "User"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Comment with mention",
-            "Attach file",
-            "View full activity log",
-            "Assign to team member"
-          ]
-        },
-        {
-          "id": "create_edit_record",
-          "name": "Create / Edit Record",
-          "purpose": "Rich form with file upload and linked records",
-          "visual": "Grouped form. File upload. Link to related record. Validation.",
-          "entities": [
-            "Record"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Upload file",
-            "Link to related record"
-          ]
-        },
-        {
-          "id": "reports",
-          "name": "Reports",
-          "purpose": "Custom report builder with saved and shared reports",
-          "visual": "Report builder sidebar. Chart preview. Save and share. Report library.",
-          "entities": [
-            "Report",
-            "Metric",
-            "Record"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Build custom report",
-            "Select chart type",
-            "Save report",
-            "Share report with team",
-            "Schedule email report"
-          ]
-        },
-        {
-          "id": "analytics",
-          "name": "Analytics",
-          "purpose": "Deeper analytics \u2014 trends, comparisons, cohorts",
-          "visual": "Trend line charts. Comparison view. Period selector. Export.",
-          "entities": [
-            "Metric",
-            "Record"
-          ],
-          "actions": [
-            "View trend over time",
-            "Compare periods",
-            "View cohort breakdown",
-            "Export chart"
-          ]
-        },
-        {
-          "id": "team_management",
-          "name": "Team Management",
-          "purpose": "Invite, manage, and assign roles to team members",
-          "visual": "Team member table. Role badge per member. Invite CTA. Pending invites.",
-          "entities": [
-            "User",
-            "Team",
-            "Role",
-            "Organisation"
-          ],
-          "actions": [
-            "Invite member",
-            "Assign role",
-            "Remove member",
-            "View pending invites",
-            "Resend invite"
-          ]
-        },
-        {
-          "id": "integrations",
-          "name": "Integrations",
-          "purpose": "Connect external services \u2014 CRM, payment, calendar, etc.",
-          "visual": "Integration cards grid. Connected status badge. Connect and disconnect.",
-          "entities": [
-            "Integration",
-            "Organisation"
-          ],
-          "actions": [
-            "Browse integrations",
-            "Connect integration",
-            "Configure integration",
-            "Disconnect",
-            "View sync status"
-          ]
-        },
-        {
-          "id": "notifications",
-          "name": "Notifications",
-          "purpose": "All system alerts, threshold triggers, and team activity",
-          "visual": "Notification list. Alert category. Threshold alert with value. Mark read.",
-          "entities": [
-            "Notification",
-            "Record",
-            "Metric"
-          ],
-          "actions": [
-            "View all",
-            "Filter by type",
-            "Mark read",
-            "Navigate to relevant record"
-          ]
-        },
-        {
-          "id": "notification_settings",
-          "name": "Notification Settings",
-          "purpose": "Configure what triggers notifications and how they are delivered",
-          "visual": "Trigger list. Toggle per trigger. Channel selector (email, in-app, Slack).",
-          "entities": [
-            "Notification",
-            "User"
-          ],
-          "actions": [
-            "Toggle notification types",
-            "Select delivery channel",
-            "Set threshold values",
-            "Test notification"
-          ]
-        },
-        {
-          "id": "audit_log",
-          "name": "Audit Log",
-          "purpose": "Full log of all user actions in the organisation",
-          "visual": "Log table. User, action, timestamp, record. Filter and search.",
-          "entities": [
-            "AuditLog",
-            "User",
-            "Record"
-          ],
-          "actions": [
-            "View log",
-            "Filter by user or action",
-            "Search log",
-            "Export log"
-          ]
-        },
-        {
-          "id": "settings",
-          "name": "Settings",
-          "purpose": "Full org and account settings",
-          "visual": "Settings sidebar. Profile. Organisation. Team. Billing. Integrations. Security.",
-          "entities": [
-            "User",
-            "Organisation",
-            "Subscription"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Manage billing",
-            "Security settings",
-            "SSO configuration",
-            "Data export"
-          ]
-        },
-        {
-          "id": "billing",
-          "name": "Billing & Subscription",
-          "purpose": "Plan management and billing history",
-          "visual": "Current plan card. Feature comparison. Upgrade CTA. Invoice history.",
-          "entities": [
-            "Subscription",
-            "Organisation"
-          ],
-          "actions": [
-            "View current plan",
-            "Upgrade or downgrade",
-            "View invoices",
-            "Update payment method",
-            "Cancel subscription"
-          ]
-        }
-      ],
-      "interaction_patterns": [
-        "All MVP interaction patterns",
-        "Widget drag and drop on dashboard \u2014 save layout",
-        "Kanban card drag between status columns",
-        "Mention autocomplete in comments \u2014 @ triggers user list",
-        "Integration status pill \u2014 connected green, error red, syncing spinner",
-        "Threshold alert banner on dashboard when metric fires",
-        "Audit log row expands to full action detail on click",
-        "Role badge on team member \u2014 colour coded by role level"
-      ]
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 4
     },
-    "scale": {
-      "tier": "Scale",
-      "description": "Enterprise SaaS with SSO, advanced permissions, multi-workspace, API, white-label, and compliance tools.",
-      "screen_count": 24,
-      "primary_flows": [
-        "All MVP and Startup flows",
-        "Enterprise admin sets up SSO \u2192 team logs in with company credentials \u2192 roles synced automatically",
-        "Create custom workflow \u2192 set triggers and actions \u2192 automate record updates \u2192 view automation log",
-        "Multi-workspace admin \u2192 switch between workspaces \u2192 manage each independently",
-        "API consumer generates key \u2192 calls API \u2192 views usage dashboard \u2192 manages rate limits",
-        "Compliance admin runs data audit \u2192 exports compliance report \u2192 satisfies regulatory requirement"
+    {
+      "id": "login",
+      "name": "Login",
+      "priority": "secondary",
+      "purpose": "Secure authentication",
+      "visual": "Dark or clean light. Logo. Email and password. SSO option.",
+      "entities": [
+        "User",
+        "Organisation"
       ],
-      "secondary_flows": [
-        "All previous secondary flows",
-        "White-label custom domain and branding",
-        "Data residency selection",
-        "Custom field creation",
-        "Webhook management",
-        "Embedded dashboard for external sharing"
+      "actions": [
+        "Email login",
+        "SSO login",
+        "Forgot password",
+        "Sign up"
       ],
-      "screens": [
-        {
-          "id": "login",
-          "name": "Login",
-          "purpose": "Enterprise auth with SSO and device management",
-          "visual": "Clean. SSO primary CTA. Email fallback. Device trust indicator.",
-          "entities": [
-            "User",
-            "Organisation"
-          ],
-          "actions": [
-            "SSO login",
-            "Email login",
-            "MFA",
-            "Trusted device"
-          ]
-        },
-        {
-          "id": "onboarding",
-          "name": "Onboarding",
-          "purpose": "Enterprise setup with SSO, data import, and workspace config",
-          "visual": "Enterprise steps. SSO setup. Data import. Workspace config. Team sync.",
-          "entities": [
-            "User",
-            "Organisation",
-            "Project",
-            "Team",
-            "Integration"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Configure SSO",
-            "Import data",
-            "Sync team from directory"
-          ]
-        },
-        {
-          "id": "dashboard",
-          "name": "Dashboard / Overview",
-          "purpose": "Multi-workspace dashboard with executive summary view",
-          "visual": "Workspace switcher. Executive KPIs. Alert panel. Widget grid. Embed toggle.",
-          "entities": [
-            "Metric",
-            "Record",
-            "Notification"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Switch workspace",
-            "Toggle executive view",
-            "Embed dashboard"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['Dashboard SaaS'].headline}}",
-            "cta": "{{industry.copy_by_app_type['Dashboard SaaS'].cta}}",
-            "empty_state": "Connect your data to see insights here. Setup takes 2 minutes."
-          }
-        },
-        {
-          "id": "records_list",
-          "name": "Records List",
-          "purpose": "Full record management with custom views and permissions",
-          "visual": "Data table. Saved views tabs. Custom fields. Permission indicators.",
-          "entities": [
-            "Record",
-            "Project"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Create custom view",
-            "Manage custom fields",
-            "View permission indicators"
-          ],
-          "copy": {
-            "headline": "All records",
-            "cta": "New record",
-            "empty_state": "No records yet. Create your first one to get started."
-          }
-        },
-        {
-          "id": "record_detail",
-          "name": "Record Detail",
-          "purpose": "Full record with workflow history and linked records graph",
-          "visual": "Fields. Comments. Workflow history. Linked records graph. Full audit.",
-          "entities": [
-            "Record",
-            "User"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View workflow history",
-            "View linked records graph",
-            "Export record"
-          ]
-        },
-        {
-          "id": "create_edit_record",
-          "name": "Create / Edit Record",
-          "purpose": "Rich form with conditional fields and workflow trigger",
-          "visual": "Conditional field logic. Workflow trigger toggle. File upload. Linked records.",
-          "entities": [
-            "Record"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Conditional fields",
-            "Trigger workflow on save"
-          ]
-        },
-        {
-          "id": "reports",
-          "name": "Reports",
-          "purpose": "Advanced reports with embedded sharing and scheduled delivery",
-          "visual": "Report builder. Embed code. Schedule delivery. Public share link.",
-          "entities": [
-            "Report",
-            "Metric",
-            "Record"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Generate embed code",
-            "Public share link",
-            "Advanced schedule"
-          ]
-        },
-        {
-          "id": "analytics",
-          "name": "Analytics",
-          "purpose": "Executive analytics with forecasting and benchmarks",
-          "visual": "Forecast line. Benchmark comparison. Cohort matrix. Full export.",
-          "entities": [
-            "Metric",
-            "Record"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View forecast",
-            "Compare to benchmark",
-            "View cohort matrix"
-          ]
-        },
-        {
-          "id": "automations",
-          "name": "Automations / Workflows",
-          "purpose": "Build trigger-action automations for record management",
-          "visual": "Automation builder canvas. Trigger selector. Action chain. Test and publish.",
-          "entities": [
-            "Record",
-            "User",
-            "Organisation"
-          ],
-          "actions": [
-            "Create automation",
-            "Set trigger",
-            "Add actions",
-            "Add conditions",
-            "Test automation",
-            "View automation log"
-          ]
-        },
-        {
-          "id": "team_management",
-          "name": "Team Management",
-          "purpose": "Multi-team org with directory sync and granular permissions",
-          "visual": "Team hierarchy. Directory sync status. Permission matrix. Invite.",
-          "entities": [
-            "User",
-            "Team",
-            "Role",
-            "Organisation"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Sync from directory",
-            "Set granular permissions",
-            "View permission matrix",
-            "Manage teams within org"
-          ]
-        },
-        {
-          "id": "workspaces",
-          "name": "Multi-Workspace Management",
-          "purpose": "Create and switch between separate workspaces",
-          "visual": "Workspace cards. Create workspace. Switch. Settings per workspace.",
-          "entities": [
-            "Organisation"
-          ],
-          "actions": [
-            "View all workspaces",
-            "Create workspace",
-            "Switch workspace",
-            "Configure workspace",
-            "Archive workspace"
-          ]
-        },
-        {
-          "id": "integrations",
-          "name": "Integrations",
-          "purpose": "Enterprise integrations with webhook management and API",
-          "visual": "Integration grid. Webhook list. API usage. Connected apps.",
-          "entities": [
-            "Integration",
-            "Organisation"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Manage webhooks",
-            "View API usage",
-            "Configure enterprise integrations"
-          ]
-        },
-        {
-          "id": "api_access",
-          "name": "API Access",
-          "purpose": "API key management and developer documentation",
-          "visual": "API key list. Usage chart. Rate limit indicator. Docs link.",
-          "entities": [
-            "Organisation",
-            "User"
-          ],
-          "actions": [
-            "Generate API key",
-            "View usage",
-            "Set rate limits",
-            "View documentation",
-            "Revoke key"
-          ]
-        },
-        {
-          "id": "notifications",
-          "name": "Notifications",
-          "purpose": "All alerts with team digest and executive summary",
-          "visual": "All notifications. Team digest. Executive summary option.",
-          "entities": [
-            "Notification",
-            "Record",
-            "Metric"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View team digest",
-            "View executive summary"
-          ]
-        },
-        {
-          "id": "notification_settings",
-          "name": "Notification Settings",
-          "purpose": "Advanced notification routing with team digest and digest schedule",
-          "visual": "Trigger matrix. Team digest schedule. Escalation rules.",
-          "entities": [
-            "Notification",
-            "User"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Set escalation rules",
-            "Configure digest schedule"
-          ]
-        },
-        {
-          "id": "audit_log",
-          "name": "Audit Log",
-          "purpose": "Full compliance audit log with data export for regulators",
-          "visual": "Comprehensive log. Compliance export. Retention policy indicator.",
-          "entities": [
-            "AuditLog",
-            "User",
-            "Record"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Export compliance report",
-            "Set retention policy"
-          ]
-        },
-        {
-          "id": "compliance",
-          "name": "Compliance Centre",
-          "purpose": "GDPR, SOC2, and other compliance management",
-          "visual": "Compliance status cards. Data subject requests. Retention policies. Audit reports.",
-          "entities": [
-            "Organisation",
-            "User"
-          ],
-          "actions": [
-            "View compliance status",
-            "Process data subject request",
-            "Set retention policies",
-            "Download compliance report",
-            "View certifications"
-          ]
-        },
-        {
-          "id": "white_label",
-          "name": "White-Label Settings",
-          "purpose": "Custom branding, domain, and email configuration",
-          "visual": "Brand settings. Logo upload. Colour picker. Custom domain. Email templates.",
-          "entities": [
-            "Organisation"
-          ],
-          "actions": [
-            "Upload logo",
-            "Set brand colours",
-            "Configure custom domain",
-            "Set email templates",
-            "Preview white-label"
-          ]
-        },
-        {
-          "id": "settings",
-          "name": "Settings",
-          "purpose": "Enterprise settings hub",
-          "visual": "Settings sidebar. All sections. Compliance. White-label. SSO. Data.",
-          "entities": [
-            "User",
-            "Organisation",
-            "Subscription"
-          ],
-          "actions": [
-            "All Startup actions",
-            "SSO configuration",
-            "White-label settings",
-            "Compliance settings",
-            "Data residency"
-          ]
-        },
-        {
-          "id": "billing",
-          "name": "Billing & Subscription",
-          "purpose": "Enterprise billing with usage-based and contract support",
-          "visual": "Enterprise plan card. Usage meters. Contract info. Invoice history.",
-          "entities": [
-            "Subscription",
-            "Organisation"
-          ],
-          "actions": [
-            "View enterprise plan",
-            "View usage meters",
-            "Download invoices",
-            "Contact sales for contract"
-          ]
-        },
-        {
-          "id": "admin_dashboard",
-          "name": "Super Admin Dashboard",
-          "purpose": "Platform-level admin \u2014 all orgs, revenue, health",
-          "visual": "Org table. Revenue chart. Health indicators. Support queue.",
-          "entities": [
-            "Organisation",
-            "User"
-          ],
-          "actions": [
-            "View all orgs",
-            "View platform revenue",
-            "View health metrics",
-            "Access org as admin",
-            "View support queue"
-          ]
-        },
-        {
-          "id": "custom_fields",
-          "name": "Custom Fields",
-          "purpose": "Define custom fields for records across the organisation",
-          "visual": "Field type selector. Preview. Assign to record type. Required toggle.",
-          "entities": [
-            "Record",
-            "Organisation"
-          ],
-          "actions": [
-            "Create custom field",
-            "Select field type",
-            "Assign to record type",
-            "Set required",
-            "Reorder fields",
-            "Delete field"
-          ]
-        },
-        {
-          "id": "help_centre",
-          "name": "Help Centre",
-          "purpose": "Self-serve help with admin and developer sections",
-          "visual": "Search. User, admin, and developer categories. API docs link.",
-          "entities": [
-            "User"
-          ],
-          "actions": [
-            "Search",
-            "Browse categories",
-            "Developer docs",
-            "Contact enterprise support"
-          ]
-        },
-        {
-          "id": "embedded_dashboard",
-          "name": "Embedded Dashboard",
-          "purpose": "Share read-only dashboard externally without login",
-          "visual": "Clean dashboard view. No nav. Powered by badge. Embed code.",
-          "entities": [
-            "Metric",
-            "Report"
-          ],
-          "actions": [
-            "View embedded dashboard",
-            "Filter if allowed",
-            "Export if allowed"
-          ]
-        }
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 5
+    },
+    {
+      "id": "onboarding",
+      "name": "Onboarding",
+      "priority": "secondary",
+      "purpose": "Organisation and project setup",
+      "visual": "Step flow. Progress bar. Form inputs. Invite team step.",
+      "entities": [
+        "User",
+        "Organisation",
+        "Project",
+        "Team"
       ],
-      "interaction_patterns": [
-        "All MVP and Startup interaction patterns",
-        "Workspace switcher \u2014 dropdown from top nav, switches context instantly",
-        "Automation builder \u2014 drag nodes on canvas, connect with arrows",
-        "Permission matrix \u2014 checkbox grid, rows are features, columns are roles",
-        "API usage bar \u2014 fills as quota approaches, turns amber then red",
-        "Compliance status card \u2014 green tick, amber warning, red alert",
-        "White-label preview \u2014 live render updates as user changes brand settings",
-        "Custom field drag to reorder \u2014 handle on left of field row",
-        "Directory sync status \u2014 last synced time, manual sync button"
-      ]
+      "actions": [
+        "Set organisation name",
+        "Set up first project",
+        "Invite team members",
+        "Complete setup"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 6
+    },
+    {
+      "id": "create_edit_record",
+      "name": "Create / Edit Record",
+      "priority": "secondary",
+      "purpose": "Form to create or edit a record",
+      "visual": "Clean form. Grouped fields. Validation indicators. Save and cancel.",
+      "entities": [
+        "Record"
+      ],
+      "actions": [
+        "Fill fields",
+        "Validate inputs",
+        "Save record",
+        "Cancel",
+        "Duplicate record"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 7
+    },
+    {
+      "id": "settings",
+      "name": "Settings",
+      "priority": "secondary",
+      "purpose": "Account and organisation settings",
+      "visual": "Settings sidebar. Profile section. Organisation section.",
+      "entities": [
+        "User",
+        "Organisation"
+      ],
+      "actions": [
+        "Edit profile",
+        "Change password",
+        "Organisation settings",
+        "Notification preferences",
+        "Log out"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "section_group",
+          "section_group"
+        ],
+        "card_count": 0
+      },
+      "generation_priority": 8
+    },
+    {
+      "id": "analytics",
+      "name": "Analytics",
+      "priority": "secondary",
+      "purpose": "Deeper analytics \u2014 trends, comparisons, cohorts",
+      "visual": "Trend line charts. Comparison view. Period selector. Export.",
+      "entities": [
+        "Metric",
+        "Record"
+      ],
+      "actions": [
+        "View trend over time",
+        "Compare periods",
+        "View cohort breakdown",
+        "Export chart"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 9
+    },
+    {
+      "id": "team_management",
+      "name": "Team Management",
+      "priority": "secondary",
+      "purpose": "Invite, manage, and assign roles to team members",
+      "visual": "Team member table. Role badge per member. Invite CTA. Pending invites.",
+      "entities": [
+        "User",
+        "Team",
+        "Role",
+        "Organisation"
+      ],
+      "actions": [
+        "Invite member",
+        "Assign role",
+        "Remove member",
+        "View pending invites",
+        "Resend invite"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 10
+    },
+    {
+      "id": "integrations",
+      "name": "Integrations",
+      "priority": "secondary",
+      "purpose": "Connect external services \u2014 CRM, payment, calendar, etc.",
+      "visual": "Integration cards grid. Connected status badge. Connect and disconnect.",
+      "entities": [
+        "Integration",
+        "Organisation"
+      ],
+      "actions": [
+        "Browse integrations",
+        "Connect integration",
+        "Configure integration",
+        "Disconnect",
+        "View sync status"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 11
+    },
+    {
+      "id": "notifications",
+      "name": "Notifications",
+      "priority": "secondary",
+      "purpose": "All system alerts, threshold triggers, and team activity",
+      "visual": "Notification list. Alert category. Threshold alert with value. Mark read.",
+      "entities": [
+        "Notification",
+        "Record",
+        "Metric"
+      ],
+      "actions": [
+        "View all",
+        "Filter by type",
+        "Mark read",
+        "Navigate to relevant record"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 12
+    },
+    {
+      "id": "notification_settings",
+      "name": "Notification Settings",
+      "priority": "secondary",
+      "purpose": "Configure what triggers notifications and how they are delivered",
+      "visual": "Trigger list. Toggle per trigger. Channel selector (email, in-app, Slack).",
+      "entities": [
+        "Notification",
+        "User"
+      ],
+      "actions": [
+        "Toggle notification types",
+        "Select delivery channel",
+        "Set threshold values",
+        "Test notification"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 13
+    },
+    {
+      "id": "audit_log",
+      "name": "Audit Log",
+      "priority": "secondary",
+      "purpose": "Full log of all user actions in the organisation",
+      "visual": "Log table. User, action, timestamp, record. Filter and search.",
+      "entities": [
+        "AuditLog",
+        "User",
+        "Record"
+      ],
+      "actions": [
+        "View log",
+        "Filter by user or action",
+        "Search log",
+        "Export log"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 14
+    },
+    {
+      "id": "billing",
+      "name": "Billing & Subscription",
+      "priority": "secondary",
+      "purpose": "Plan management and billing history",
+      "visual": "Current plan card. Feature comparison. Upgrade CTA. Invoice history.",
+      "entities": [
+        "Subscription",
+        "Organisation"
+      ],
+      "actions": [
+        "View current plan",
+        "Upgrade or downgrade",
+        "View invoices",
+        "Update payment method",
+        "Cancel subscription"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 15
+    },
+    {
+      "id": "automations",
+      "name": "Automations / Workflows",
+      "priority": "secondary",
+      "purpose": "Build trigger-action automations for record management",
+      "visual": "Automation builder canvas. Trigger selector. Action chain. Test and publish.",
+      "entities": [
+        "Record",
+        "User",
+        "Organisation"
+      ],
+      "actions": [
+        "Create automation",
+        "Set trigger",
+        "Add actions",
+        "Add conditions",
+        "Test automation",
+        "View automation log"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 16
+    },
+    {
+      "id": "workspaces",
+      "name": "Multi-Workspace Management",
+      "priority": "secondary",
+      "purpose": "Create and switch between separate workspaces",
+      "visual": "Workspace cards. Create workspace. Switch. Settings per workspace.",
+      "entities": [
+        "Organisation"
+      ],
+      "actions": [
+        "View all workspaces",
+        "Create workspace",
+        "Switch workspace",
+        "Configure workspace",
+        "Archive workspace"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 17
+    },
+    {
+      "id": "api_access",
+      "name": "API Access",
+      "priority": "secondary",
+      "purpose": "API key management and developer documentation",
+      "visual": "API key list. Usage chart. Rate limit indicator. Docs link.",
+      "entities": [
+        "Organisation",
+        "User"
+      ],
+      "actions": [
+        "Generate API key",
+        "View usage",
+        "Set rate limits",
+        "View documentation",
+        "Revoke key"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 18
+    },
+    {
+      "id": "compliance",
+      "name": "Compliance Centre",
+      "priority": "secondary",
+      "purpose": "GDPR, SOC2, and other compliance management",
+      "visual": "Compliance status cards. Data subject requests. Retention policies. Audit reports.",
+      "entities": [
+        "Organisation",
+        "User"
+      ],
+      "actions": [
+        "View compliance status",
+        "Process data subject request",
+        "Set retention policies",
+        "Download compliance report",
+        "View certifications"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 19
+    },
+    {
+      "id": "white_label",
+      "name": "White-Label Settings",
+      "priority": "secondary",
+      "purpose": "Custom branding, domain, and email configuration",
+      "visual": "Brand settings. Logo upload. Colour picker. Custom domain. Email templates.",
+      "entities": [
+        "Organisation"
+      ],
+      "actions": [
+        "Upload logo",
+        "Set brand colours",
+        "Configure custom domain",
+        "Set email templates",
+        "Preview white-label"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 20
+    },
+    {
+      "id": "admin_dashboard",
+      "name": "Super Admin Dashboard",
+      "priority": "secondary",
+      "purpose": "Platform-level admin \u2014 all orgs, revenue, health",
+      "visual": "Org table. Revenue chart. Health indicators. Support queue.",
+      "entities": [
+        "Organisation",
+        "User"
+      ],
+      "actions": [
+        "View all orgs",
+        "View platform revenue",
+        "View health metrics",
+        "Access org as admin",
+        "View support queue"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 21
+    },
+    {
+      "id": "custom_fields",
+      "name": "Custom Fields",
+      "priority": "secondary",
+      "purpose": "Define custom fields for records across the organisation",
+      "visual": "Field type selector. Preview. Assign to record type. Required toggle.",
+      "entities": [
+        "Record",
+        "Organisation"
+      ],
+      "actions": [
+        "Create custom field",
+        "Select field type",
+        "Assign to record type",
+        "Set required",
+        "Reorder fields",
+        "Delete field"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 22
+    },
+    {
+      "id": "help_centre",
+      "name": "Help Centre",
+      "priority": "secondary",
+      "purpose": "Self-serve help with admin and developer sections",
+      "visual": "Search. User, admin, and developer categories. API docs link.",
+      "entities": [
+        "User"
+      ],
+      "actions": [
+        "Search",
+        "Browse categories",
+        "Developer docs",
+        "Contact enterprise support"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 23
+    },
+    {
+      "id": "embedded_dashboard",
+      "name": "Embedded Dashboard",
+      "priority": "secondary",
+      "purpose": "Share read-only dashboard externally without login",
+      "visual": "Clean dashboard view. No nav. Powered by badge. Embed code.",
+      "entities": [
+        "Metric",
+        "Report"
+      ],
+      "actions": [
+        "View embedded dashboard",
+        "Filter if allowed",
+        "Export if allowed"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 24
     }
-  },
+  ],
+  "screen_count": 24,
+  "primary_count": 4,
+  "secondary_count": 20,
   "layout": {
     "iphone": {
       "nav": "bottom_tab_4",

@@ -126,9 +126,7 @@ interface S1Input {
   industry: string;
   app_type: string;
   project_type: string;
-  complexity: "MVP" | "Startup" | "Scale";
   features: string[];
-  notes: string;
 }
 
 interface S2Input {
@@ -144,21 +142,44 @@ interface RequestBody {
   userId: string;
   s1: S1Input;
   s2: S2Input;
+  /** If Screen 1 already ran /api/classify, pass its pipelineRunId to skip steps 01–01.5c */
+  pipelineRunId?: string;
 }
 
-interface ParsedIntent {
-  user_types: { type: string; primary: boolean }[];
-  app_structure: string;
-  core_flows_detected: string[];
-  features_implied: {
-    explicitly_mentioned: string[];
-    strongly_implied: string[];
-  };
-  complexity_signal: string;
-  industry_signal: string;
-  tone_hints: string[];
+// ─── Step 01.5a — Classification output ──────────────────────────────────────
+
+interface Classification {
+  industry_signal: { detected: string; confidence: string; keywords_matched: string[]; user_selected: string; match: boolean };
+  app_type_signal:  { detected: string; confidence: string; keywords_matched: string[]; user_selected: string; match: boolean };
+  complexity_inferred: "simple" | "mid" | "complex";
+  complexity_reason: string;
+  app_structure: "single_sided" | "two_sided" | "multi_tenant";
   mismatches: string[];
-  suggestions: string[];
+  proceed: boolean;
+  proceed_reason: string;
+}
+
+// ─── Step 01.5b — Domain DNA extraction output ────────────────────────────────
+
+interface DomainExtraction {
+  domain_entities: { name: string; fields: string[] }[];
+  product_vocabulary: {
+    primary_object: string;
+    action_verb: string;
+    user_title: string;
+    owner_title?: string;
+    key_differentiator: string;
+  };
+  screen_content_hints: Record<string, string>;
+  what_makes_this_specific: string[];
+  features: {
+    explicit: string[];
+    inferred: string[];
+    irrelevant: string[];
+    on_demand: string[];
+  };
+  custom_features: unknown[];
+  tone_hints: string[];
   enriched_notes: string;
 }
 
@@ -192,6 +213,14 @@ interface QualityReport {
   fail_prompt_append?: string;
 }
 
+// ─── Map complexity_inferred → product brain tier key ────────────────────────
+
+function complexityToTier(c: "simple" | "mid" | "complex"): "mvp" | "startup" | "scale" {
+  if (c === "simple") return "mvp";
+  if (c === "complex") return "scale";
+  return "startup";
+}
+
 // ─── Supabase admin client (service role) ────────────────────────────────────
 
 function getAdminClient() {
@@ -216,7 +245,36 @@ async function createPipelineRun(projectId: string, userId: string, step01: unkn
 
 async function updateRun(runId: string, updates: Record<string, unknown>): Promise<void> {
   const supabase = getAdminClient();
-  await supabase.from("pipeline_runs").update(updates).eq("id", runId);
+  const { error } = await supabase.from("pipeline_runs").update(updates).eq("id", runId);
+  if (error) {
+    console.error(`[updateRun] ✗ Failed | keys=[${Object.keys(updates).join(",")}] | ${error.message}`);
+  }
+}
+
+// ─── Execution log helper ─────────────────────────────────────────────────────
+// Appends a structured log entry to execution_log[] using Postgres array append.
+// Fire-and-forget — never throws (log failures must not abort the pipeline).
+
+interface LogEntry {
+  step: string;
+  status: "ok" | "warn" | "error" | "skipped";
+  msg: string;
+  duration_ms?: number;
+  tokens?: { in: number; out: number };
+  meta?: Record<string, unknown>;
+}
+
+async function appendLog(runId: string, entry: LogEntry): Promise<void> {
+  try {
+    const supabase = getAdminClient();
+    const row: Record<string, unknown> = { ...entry, ts: new Date().toISOString() };
+    const { error } = await supabase.rpc("pipeline_run_append_log", { run_id: runId, entry: row });
+    if (error) {
+      console.error(`[appendLog] ✗ step=${entry.step} | ${error.message}`);
+    }
+  } catch (e) {
+    console.error(`[appendLog] ✗ step=${entry.step} | unexpected:`, e);
+  }
 }
 
 // ─── Step 09.5 — Structural Validation ───────────────────────────────────────
@@ -420,7 +478,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json() as RequestBody;
-    const { projectId, userId, s1, s2 } = body;
+    const { projectId, userId, s1, s2, pipelineRunId: existingRunId } = body;
 
     if (!projectId || !userId || !s1?.project_name) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -429,81 +487,182 @@ export async function POST(req: NextRequest) {
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const supabase = getAdminClient();
 
-    const step01Input = { s1, s2 };
-    runId = await createPipelineRun(projectId, userId, step01Input);
+    const industryKey = INDUSTRY_FILE[s1.industry]  ?? s1.industry.toLowerCase().replace(/\s+/g, "_");
+    const productKey  = PRODUCT_FILE[s1.app_type]   ?? s1.app_type.toLowerCase().replace(/\s+/g, "_");
 
-    console.log(`\n[pipeline] ▶ run ${runId} | ${s1.project_name} | ${s1.industry} × ${s1.app_type} | ${s1.complexity}`);
+    let classification: Classification;
+    let extraction: DomainExtraction;
 
-    // ══════════════════════════════════════════════════════════════════════════
-    // STEP 01.5 — AI Intent Parse (Haiku)
-    // ══════════════════════════════════════════════════════════════════════════
+    if (existingRunId) {
+      // ════════════════════════════════════════════════════════════════════════
+      // CONTINUE FROM CLASSIFY — steps 01–01.5c already done by /api/classify
+      // Load outputs from the existing pipeline_runs record.
+      // ════════════════════════════════════════════════════════════════════════
+      runId = existingRunId;
+      console.log(`\n[pipeline] ▶ continuing run ${runId} | ${s1.project_name} (classify already done)`);
 
-    const intentPrompt = `Parse this app idea and return structured intent JSON.
+      const { data: existingRun, error: loadErr } = await supabase
+        .from("pipeline_runs")
+        .select("step_015a_output, step_015b_output, step_015c_output")
+        .eq("id", runId)
+        .single();
 
-App: "${s1.project_name}"
-Industry: ${s1.industry}
-App Type: ${s1.app_type}
-Complexity: ${s1.complexity}
-Features selected: ${s1.features.length ? s1.features.join(", ") : "none"}
+      if (loadErr || !existingRun) {
+        return NextResponse.json({ error: `Could not load classify run: ${loadErr?.message ?? "not found"}` }, { status: 400 });
+      }
 
-User's Description:
-${s1.description || "(none)"}
+      classification = existingRun.step_015a_output as Classification;
+      extraction     = existingRun.step_015b_output as DomainExtraction;
 
-User's Notes:
-${s1.notes || "(none)"}
+      // Update the run record and mark as running again
+      await updateRun(runId, { status: "running" });
 
-Return ONLY raw JSON (no markdown):
-{
-  "user_types": [{"type": "string", "primary": bool}],
-  "app_structure": "single_sided|two_sided|multi_tenant",
-  "core_flows_detected": ["flow 1", "flow 2"],
-  "features_implied": {
-    "explicitly_mentioned": ["feature from description"],
-    "strongly_implied": ["implied feature"]
-  },
-  "complexity_signal": "confirm or contradict selected complexity",
-  "industry_signal": "confidence that description matches selected industry",
-  "tone_hints": ["tone word 1", "tone word 2"],
-  "mismatches": ["any mismatches between description and selections"],
-  "suggestions": ["suggested addition 1"],
-  "enriched_notes": "1-2 sentence summary that will be injected into generation context"
-}`;
+      appendLog(runId, {
+        step: "pipeline_resume",
+        status: "ok",
+        msg: `Resumed from classify | continuing from step 02 | complexity=${classification.complexity_inferred}`,
+        meta: { skipped: ["01", "01.5a", "01.5b"] },
+      });
 
-    console.log(`[step 01.5] Haiku intent parse…`);
-    const s015Start = Date.now();
-    const intentRes = await anthropic.messages.create({
-      model: HAIKU,
-      max_tokens: 800,
-      system: "You are a product intent parser. Return ONLY valid JSON. No markdown.",
-      messages: [{ role: "user", content: intentPrompt }],
-    });
-    const s015Duration = Date.now() - s015Start;
-    const intentRaw = intentRes.content[0].type === "text" ? intentRes.content[0].text : "{}";
+      console.log(`[pipeline] ✓ loaded classify outputs | complexity=${classification.complexity_inferred}`);
 
-    let parsedIntent: ParsedIntent;
-    try {
-      parsedIntent = JSON.parse(extractJson(intentRaw)) as ParsedIntent;
-    } catch {
-      parsedIntent = {
-        user_types: [{ type: "user", primary: true }],
-        app_structure: "single_sided",
-        core_flows_detected: [],
-        features_implied: { explicitly_mentioned: s1.features, strongly_implied: [] },
-        complexity_signal: "matches selection",
-        industry_signal: "high confidence",
-        tone_hints: [],
-        mismatches: [],
-        suggestions: [],
-        enriched_notes: s1.description,
+    } else {
+      // ════════════════════════════════════════════════════════════════════════
+      // FULL PIPELINE — run steps 01 through 01.5c in-line (backwards compat)
+      // ════════════════════════════════════════════════════════════════════════
+
+      const step01Input = {
+        s1,
+        s2,
+        brain_keys: {
+          industry_brain: industryKey,
+          product_brain:  productKey,
+          feature_modules: s1.features.map(featureToFile),
+        },
       };
+
+      runId = await createPipelineRun(projectId, userId, step01Input);
+      console.log(`\n[pipeline] ▶ run ${runId} | ${s1.project_name} | ${s1.industry} × ${s1.app_type}`);
+
+      appendLog(runId, {
+        step: "01",
+        status: "ok",
+        msg: `Form captured | industry=${industryKey} product=${productKey} features=[${s1.features.join(",")}]`,
+        meta: { industry: industryKey, product: productKey, feature_count: s1.features.length },
+      });
+
+      if (process.env.PIPELINE_STOP_AFTER === "step01") {
+        await updateRun(runId, { status: "stopped_step01", completed_at: new Date().toISOString() });
+        return NextResponse.json({ pipelineRunId: runId, stopped_at: "step01" });
+      }
+
+      // ── Step 01.5a — AI Classification (Haiku) ────────────────────────────
+      const classificationPrompt = `Validate these app selections against the description and return structured JSON.
+
+Description: "${s1.description}"
+
+User selected:
+- Industry: ${s1.industry}
+- App Type: ${s1.app_type}
+- Features selected: ${s1.features.length ? s1.features.join(", ") : "none"}
+
+Return JSON with exactly these keys:
+{
+  "industry_signal": { "detected": "string", "confidence": "high | medium | low", "keywords_matched": [], "user_selected": "${s1.industry}", "match": true | false },
+  "app_type_signal":  { "detected": "string", "confidence": "high | medium | low", "keywords_matched": [], "user_selected": "${s1.app_type}",  "match": true | false },
+  "complexity_inferred": "simple | mid | complex",
+  "complexity_reason": "string",
+  "app_structure": "single_sided | two_sided | multi_tenant",
+  "mismatches": [],
+  "proceed": true | false,
+  "proceed_reason": "string — only if proceed is false"
+}
+
+Complexity: simple=5-8 screens, mid=10-16 screens, complex=17+ screens.
+Set proceed: false if industry or app_type doesn't match description.`;
+
+      console.log(`[step 01.5a] Haiku classification…`);
+      const s015aStart = Date.now();
+      const classRes = await anthropic.messages.create({
+        model: HAIKU, max_tokens: 600,
+        system: "You are a product classification engine. Return ONLY valid JSON. No commentary. No markdown.",
+        messages: [{ role: "user", content: classificationPrompt }],
+      });
+      const s015aDuration = Date.now() - s015aStart;
+      const classRaw = classRes.content[0].type === "text" ? classRes.content[0].text : "{}";
+
+      try {
+        classification = JSON.parse(extractJson(classRaw)) as Classification;
+      } catch {
+        classification = {
+          industry_signal: { detected: s1.industry, confidence: "high", keywords_matched: [], user_selected: s1.industry, match: true },
+          app_type_signal:  { detected: s1.app_type,  confidence: "high", keywords_matched: [], user_selected: s1.app_type,  match: true },
+          complexity_inferred: "mid", complexity_reason: "Fallback",
+          app_structure: "single_sided", mismatches: [], proceed: true, proceed_reason: "",
+        };
+      }
+
+      console.log(`[step 01.5a] ✓ ${s015aDuration}ms | complexity=${classification.complexity_inferred} proceed=${classification.proceed}`);
+      await updateRun(runId, { step_015a_output: classification });
+      appendLog(runId, {
+        step: "01.5a", status: classification.proceed ? "ok" : "error",
+        msg: classification.proceed ? `Classified | complexity=${classification.complexity_inferred}` : `Blocked — ${classification.proceed_reason}`,
+        duration_ms: s015aDuration, tokens: { in: classRes.usage.input_tokens, out: classRes.usage.output_tokens },
+      });
+
+      if (process.env.PIPELINE_STOP_AFTER === "step015a") {
+        await updateRun(runId, { status: "stopped_step015a", completed_at: new Date().toISOString() });
+        return NextResponse.json({ pipelineRunId: runId, stopped_at: "step015a" });
+      }
+      if (!classification.proceed) {
+        await updateRun(runId, { status: "failed", error_log: { message: classification.proceed_reason, step: "01.5a" }, completed_at: new Date().toISOString() });
+        return NextResponse.json({ error: classification.proceed_reason, step: "01.5a", mismatches: classification.mismatches }, { status: 422 });
+      }
+
+      // ── Step 01.5b — Domain DNA Extraction (Haiku) ────────────────────────
+      const extractionPrompt = `Extract domain DNA for this product.
+Description: "${s1.description}" | Industry: ${s1.industry} | App Type: ${s1.app_type}
+Complexity: ${classification.complexity_inferred} | Features: ${s1.features.join(", ") || "none"}
+Available features: Authentication, Payments, Chat / Messaging, Notifications, Search & Filters, Maps / Location, Analytics / Dashboard, File Upload, Video / Calls
+
+Return JSON: { "domain_entities": [{"name":"","fields":[]}], "product_vocabulary": {"primary_object":"","action_verb":"","user_title":"","key_differentiator":""}, "screen_content_hints": {}, "what_makes_this_specific": [], "features": {"explicit":[],"inferred":[],"irrelevant":[],"on_demand":[]}, "custom_features": [], "tone_hints": [], "enriched_notes": "" }`;
+
+      console.log(`[step 01.5b] Haiku domain extraction…`);
+      const s015bStart = Date.now();
+      const extractRes = await anthropic.messages.create({
+        model: HAIKU, max_tokens: 1000,
+        system: "You are a product domain extraction engine. Return ONLY valid JSON. No commentary. No markdown.",
+        messages: [{ role: "user", content: extractionPrompt }],
+      });
+      const s015bDuration = Date.now() - s015bStart;
+      const extractRaw = extractRes.content[0].type === "text" ? extractRes.content[0].text : "{}";
+
+      try {
+        extraction = JSON.parse(extractJson(extractRaw)) as DomainExtraction;
+      } catch {
+        extraction = {
+          domain_entities: [], product_vocabulary: { primary_object: "", action_verb: "", user_title: "user", key_differentiator: s1.description },
+          screen_content_hints: {}, what_makes_this_specific: [],
+          features: { explicit: s1.features, inferred: [], irrelevant: [], on_demand: [] },
+          custom_features: [], tone_hints: [], enriched_notes: s1.description,
+        };
+      }
+
+      console.log(`[step 01.5b] ✓ ${s015bDuration}ms | entities=${extraction.domain_entities.length}`);
+      await updateRun(runId, { step_015b_output: extraction });
+      appendLog(runId, {
+        step: "01.5b", status: "ok",
+        msg: `Domain DNA extracted | entities=${extraction.domain_entities.length} hints=${Object.keys(extraction.screen_content_hints).length}`,
+        duration_ms: s015bDuration, tokens: { in: extractRes.usage.input_tokens, out: extractRes.usage.output_tokens },
+      });
+
+      if (process.env.PIPELINE_STOP_AFTER === "step015b") {
+        await updateRun(runId, { status: "stopped_step015b", completed_at: new Date().toISOString() });
+        return NextResponse.json({ pipelineRunId: runId, stopped_at: "step015b" });
+      }
+
     }
-
-    console.log(`[step 01.5] ✓ ${s015Duration}ms | in:${intentRes.usage.input_tokens} out:${intentRes.usage.output_tokens}`);
-    console.log(`[step 01.5] structure=${parsedIntent.app_structure} | flows=${parsedIntent.core_flows_detected.length} | enriched="${parsedIntent.enriched_notes?.slice(0, 80)}…"`);
-
-    await updateRun(runId, {
-      step_015_output: parsedIntent,
-    });
+    // Continue directly from 01.5b to step 02
 
     // ══════════════════════════════════════════════════════════════════════════
     // STEP 02 — Theme/Font Dictionary Pick
@@ -522,31 +681,46 @@ Return ONLY raw JSON (no markdown):
     // STEP 03 — Structured User Context
     // ══════════════════════════════════════════════════════════════════════════
 
+    const tierKey = complexityToTier(classification.complexity_inferred);
+
     const step03 = {
       project: {
         name: s1.project_name,
         description: s1.description,
-        enriched_notes: parsedIntent.enriched_notes,
+        enriched_notes: extraction.enriched_notes,
+        domain: {
+          entities: extraction.domain_entities,
+          vocabulary: extraction.product_vocabulary,
+          screen_hints: extraction.screen_content_hints,
+          what_makes_this_specific: extraction.what_makes_this_specific,
+        },
         project_type: s1.project_type,
       },
       visual: step02,
       intent: {
-        user_types: parsedIntent.user_types,
-        app_structure: parsedIntent.app_structure,
-        tone_hints: parsedIntent.tone_hints,
-        features_implied: parsedIntent.features_implied,
+        app_structure: classification.app_structure,
+        complexity_inferred: classification.complexity_inferred,
+        tone_hints: extraction.tone_hints,
+        features: extraction.features,
+        custom_features: extraction.custom_features,
       },
       brain_keys: {
-        industry_brain: INDUSTRY_FILE[s1.industry] ?? s1.industry.toLowerCase().replace(/\s+/g, "_"),
-        product_brain:  PRODUCT_FILE[s1.app_type]  ?? s1.app_type.toLowerCase().replace(/\s+/g, "_"),
+        industry_brain: industryKey,
+        product_brain:  productKey,
         feature_modules: s1.features.map(featureToFile),
-        complexity_tier: s1.complexity.toLowerCase(),
+        complexity_tier: tierKey,
       },
       validation: "PASS",
     };
 
     console.log(`[step 03] ✓ brain_keys: industry=${step03.brain_keys.industry_brain} product=${step03.brain_keys.product_brain} modules=[${step03.brain_keys.feature_modules.join(",")}]`);
     await updateRun(runId, { step_03_output: step03 });
+    appendLog(runId, {
+      step: "03",
+      status: "ok",
+      msg: `Context structured | industry=${step03.brain_keys.industry_brain} product=${step03.brain_keys.product_brain} tier=${tierKey} modules=[${step03.brain_keys.feature_modules.join(",")}]`,
+      meta: { brain_keys: step03.brain_keys },
+    });
 
     // ══════════════════════════════════════════════════════════════════════════
     // STEP 04 — Brain Files Loaded
@@ -582,12 +756,17 @@ Return ONLY raw JSON (no markdown):
     };
     console.log(`[step 04] ✓ industry=${step04.industry_brain_loaded} product=${step04.product_brain_loaded} theme=${step04.theme_tokens_loaded} modules=${step04.feature_modules_loaded}`);
     await updateRun(runId, { step_04_output: step04 });
+    appendLog(runId, {
+      step: "04",
+      status: step04.industry_brain_loaded && step04.product_brain_loaded ? "ok" : "warn",
+      msg: `Brains loaded | industry=${step04.industry_brain_loaded} product=${step04.product_brain_loaded} theme=${step04.theme_tokens_loaded} modules=${step04.feature_modules_loaded.length}`,
+      meta: step04,
+    });
 
     // ══════════════════════════════════════════════════════════════════════════
     // STEP 05 — Feature Module Merge (screens dedup)
     // ══════════════════════════════════════════════════════════════════════════
 
-    const tierKey = s1.complexity.toLowerCase() as "mvp" | "startup" | "scale";
     const tiers = (productBrain?.tiers as Record<string, unknown> | undefined) ?? {};
     const tierData = (tiers[tierKey] as Record<string, unknown> | undefined) ?? {};
     const baseScreens = (tierData.screens as ScreenDef[] | undefined) ?? [];
@@ -623,6 +802,12 @@ Return ONLY raw JSON (no markdown):
     console.log(`[step 05] ✓ base=${step05.base_screen_count} + modules=${step05.module_screens_added} = total=${step05.total_screens}`);
     console.log(`[step 05]   screens: ${screenIds.join(", ")}`);
     await updateRun(runId, { step_05_output: step05 });
+    appendLog(runId, {
+      step: "05",
+      status: "ok",
+      msg: `Screen merge complete | base=${step05.base_screen_count} + modules=${step05.module_screens_added} = total=${step05.total_screens}`,
+      meta: { total_screens: step05.total_screens, screen_ids: screenIds },
+    });
 
     // ══════════════════════════════════════════════════════════════════════════
     // STEP 06 — Context Resolution
@@ -674,6 +859,12 @@ Return ONLY raw JSON (no markdown):
     };
     console.log(`[step 06] ✓ copy="${resolvedCopy.headline}" | tabBar=[${tabBar.join(",")}] | tone="${typeof step06.industry_tone === 'object' ? (step06.industry_tone as {primary?: string}).primary ?? '' : ''}"`);
     await updateRun(runId, { step_06_output: step06 });
+    appendLog(runId, {
+      step: "06",
+      status: "ok",
+      msg: `Context resolved | headline="${resolvedCopy.headline}" cta="${resolvedCopy.cta}" tabBar=[${tabBar.join(",")}]`,
+      meta: { headline: resolvedCopy.headline, cta: resolvedCopy.cta, tab_bar: tabBar, theme: s2.style_pack },
+    });
 
     // ══════════════════════════════════════════════════════════════════════════
     // STEP 07 — Full Generation Context Object
@@ -683,11 +874,11 @@ Return ONLY raw JSON (no markdown):
       project: {
         name: s1.project_name,
         description: s1.description,
-        enriched_notes: parsedIntent.enriched_notes,
-        complexity: s1.complexity,
+        enriched_notes: extraction.enriched_notes,
+        complexity: classification.complexity_inferred,
         project_type: s1.project_type,
-        user_types: parsedIntent.user_types.map((u) => u.type),
-        app_structure: parsedIntent.app_structure,
+        app_structure: classification.app_structure,
+        domain: step03.project.domain,
       },
       industry: {
         id: step03.brain_keys.industry_brain,
@@ -705,12 +896,12 @@ Return ONLY raw JSON (no markdown):
         components:    (productBrain?.components as string[] | undefined) ?? [],
         icon_pack:     productBrain?.icon_pack,
         layout:        productBrain?.layout ?? { iphone: step06.layout.iphone, nav_items: tabBar },
-        nav_active_states: step06.nav_active_states, // explicit per-screen tab mapping
+        nav_active_states: step06.nav_active_states,
         constraints:   step06.product_constraints,
-        states:        productBrain?.states, // empty_states, loading_states, error_flows, edge_cases
-        // Only the selected tier (not all 3 tiers — keeps context lean)
+        states:        productBrain?.states,
+        // Only the inferred tier (not all 3 — keeps context lean)
         tier: {
-          name:                 s1.complexity,
+          name:                 classification.complexity_inferred,
           description:          tierData.description,
           primary_flows:        tierData.primary_flows,
           secondary_flows:      tierData.secondary_flows,
@@ -749,6 +940,12 @@ Return ONLY raw JSON (no markdown):
     };
     console.log(`[step 07] ✓ context assembled | ${step07.char_count} chars (~${step07.estimated_tokens} tokens) | ${step07.screen_count} screens`);
     await updateRun(runId, { step_07_output: { ...step07, preview: contextJson.slice(0, 500) } });
+    appendLog(runId, {
+      step: "07",
+      status: "ok",
+      msg: `Generation context assembled | ${step07.char_count} chars (~${step07.estimated_tokens} tokens) | ${step07.screen_count} screens`,
+      meta: { char_count: step07.char_count, estimated_tokens: step07.estimated_tokens, screen_count: step07.screen_count },
+    });
 
     // ══════════════════════════════════════════════════════════════════════════
     // STEP 08 — Screen Generation (Sonnet) — BATCH mode
@@ -889,6 +1086,13 @@ IMPORTANT: You MUST output all ${batch.length} screens listed above. Do not stop
     step08Html = finalHtml;
     await updateRun(runId, { step_08_html: step08Html, retry_count: retryCount });
     console.log(`[step 08] ✓ all ${batches.length} batch(es) merged | total chars: ${finalHtml.length} | total tokens: in=${s08Tokens.in} out=${s08Tokens.out}`);
+    appendLog(runId, {
+      step: "08",
+      status: "ok",
+      msg: `HTML generation complete | ${batches.length} batch(es) | ${finalHtml.length} chars`,
+      tokens: { in: s08Tokens.in, out: s08Tokens.out },
+      meta: { batch_count: batches.length, html_chars: finalHtml.length, calls: s08Tokens.calls },
+    });
 
     // ══════════════════════════════════════════════════════════════════════════
     // STEP 09.5 — Structural Validation (code-only)
@@ -898,6 +1102,12 @@ IMPORTANT: You MUST output all ${batch.length} screens listed above. Do not stop
     console.log(`[step 09.5] ${validation.result} | found=${validation.screen_count_found}/${validation.screen_count_expected} | ${validation.passed}/${validation.total} checks`);
     if (validation.missing_screens.length > 0) console.log(`[step 09.5] missing: ${validation.missing_screens.join(", ")}`);
     await updateRun(runId, { step_095_output: validation });
+    appendLog(runId, {
+      step: "09.5",
+      status: validation.result === "PASS" ? "ok" : "warn",
+      msg: `Structural validation ${validation.result} | found=${validation.screen_count_found}/${validation.screen_count_expected} screens | ${validation.passed}/${validation.total} checks passed${validation.missing_screens.length ? ` | missing: ${validation.missing_screens.join(",")}` : ""}`,
+      meta: { result: validation.result, found: validation.screen_count_found, expected: validation.screen_count_expected, missing: validation.missing_screens, runtime_ms: validation.runtime_ms },
+    });
 
     // On structural failure: generate missing screens as a patch batch
     if (validation.result === "FAIL" && validation.missing_screens.length > 0 && retryCount === 0) {
@@ -975,6 +1185,14 @@ Output ONLY the <div class="screen"> elements. All style="display:none". No head
     console.log(`[step 09.7] ✓ ${s097Duration}ms | in:${qualityRes.usage.input_tokens} out:${qualityRes.usage.output_tokens} | score=${qualityReport.score} result=${qualityReport.result}`);
     if (qualityReport.warnings.length > 0) console.log(`[step 09.7] warnings: ${qualityReport.warnings.join("; ")}`);
     await updateRun(runId, { step_097_output: qualityReport });
+    appendLog(runId, {
+      step: "09.7",
+      status: qualityReport.result === "PASS" ? "ok" : qualityReport.result === "WARN" ? "warn" : "error",
+      msg: `UI quality check ${qualityReport.result} | score=${qualityReport.score}${qualityReport.warnings.length ? ` | warnings: ${qualityReport.warnings.join("; ")}` : ""}`,
+      duration_ms: s097Duration,
+      tokens: { in: qualityRes.usage.input_tokens, out: qualityRes.usage.output_tokens },
+      meta: { score: qualityReport.score, result: qualityReport.result, warnings: qualityReport.warnings },
+    });
 
     // If quality fails, trigger targeted fix (step 09.8 handles this below)
     // No full regeneration on quality fail — use surgical patch instead
@@ -1022,6 +1240,14 @@ ${finalHtml.slice(0, 50000)}`;
       }
       console.log(`[step 09.8] ✓ ${s098Duration}ms | in:${fixRes.usage.input_tokens} out:${fixRes.usage.output_tokens}`);
       await updateRun(runId, { step_098_html: step098Html });
+      appendLog(runId, {
+        step: "09.8",
+        status: "ok",
+        msg: `Targeted fix applied | ${s098Duration}ms`,
+        duration_ms: s098Duration,
+        tokens: { in: fixRes.usage.input_tokens, out: fixRes.usage.output_tokens },
+        meta: { fix_applied: !!step098Html, failing_checks: failingChecks.length },
+      });
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -1048,10 +1274,9 @@ ${finalHtml.slice(0, 50000)}`;
         description: s1.description,
         industry: s1.industry,
         app_type: s1.app_type,
-        complexity: s1.complexity,
+        complexity_inferred: classification.complexity_inferred,
         features: s1.features,
-        notes: s1.notes,
-        enriched_notes: parsedIntent.enriched_notes,
+        enriched_notes: extraction.enriched_notes,
         platform: ["iOS"],
         project_type: s1.project_type,
         created_at: new Date().toISOString().slice(0, 10),
@@ -1107,13 +1332,27 @@ ${finalHtml.slice(0, 50000)}`;
       duration_ms:   totalDuration,
       completed_at:  new Date().toISOString(),
       total_tokens: {
-        step_015: { in: intentRes.usage.input_tokens, out: intentRes.usage.output_tokens },
+        step_015a: existingRunId ? "loaded_from_classify" : "ran_inline",
+        step_015b: existingRunId ? "loaded_from_classify" : "ran_inline",
         step_08:  s08Tokens,
         step_097: { in: qualityRes.usage.input_tokens, out: qualityRes.usage.output_tokens },
       },
     });
 
     console.log(`\n[pipeline] ✓ COMPLETE | ${runId} | ${totalDuration}ms | ${allScreens.length} screens | quality=${qualityReport.score}`);
+
+    appendLog(runId, {
+      step: "complete",
+      status: "ok",
+      msg: `Pipeline complete | ${totalDuration}ms | ${allScreens.length} screens | quality=${qualityReport.score} (${qualityReport.result})`,
+      duration_ms: totalDuration,
+      meta: {
+        screen_count: allScreens.length,
+        quality_score: qualityReport.score,
+        quality_result: qualityReport.result,
+        retry_count: retryCount,
+      },
+    });
 
     return NextResponse.json({
       pipelineRunId: runId,
@@ -1129,6 +1368,11 @@ ${finalHtml.slice(0, 50000)}`;
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error("[pipeline] ✗ ERROR:", message);
     if (runId) {
+      appendLog(runId, {
+        step: "error",
+        status: "error",
+        msg: message,
+      });
       await updateRun(runId, {
         status: "failed",
         error_log: { message, timestamp: new Date().toISOString() },

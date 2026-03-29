@@ -105,5 +105,9 @@
       "case": "Magic link clicked on different device than requested",
       "ui": "Show warning: 'This link was opened on a different device'. Options: 'Continue anyway' or 'Request a new link'. Do not auto-approve cross-device without acknowledgement."
     }
-  ]
+  ],
+  "priority": "primary",
+  "default_classification": "explicit",
+  "always_required": true,
+  "classification_note": "Always primary \u2014 every app needs auth. Usually explicit but inferred if not selected."
 }

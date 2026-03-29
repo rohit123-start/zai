@@ -95,5 +95,9 @@
       "case": "Call participant uses a very slow device (high CPU)",
       "ui": "Auto-reduce received video quality for that participant. Their feed stays visible but at lower resolution. Never cause their app to crash by sending too high a stream."
     }
-  ]
+  ],
+  "priority": "secondary",
+  "default_classification": "on_demand",
+  "always_required": false,
+  "classification_note": "Secondary. Inferred when description mentions 'video', 'call', 'telehealth', 'virtual', 'live session'."
 }

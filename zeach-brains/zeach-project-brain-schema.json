@@ -1,0 +1,193 @@
+{
+  "version": "1.0",
+  "description": "Schema for the Project Brain produced at Step 7.8. This is the locked design spec that every screen generation call reads. Stored against project_id in the database.",
+  "schema": {
+    "project_id": "string \u2014 unique project identifier",
+    "project_name": "string \u2014 from context.project.name",
+    "created_at": "ISO 8601 timestamp",
+    "design_system": {
+      "colors": {
+        "background": "hex \u2014 from context.theme.background",
+        "primary": "hex \u2014 from context.theme.primary",
+        "primary_light": "hex",
+        "primary_dark": "hex",
+        "surface": "hex",
+        "surface2": "hex",
+        "border": "hex",
+        "text": "hex",
+        "text_muted": "hex",
+        "text_inverse": "hex",
+        "usage_rules": {
+          "primary": "string \u2014 when to use primary color",
+          "surface": "string \u2014 when to use surface",
+          "text_muted": "string \u2014 when to use text_muted"
+        }
+      },
+      "typography": {
+        "h1": "string \u2014 font, size, weight, line-height, use case",
+        "h2": "string",
+        "h3": "string",
+        "body": "string",
+        "label": "string",
+        "caption": "string"
+      },
+      "component_registry": {
+        "description": "Complete CSS definitions for every component in context.product.components. Locked. Every screen generation call receives this as a locked style block.",
+        "components": {
+          "[ComponentName]": "string \u2014 complete CSS class definition"
+        }
+      },
+      "buttons": {
+        "primary": "string \u2014 complete CSS definition",
+        "secondary": "string",
+        "ghost": "string",
+        "destructive": "string"
+      },
+      "spacing": {
+        "screen_padding": "string \u2014 horizontal padding value",
+        "card_padding": "string",
+        "section_gap": "string",
+        "item_gap": "string"
+      },
+      "animation": {
+        "speed": "string \u2014 CSS duration value",
+        "easing": "string \u2014 CSS easing function",
+        "hover_card": "string \u2014 translateY + shadow rule",
+        "button_active": "string \u2014 scale rule"
+      }
+    },
+    "copy_guide": {
+      "cta_primary": "string \u2014 exact CTA label from context.industry.copy.cta",
+      "home_headline": "string \u2014 exact headline from context.industry.copy.headline",
+      "tone_voice": "string \u2014 tone description from context.industry.tone",
+      "avoid": "array \u2014 words and patterns to never use",
+      "empty_states": {
+        "[screen_id]": "string \u2014 exact empty state copy"
+      },
+      "domain_vocabulary": {
+        "primary_object": "string \u2014 what the main entity is called",
+        "action_verb": "string \u2014 primary action word",
+        "user_title": "string \u2014 what users are called"
+      }
+    },
+    "screen_plan": {
+      "[screen_id]": "string \u2014 plain English description of what this screen shows and how it's laid out, informed by domain DNA"
+    },
+    "generation_queue": {
+      "primary": "array of screen_ids \u2014 generate first in background",
+      "secondary": "array of screen_ids \u2014 generate after primary",
+      "on_demand_features": "array of feature_ids \u2014 generate only when user navigates there"
+    },
+    "custom_screens": {
+      "description": "All screens not in the archetype brain. Two sources: (1) custom features with screen_needed=true extracted from notes at Step 1.5b, (2) screens requested post-creation via natural language or broken link detection.",
+      "fields": [
+        "id",
+        "name",
+        "priority",
+        "source",
+        "generation_priority",
+        "purpose",
+        "entities",
+        "skeleton",
+        "note_for_generation"
+      ],
+      "source_values": [
+        "user_notes_step_1_5b",
+        "post_creation_request",
+        "broken_link_detection"
+      ]
+    },
+    "layout": {
+      "iphone": "object \u2014 from context.product.layout.iphone",
+      "ipad": "object \u2014 from context.product.layout.ipad",
+      "desktop": "object \u2014 from context.product.layout.desktop"
+    },
+    "constraints": {
+      "product_avoid": "array \u2014 from context.product.constraints.avoid",
+      "product_enforce": "array \u2014 from context.product.constraints.enforce",
+      "industry_avoid": "array \u2014 from context.industry.constraints.avoid",
+      "industry_enforce": "array \u2014 from context.industry.constraints.enforce"
+    },
+    "ux_norms": "array \u2014 from context.industry.ux_norms",
+    "trust_signals": "array \u2014 from context.industry.trust_signals",
+    "custom_features": {
+      "description": "Custom features extracted from user notes by Step 1.5b. Priority = explicit \u2014 same as user-selected checkbox features.",
+      "priority": "explicit",
+      "source": "user_notes",
+      "screen_needed_false": {
+        "handling": "note_for_generation added to relevant screens in screen_plan",
+        "example": "screen_plan.checkout += 'Show GST line item. Display tax-inclusive and tax-exclusive amounts.'"
+      },
+      "screen_needed_true": {
+        "handling": "Added to custom_screens array. generation_priority = primary. Generates in primary batch alongside explicit checkbox features.",
+        "fields": [
+          "name",
+          "priority",
+          "source",
+          "suggested_screen_id",
+          "generation_priority",
+          "entities_needed",
+          "note_for_generation"
+        ]
+      }
+    },
+    "visual_dna": {
+      "description": "Visual DNA extracted from user-uploaded inspiration or reference images by Step 1.5v. Only present if user uploaded images on Screen 2. Highest priority visual signal \u2014 overrides brain layout defaults. Does not override theme color tokens.",
+      "trigger": "Only present if user uploaded images on Screen 2",
+      "priority": "HIGHEST visual signal \u2014 overrides brain layout defaults",
+      "does_not_override": [
+        "theme color tokens",
+        "product.constraints",
+        "industry.ux_norms"
+      ],
+      "fields": {
+        "background_treatment": "string",
+        "typography_feel": "string",
+        "card_style": "string",
+        "spacing_feel": "string",
+        "ui_density": "low | medium | high",
+        "corner_radius": "string",
+        "elevation_style": "string",
+        "nav_style": "string",
+        "image_treatment": "string",
+        "interaction_feel": "string",
+        "reference_products": "array of strings",
+        "what_to_replicate": "array \u2014 applied as positive design direction",
+        "what_to_avoid": "array \u2014 applied as hard constraints",
+        "generation_notes": "string \u2014 primary visual direction for generation engine"
+      },
+      "existing_app_specific": {
+        "applies": "boolean",
+        "preserve_patterns": "array \u2014 patterns to keep from existing app",
+        "modernise_patterns": "array \u2014 patterns to update"
+      }
+    }
+  },
+  "usage": {
+    "stored_at": "Step 7.8 \u2014 after design system generation",
+    "read_by": "Step 8 screen generation \u2014 one call per screen",
+    "not_sent": "Raw brain files are NOT sent to screen generation. Project Brain only.",
+    "regenerate_when": "User edits description or requests a design system refresh",
+    "screen_generation_receives": [
+      "project_brain.design_system",
+      "project_brain.copy_guide",
+      "project_brain.screen_plan[screen_id]",
+      "project_brain.layout",
+      "project_brain.constraints",
+      "project_brain.ux_norms",
+      "screen_definition (id, priority, purpose, visual, entities, actions, skeleton)"
+    ],
+    "priority_hierarchy": {
+      "1_explicit": "User-selected checkbox features + custom features from notes \u2014 HIGHEST \u2014 both are direct user intent",
+      "2_inferred": "AI-detected from description",
+      "3_defaults": "Brain archetype defaults",
+      "4_on_demand": "Generate only when navigated to"
+    },
+    "priority_hierarchy_visual": {
+      "1_visual_dna": "Uploaded inspiration/reference images \u2014 HIGHEST \u2014 overrides layout defaults",
+      "2_selected_theme": "User-selected theme \u2014 colors and fonts",
+      "3_industry_visual": "Industry visual language from brain",
+      "4_archetype_layout": "Archetype layout defaults"
+    }
+  }
+}

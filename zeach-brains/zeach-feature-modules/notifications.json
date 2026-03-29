@@ -73,5 +73,9 @@
       "case": "Notification for action completed by a different device",
       "ui": "Still show notification if it carries new information (e.g. order shipped). Suppress notification if it is purely confirmatory of an action the user just took on this device (e.g. 'login successful' after login)."
     }
-  ]
+  ],
+  "priority": "secondary",
+  "default_classification": "inferred",
+  "always_required": false,
+  "classification_note": "Secondary. Almost always inferred \u2014 most apps need notifications. Explicit if user selects."
 }

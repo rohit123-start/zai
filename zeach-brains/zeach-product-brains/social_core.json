@@ -118,910 +118,638 @@
       "Report filed by User against Post, Comment, or User"
     ]
   },
-  "tiers": {
-    "mvp": {
-      "tier": "MVP",
-      "description": "Core social \u2014 feed, post, follow, like, comment, profile.",
-      "screen_count": 8,
-      "primary_flows": [
-        "Sign up \u2192 set up profile \u2192 follow users \u2192 view feed \u2192 interact with posts",
-        "Create post \u2192 add media \u2192 write caption \u2192 publish \u2192 view engagement",
-        "Discover users \u2192 view profile \u2192 follow \u2192 see their posts in feed"
+  "screens": [
+    {
+      "id": "feed",
+      "name": "Feed / Home",
+      "priority": "primary",
+      "purpose": "Chronological or algorithmic feed of posts from followed users",
+      "visual": "Industry brain visual. Post cards. Like, comment, share actions. Story row at top.",
+      "entities": [
+        "Post",
+        "User",
+        "Story"
       ],
-      "secondary_flows": [
-        "Save post to collection",
-        "Share post",
-        "Report post or user",
-        "Search users or content"
+      "actions": [
+        "View posts",
+        "Like post",
+        "Comment",
+        "Share",
+        "Save",
+        "Follow from feed",
+        "View story"
       ],
-      "screens": [
-        {
-          "id": "feed",
-          "name": "Feed / Home",
-          "purpose": "Chronological or algorithmic feed of posts from followed users",
-          "visual": "Industry brain visual. Post cards. Like, comment, share actions. Story row at top.",
-          "entities": [
-            "Post",
-            "User",
-            "Story"
-          ],
-          "actions": [
-            "View posts",
-            "Like post",
-            "Comment",
-            "Share",
-            "Save",
-            "Follow from feed",
-            "View story"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['Social & Community'].headline}}",
-            "cta": "{{industry.copy_by_app_type['Social & Community'].cta}}",
-            "empty_state": "Follow people to see their posts here."
-          }
-        },
-        {
-          "id": "discover",
-          "name": "Discover / Explore",
-          "purpose": "Discover new users and content by interest or trending",
-          "visual": "Grid of posts. Trending topics. Suggested users row.",
-          "entities": [
-            "Post",
-            "User"
-          ],
-          "actions": [
-            "Browse trending",
-            "View post detail",
-            "Follow user",
-            "Search"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['Social & Community'].headline}}",
-            "cta": "Explore",
-            "empty_state": "Nothing trending yet \u2014 check back soon."
-          }
-        },
-        {
-          "id": "post_detail",
-          "name": "Post Detail",
-          "purpose": "Full post with comments and engagement",
-          "visual": "Post media full view. Caption. Like and comment counts. Comment thread below.",
-          "entities": [
-            "Post",
-            "Comment",
-            "Like",
-            "User"
-          ],
-          "actions": [
-            "View full post",
-            "Like",
-            "Comment",
-            "Reply to comment",
-            "Like comment",
-            "Save",
-            "Share",
-            "Report"
-          ]
-        },
-        {
-          "id": "create_post",
-          "name": "Create Post",
-          "purpose": "Upload media and write post",
-          "visual": "Camera or gallery picker. Caption input. Tag users. Location. Publish CTA.",
-          "entities": [
-            "Post",
-            "User"
-          ],
-          "actions": [
-            "Upload photo or video",
-            "Write caption",
-            "Tag users",
-            "Add location",
-            "Publish",
-            "Save draft"
-          ]
-        },
-        {
-          "id": "profile",
-          "name": "User Profile",
-          "purpose": "User's posts, followers, following, and bio",
-          "visual": "Avatar. Bio. Stats (posts, followers, following). Posts grid. Follow CTA.",
-          "entities": [
-            "User",
-            "Post",
-            "Follow"
-          ],
-          "actions": [
-            "View posts grid",
-            "Follow or unfollow",
-            "Message user",
-            "View followers",
-            "View following",
-            "Share profile",
-            "Report"
-          ]
-        },
-        {
-          "id": "own_profile",
-          "name": "Own Profile",
-          "purpose": "Logged-in user's own profile and collections",
-          "visual": "Avatar. Bio. Stats. Posts grid. Collections tab. Edit profile CTA.",
-          "entities": [
-            "User",
-            "Post",
-            "Collection"
-          ],
-          "actions": [
-            "Edit profile",
-            "View posts",
-            "View collections",
-            "View saved",
-            "Share profile"
-          ]
-        },
-        {
-          "id": "notifications",
-          "name": "Notifications",
-          "purpose": "All social activity \u2014 likes, comments, follows, mentions",
-          "visual": "Activity list. User avatars. Post thumbnails. Unread indicator.",
-          "entities": [
-            "Notification",
-            "User",
-            "Post"
-          ],
-          "actions": [
-            "View all activity",
-            "Tap to navigate",
-            "Mark read",
-            "Follow back from notification"
-          ]
-        },
-        {
-          "id": "profile_settings",
-          "name": "Profile & Settings",
-          "purpose": "Account settings and privacy",
-          "visual": "Settings list. Privacy controls. Account settings. Log out.",
-          "entities": [
-            "User"
-          ],
-          "actions": [
-            "Edit profile",
-            "Privacy settings",
-            "Notification settings",
-            "Block list",
-            "Log out"
-          ]
-        }
-      ],
-      "interaction_patterns": [
-        "Double tap to like \u2014 heart animation on post",
-        "Pull to refresh on feed",
-        "Story row at top of feed \u2014 circular avatars",
-        "Follow button toggles to Following with check icon",
-        "Comment like \u2014 heart icon on comment",
-        "Long press on post to access quick save or share",
-        "Swipe up on story to react or reply"
-      ]
+      "skeleton": {
+        "hero": "story_row",
+        "sections": [
+          "post_stack"
+        ],
+        "card_count": 5
+      },
+      "copy": {
+        "headline": "{{industry.copy_by_app_type['Social & Community'].headline}}",
+        "cta": "{{industry.copy_by_app_type['Social & Community'].cta}}",
+        "empty_state": "Follow people to see their posts here."
+      },
+      "generation_priority": 1
     },
-    "startup": {
-      "tier": "Startup",
-      "description": "Full social platform with stories, DMs, groups, events, and content collections.",
-      "screen_count": 15,
-      "primary_flows": [
-        "All MVP flows",
-        "Create story \u2192 add media or text \u2192 publish \u2192 view story views \u2192 expires in 24h",
-        "Find or create group \u2192 join \u2192 post in group \u2192 interact with group members",
-        "Send DM \u2192 chat with user \u2192 share post in DM",
-        "Create event \u2192 invite followers \u2192 track RSVPs \u2192 post updates"
+    {
+      "id": "post_detail",
+      "name": "Post Detail",
+      "priority": "primary",
+      "purpose": "Full post with comments and engagement",
+      "visual": "Post media full view. Caption. Like and comment counts. Comment thread below.",
+      "entities": [
+        "Post",
+        "Comment",
+        "Like",
+        "User"
       ],
-      "secondary_flows": [
-        "All MVP secondary flows",
+      "actions": [
+        "View full post",
+        "Like",
+        "Comment",
+        "Reply to comment",
+        "Like comment",
+        "Save",
+        "Share",
+        "Report"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 2
+    },
+    {
+      "id": "create_post",
+      "name": "Create Post",
+      "priority": "primary",
+      "purpose": "Upload media and write post",
+      "visual": "Camera or gallery picker. Caption input. Tag users. Location. Publish CTA.",
+      "entities": [
+        "Post",
+        "User"
+      ],
+      "actions": [
+        "Upload photo or video",
+        "Write caption",
+        "Tag users",
+        "Add location",
+        "Publish",
+        "Save draft"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "field_stack",
+          "cta"
+        ],
+        "card_count": 0
+      },
+      "generation_priority": 3
+    },
+    {
+      "id": "profile",
+      "name": "User Profile",
+      "priority": "primary",
+      "purpose": "User's posts, followers, following, and bio",
+      "visual": "Avatar. Bio. Stats (posts, followers, following). Posts grid. Follow CTA.",
+      "entities": [
+        "User",
+        "Post",
+        "Follow"
+      ],
+      "actions": [
+        "View posts grid",
+        "Follow or unfollow",
+        "Message user",
+        "View followers",
+        "View following",
+        "Share profile",
+        "Report"
+      ],
+      "skeleton": {
+        "hero": "profile_header",
+        "sections": [
+          "stats_row",
+          "grid_or_list"
+        ],
+        "card_count": 0
+      },
+      "generation_priority": 4
+    },
+    {
+      "id": "discover",
+      "name": "Discover / Explore",
+      "priority": "primary",
+      "purpose": "Discover new users and content by interest or trending",
+      "visual": "Grid of posts. Trending topics. Suggested users row.",
+      "entities": [
+        "Post",
+        "User"
+      ],
+      "actions": [
+        "Browse trending",
+        "View post detail",
+        "Follow user",
+        "Search"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "card_stack"
+        ],
+        "card_count": 5
+      },
+      "copy": {
+        "headline": "{{industry.copy_by_app_type['Social & Community'].headline}}",
+        "cta": "Explore",
+        "empty_state": "Nothing trending yet \u2014 check back soon."
+      },
+      "generation_priority": 5
+    },
+    {
+      "id": "own_profile",
+      "name": "Own Profile",
+      "priority": "secondary",
+      "purpose": "Logged-in user's own profile and collections",
+      "visual": "Avatar. Bio. Stats. Posts grid. Collections tab. Edit profile CTA.",
+      "entities": [
+        "User",
+        "Post",
+        "Collection"
+      ],
+      "actions": [
+        "Edit profile",
+        "View posts",
+        "View collections",
+        "View saved",
+        "Share profile"
+      ],
+      "skeleton": {
+        "hero": "profile_header",
+        "sections": [
+          "stats_row",
+          "grid_or_list"
+        ],
+        "card_count": 0
+      },
+      "generation_priority": 6
+    },
+    {
+      "id": "notifications",
+      "name": "Notifications",
+      "priority": "secondary",
+      "purpose": "All social activity \u2014 likes, comments, follows, mentions",
+      "visual": "Activity list. User avatars. Post thumbnails. Unread indicator.",
+      "entities": [
+        "Notification",
+        "User",
+        "Post"
+      ],
+      "actions": [
+        "View all activity",
+        "Tap to navigate",
+        "Mark read",
+        "Follow back from notification"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 7
+    },
+    {
+      "id": "profile_settings",
+      "name": "Profile & Settings",
+      "priority": "secondary",
+      "purpose": "Account settings and privacy",
+      "visual": "Settings list. Privacy controls. Account settings. Log out.",
+      "entities": [
+        "User"
+      ],
+      "actions": [
+        "Edit profile",
+        "Privacy settings",
+        "Notification settings",
+        "Block list",
+        "Log out"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "section_group",
+          "section_group"
+        ],
+        "card_count": 0
+      },
+      "generation_priority": 8
+    },
+    {
+      "id": "stories",
+      "name": "Stories",
+      "priority": "secondary",
+      "purpose": "Create and view ephemeral 24-hour stories",
+      "visual": "Full-screen story view. Progress bar. Reaction bar. Reply input.",
+      "entities": [
+        "Story",
+        "User"
+      ],
+      "actions": [
+        "View story",
+        "React to story",
+        "Reply to story",
+        "Swipe to next",
+        "View who watched",
+        "Skip story"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 9
+    },
+    {
+      "id": "create_story",
+      "name": "Create Story",
+      "priority": "secondary",
+      "purpose": "Capture or upload content for story",
+      "visual": "Camera. Media picker. Text and sticker overlays. Music. Publish CTA.",
+      "entities": [
+        "Story",
+        "User"
+      ],
+      "actions": [
+        "Capture photo or video",
+        "Upload media",
+        "Add text overlay",
+        "Add sticker",
+        "Add music",
+        "Publish story"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 10
+    },
+    {
+      "id": "messages",
+      "name": "Messages / DMs",
+      "priority": "secondary",
+      "purpose": "Direct messaging between users",
+      "visual": "Conversation list. Unread indicator. Chat thread. Post share in chat.",
+      "entities": [
+        "Message",
+        "User"
+      ],
+      "actions": [
+        "View conversations",
+        "Send message",
+        "Share post in chat",
+        "Send voice note",
+        "React to message",
+        "Create group chat"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 11
+    },
+    {
+      "id": "groups",
+      "name": "Groups / Communities",
+      "priority": "secondary",
+      "purpose": "Join and interact in interest-based groups",
+      "visual": "Group header. Member count. Posts feed. Join CTA. Admin badge.",
+      "entities": [
+        "Group",
+        "Post",
+        "User"
+      ],
+      "actions": [
+        "View group feed",
+        "Join or leave group",
+        "Post in group",
+        "View members",
+        "Invite friends",
+        "Report group"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 12
+    },
+    {
+      "id": "events",
+      "name": "Events",
+      "priority": "secondary",
+      "purpose": "Discover and create social events",
+      "visual": "Events feed. Event cards with date and attendee count. Create event CTA.",
+      "entities": [
+        "Event",
+        "User",
+        "Group"
+      ],
+      "actions": [
+        "Browse events",
+        "View event detail",
+        "RSVP",
+        "Share event",
+        "Create event",
+        "Invite followers"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 13
+    },
+    {
+      "id": "collections",
+      "name": "Collections / Saved",
+      "priority": "secondary",
+      "purpose": "Saved posts organised into private collections",
+      "visual": "Collections grid. Create collection. Posts within collection.",
+      "entities": [
+        "Collection",
+        "Post"
+      ],
+      "actions": [
+        "Create collection",
+        "View collection",
+        "Add post to collection",
+        "Remove post",
+        "Share collection"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 14
+    },
+    {
+      "id": "live",
+      "name": "Live Streaming",
+      "priority": "secondary",
+      "purpose": "Go live and interact with viewers in real time",
+      "visual": "Camera view. Viewer count. Live comments stream. Reactions overlay. End live CTA.",
+      "entities": [
+        "User",
+        "Post"
+      ],
+      "actions": [
         "Go live",
-        "Create poll in post",
-        "Collab post with another user",
-        "Mention user in post or comment",
-        "Pin post on own profile"
+        "View live comments",
+        "React to live",
+        "Share live",
+        "End live",
+        "Save live recording"
       ],
-      "screens": [
-        {
-          "id": "feed",
-          "name": "Feed / Home",
-          "purpose": "Personalised feed with stories, suggested content, and live indicators",
-          "visual": "Stories row. Personalised posts. Live badge on active streams. Suggested users card.",
-          "entities": [
-            "Post",
-            "User",
-            "Story"
-          ],
-          "actions": [
-            "All MVP actions",
-            "View live stream",
-            "View suggested users"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['Social & Community'].headline}}",
-            "cta": "{{industry.copy_by_app_type['Social & Community'].cta}}",
-            "empty_state": "Follow people to see their posts here."
-          }
-        },
-        {
-          "id": "stories",
-          "name": "Stories",
-          "purpose": "Create and view ephemeral 24-hour stories",
-          "visual": "Full-screen story view. Progress bar. Reaction bar. Reply input.",
-          "entities": [
-            "Story",
-            "User"
-          ],
-          "actions": [
-            "View story",
-            "React to story",
-            "Reply to story",
-            "Swipe to next",
-            "View who watched",
-            "Skip story"
-          ]
-        },
-        {
-          "id": "create_story",
-          "name": "Create Story",
-          "purpose": "Capture or upload content for story",
-          "visual": "Camera. Media picker. Text and sticker overlays. Music. Publish CTA.",
-          "entities": [
-            "Story",
-            "User"
-          ],
-          "actions": [
-            "Capture photo or video",
-            "Upload media",
-            "Add text overlay",
-            "Add sticker",
-            "Add music",
-            "Publish story"
-          ]
-        },
-        {
-          "id": "discover",
-          "name": "Discover / Explore",
-          "purpose": "Personalised content discovery with topic filters",
-          "visual": "Topic filter chips. Trending posts grid. Suggested users. Trending hashtags.",
-          "entities": [
-            "Post",
-            "User"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Filter by topic",
-            "Browse trending hashtags",
-            "View suggested groups"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['Social & Community'].headline}}",
-            "cta": "Explore",
-            "empty_state": "Nothing trending yet \u2014 check back soon."
-          }
-        },
-        {
-          "id": "post_detail",
-          "name": "Post Detail",
-          "purpose": "Full post with threaded comments and collab indicator",
-          "visual": "Post media. Caption. Collab tag if applicable. Comment threads.",
-          "entities": [
-            "Post",
-            "Comment",
-            "Like",
-            "User"
-          ],
-          "actions": [
-            "All MVP actions",
-            "View collab account",
-            "Expand comment threads"
-          ]
-        },
-        {
-          "id": "create_post",
-          "name": "Create Post",
-          "purpose": "Rich post creation with polls, collabs, and scheduling",
-          "visual": "Media picker. Caption. Poll option. Collab invite. Schedule toggle. Publish.",
-          "entities": [
-            "Post",
-            "User"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Add poll",
-            "Invite collaborator",
-            "Schedule post",
-            "Tag products"
-          ]
-        },
-        {
-          "id": "messages",
-          "name": "Messages / DMs",
-          "purpose": "Direct messaging between users",
-          "visual": "Conversation list. Unread indicator. Chat thread. Post share in chat.",
-          "entities": [
-            "Message",
-            "User"
-          ],
-          "actions": [
-            "View conversations",
-            "Send message",
-            "Share post in chat",
-            "Send voice note",
-            "React to message",
-            "Create group chat"
-          ]
-        },
-        {
-          "id": "groups",
-          "name": "Groups / Communities",
-          "purpose": "Join and interact in interest-based groups",
-          "visual": "Group header. Member count. Posts feed. Join CTA. Admin badge.",
-          "entities": [
-            "Group",
-            "Post",
-            "User"
-          ],
-          "actions": [
-            "View group feed",
-            "Join or leave group",
-            "Post in group",
-            "View members",
-            "Invite friends",
-            "Report group"
-          ]
-        },
-        {
-          "id": "events",
-          "name": "Events",
-          "purpose": "Discover and create social events",
-          "visual": "Events feed. Event cards with date and attendee count. Create event CTA.",
-          "entities": [
-            "Event",
-            "User",
-            "Group"
-          ],
-          "actions": [
-            "Browse events",
-            "View event detail",
-            "RSVP",
-            "Share event",
-            "Create event",
-            "Invite followers"
-          ]
-        },
-        {
-          "id": "profile",
-          "name": "User Profile",
-          "purpose": "Full profile with story highlights and mutual connections",
-          "visual": "Avatar. Story highlights row. Bio. Stats. Posts grid. Mutual follows.",
-          "entities": [
-            "User",
-            "Post",
-            "Follow",
-            "Story"
-          ],
-          "actions": [
-            "All MVP actions",
-            "View story highlights",
-            "View mutual follows"
-          ]
-        },
-        {
-          "id": "own_profile",
-          "name": "Own Profile",
-          "purpose": "Full own profile with highlights management",
-          "visual": "Avatar. Edit button. Story highlights. Posts. Collections. Archive.",
-          "entities": [
-            "User",
-            "Post",
-            "Collection",
-            "Story"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Manage story highlights",
-            "View post archive",
-            "Pin post"
-          ]
-        },
-        {
-          "id": "collections",
-          "name": "Collections / Saved",
-          "purpose": "Saved posts organised into private collections",
-          "visual": "Collections grid. Create collection. Posts within collection.",
-          "entities": [
-            "Collection",
-            "Post"
-          ],
-          "actions": [
-            "Create collection",
-            "View collection",
-            "Add post to collection",
-            "Remove post",
-            "Share collection"
-          ]
-        },
-        {
-          "id": "notifications",
-          "name": "Notifications",
-          "purpose": "All activity with following suggestions and group alerts",
-          "visual": "Activity tabs \u2014 all, mentions, groups. Suggested follows section.",
-          "entities": [
-            "Notification",
-            "User",
-            "Post"
-          ],
-          "actions": [
-            "All MVP actions",
-            "View group notifications",
-            "View mention notifications"
-          ]
-        },
-        {
-          "id": "live",
-          "name": "Live Streaming",
-          "purpose": "Go live and interact with viewers in real time",
-          "visual": "Camera view. Viewer count. Live comments stream. Reactions overlay. End live CTA.",
-          "entities": [
-            "User",
-            "Post"
-          ],
-          "actions": [
-            "Go live",
-            "View live comments",
-            "React to live",
-            "Share live",
-            "End live",
-            "Save live recording"
-          ]
-        },
-        {
-          "id": "profile_settings",
-          "name": "Profile & Settings",
-          "purpose": "Full settings with blocked accounts and close friends",
-          "visual": "Settings list. Close friends list. Blocked accounts. Privacy controls.",
-          "entities": [
-            "User"
-          ],
-          "actions": [
-            "All MVP actions",
-            "Manage close friends list",
-            "Manage blocked accounts",
-            "Download data"
-          ]
-        }
-      ],
-      "interaction_patterns": [
-        "All MVP interaction patterns",
-        "Story progress bar \u2014 fills across all stories from one user",
-        "Group chat creation \u2014 select users from following list",
-        "Event RSVP \u2014 going, interested, not going \u2014 toggles",
-        "Live viewer count animates \u2014 pulses on spike",
-        "Highlight creation \u2014 select stories \u2192 name \u2192 cover image",
-        "DM post share \u2014 mini post card in chat thread",
-        "Poll vote \u2014 bar fills with live percentage after vote"
-      ]
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 15
     },
-    "scale": {
-      "tier": "Scale",
-      "description": "Full social platform with creator monetisation, moderation tools, brand partnerships, and advanced analytics.",
-      "screen_count": 23,
-      "primary_flows": [
-        "All MVP and Startup flows",
-        "Creator enables monetisation \u2192 earns from tips, subscriptions, or brand deals",
-        "Brand creates sponsored post \u2192 targets audience \u2192 creator publishes \u2192 analytics tracked",
-        "Admin reviews flagged content \u2192 approves or removes \u2192 notifies user",
-        "User subscribes to creator \u2192 unlocks exclusive content \u2192 auto-renews monthly"
+    {
+      "id": "creator_monetisation",
+      "name": "Creator Monetisation",
+      "priority": "secondary",
+      "purpose": "Creator enables tips, subscriptions, and brand deals",
+      "visual": "Monetisation overview. Earnings chart. Tips history. Subscriptions. Brand deals.",
+      "entities": [
+        "User"
       ],
-      "secondary_flows": [
-        "All previous secondary flows",
-        "Creator merchandise store",
-        "Affiliate link in bio",
-        "Brand partnership application",
-        "Content scheduling and calendar",
-        "Cross-platform share"
+      "actions": [
+        "Enable tips",
+        "Set subscription price",
+        "View earnings",
+        "Apply for brand deals",
+        "View subscriber list"
       ],
-      "screens": [
-        {
-          "id": "feed",
-          "name": "Feed / Home",
-          "purpose": "AI feed with creator subscription content and sponsored posts",
-          "visual": "AI-ranked feed. Subscription content badge. Sponsored post indicator. Live.",
-          "entities": [
-            "Post",
-            "User",
-            "Story"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View subscription content",
-            "Identify sponsored posts"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['Social & Community'].headline}}",
-            "cta": "{{industry.copy_by_app_type['Social & Community'].cta}}",
-            "empty_state": "Follow people to see their posts here."
-          }
-        },
-        {
-          "id": "stories",
-          "name": "Stories",
-          "purpose": "Stories with shopping tags and subscription exclusive stories",
-          "visual": "Full-screen story. Shopping tag overlay. Exclusive badge for subscribers.",
-          "entities": [
-            "Story",
-            "User"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Tap shopping tag",
-            "View exclusive subscriber story"
-          ]
-        },
-        {
-          "id": "create_story",
-          "name": "Create Story",
-          "purpose": "Story creation with shopping tags and exclusive toggle",
-          "visual": "Camera. Overlays. Shopping tag tool. Exclusive subscribers toggle. Publish.",
-          "entities": [
-            "Story",
-            "User"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Add shopping tag",
-            "Set exclusive for subscribers"
-          ]
-        },
-        {
-          "id": "discover",
-          "name": "Discover / Explore",
-          "purpose": "Full discovery with brand content and sponsored categories",
-          "visual": "Personalised grid. Sponsored category. Brand content section. Topic filters.",
-          "entities": [
-            "Post",
-            "User"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Browse brand content",
-            "View sponsored category"
-          ],
-          "copy": {
-            "headline": "{{industry.copy_by_app_type['Social & Community'].headline}}",
-            "cta": "Explore",
-            "empty_state": "Nothing trending yet \u2014 check back soon."
-          }
-        },
-        {
-          "id": "post_detail",
-          "name": "Post Detail",
-          "purpose": "Full post with shopping tags, tips, and brand partnership label",
-          "visual": "Post. Shopping tags overlay. Tip button. Paid partnership label.",
-          "entities": [
-            "Post",
-            "Comment",
-            "Like",
-            "User"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Tap shopping tag",
-            "Send tip",
-            "View brand partnership info"
-          ]
-        },
-        {
-          "id": "create_post",
-          "name": "Create Post",
-          "purpose": "Full creation with shopping tags, paid partnership label, and scheduling",
-          "visual": "Media. Caption. Shopping tag tool. Paid partnership toggle. Schedule.",
-          "entities": [
-            "Post",
-            "User"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Add shopping tags",
-            "Add paid partnership label",
-            "Advanced scheduling"
-          ]
-        },
-        {
-          "id": "messages",
-          "name": "Messages / DMs",
-          "purpose": "DMs with tip sending and subscription unlock from chat",
-          "visual": "Conversation list. Chat thread. Tip button. Subscribe CTA in chat.",
-          "entities": [
-            "Message",
-            "User"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Send tip from chat",
-            "Subscribe from chat"
-          ]
-        },
-        {
-          "id": "groups",
-          "name": "Groups / Communities",
-          "purpose": "Moderated groups with paid membership option",
-          "visual": "Group header. Paid badge. Moderation tools. Posts feed. Members.",
-          "entities": [
-            "Group",
-            "Post",
-            "User"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Pay to join group",
-            "Moderate posts as admin",
-            "View moderation queue"
-          ]
-        },
-        {
-          "id": "events",
-          "name": "Events",
-          "purpose": "Ticketed events with online and in-person support",
-          "visual": "Events feed. Ticket purchase option. Online event join link.",
-          "entities": [
-            "Event",
-            "User",
-            "Group"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Purchase event ticket",
-            "Join online event",
-            "View ticket in wallet"
-          ]
-        },
-        {
-          "id": "creator_monetisation",
-          "name": "Creator Monetisation",
-          "purpose": "Creator enables tips, subscriptions, and brand deals",
-          "visual": "Monetisation overview. Earnings chart. Tips history. Subscriptions. Brand deals.",
-          "entities": [
-            "User"
-          ],
-          "actions": [
-            "Enable tips",
-            "Set subscription price",
-            "View earnings",
-            "Apply for brand deals",
-            "View subscriber list"
-          ]
-        },
-        {
-          "id": "subscriptions_creator",
-          "name": "Creator Subscriptions",
-          "purpose": "Fans subscribe for exclusive content from a creator",
-          "visual": "Subscription tier cards. Perks list. Subscribe CTA. Subscriber count.",
-          "entities": [
-            "User"
-          ],
-          "actions": [
-            "View subscription tiers",
-            "Subscribe",
-            "View exclusive content",
-            "Cancel subscription"
-          ]
-        },
-        {
-          "id": "brand_partnerships",
-          "name": "Brand Partnerships",
-          "purpose": "Creator applies and manages brand deal campaigns",
-          "visual": "Campaign list. Brief. Rate card. Application status. Deliverables.",
-          "entities": [
-            "User"
-          ],
-          "actions": [
-            "Browse campaigns",
-            "View brief",
-            "Set rate card",
-            "Apply to campaign",
-            "Submit deliverable",
-            "View campaign analytics"
-          ]
-        },
-        {
-          "id": "profile",
-          "name": "User Profile",
-          "purpose": "Full creator profile with subscribe, tip, and shop buttons",
-          "visual": "Avatar. Subscribe button. Tip button. Shop link. Story highlights. Posts grid.",
-          "entities": [
-            "User",
-            "Post",
-            "Follow",
-            "Story"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Subscribe to creator",
-            "Tip creator",
-            "Visit creator shop"
-          ]
-        },
-        {
-          "id": "own_profile",
-          "name": "Own Profile",
-          "purpose": "Creator profile management with analytics preview",
-          "visual": "Avatar. Edit. Monetisation dashboard link. Posts. Analytics preview.",
-          "entities": [
-            "User",
-            "Post",
-            "Collection",
-            "Story"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View monetisation dashboard",
-            "View post analytics"
-          ]
-        },
-        {
-          "id": "collections",
-          "name": "Collections / Saved",
-          "purpose": "Saved posts and product collections with shopping integration",
-          "visual": "Collections. Product saves tab. Shop from saved.",
-          "entities": [
-            "Collection",
-            "Post"
-          ],
-          "actions": [
-            "All Startup actions",
-            "View product saves",
-            "Shop from saved"
-          ]
-        },
-        {
-          "id": "creator_analytics",
-          "name": "Creator Analytics",
-          "purpose": "Deep analytics \u2014 reach, engagement, follower growth, earnings",
-          "visual": "Reach chart. Engagement rate. Top posts. Follower growth. Earnings.",
-          "entities": [
-            "User",
-            "Post"
-          ],
-          "actions": [
-            "View reach",
-            "View engagement",
-            "View top posts",
-            "View follower growth",
-            "View earnings",
-            "Export report"
-          ]
-        },
-        {
-          "id": "content_calendar",
-          "name": "Content Calendar",
-          "purpose": "Schedule and manage upcoming posts",
-          "visual": "Calendar view. Scheduled posts. Draft posts. Create CTA.",
-          "entities": [
-            "Post",
-            "User"
-          ],
-          "actions": [
-            "View scheduled posts",
-            "Edit scheduled post",
-            "Move to draft",
-            "Create scheduled post"
-          ]
-        },
-        {
-          "id": "moderation_admin",
-          "name": "Admin \u2014 Content Moderation",
-          "purpose": "Platform moderates flagged content and accounts",
-          "visual": "Moderation queue. Flagged content cards. Approve or remove. Appeals queue.",
-          "entities": [
-            "Post",
-            "User",
-            "Report"
-          ],
-          "actions": [
-            "Review flagged content",
-            "Approve or remove",
-            "Ban account",
-            "View appeals",
-            "Set moderation rules"
-          ]
-        },
-        {
-          "id": "admin_dashboard",
-          "name": "Admin Dashboard",
-          "purpose": "Platform KPIs \u2014 DAU, posts, engagement, revenue",
-          "visual": "DAU chart. Posts volume. Engagement rate. Revenue from creator monetisation.",
-          "entities": [
-            "User",
-            "Post"
-          ],
-          "actions": [
-            "View DAU",
-            "View engagement",
-            "View creator revenue",
-            "View moderation stats"
-          ]
-        },
-        {
-          "id": "notifications",
-          "name": "Notifications",
-          "purpose": "All activity with subscription and monetisation alerts",
-          "visual": "Activity tabs. Subscription alerts. Tip received. Brand deal updates.",
-          "entities": [
-            "Notification",
-            "User",
-            "Post"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Tip received notification",
-            "Subscription alert",
-            "Brand deal update"
-          ]
-        },
-        {
-          "id": "live",
-          "name": "Live Streaming",
-          "purpose": "Live with tips, subscriber badges, and co-host support",
-          "visual": "Camera. Viewer count. Subscriber badge on comments. Tips overlay. Co-host layout.",
-          "entities": [
-            "User",
-            "Post"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Receive tips during live",
-            "Invite co-host",
-            "Subscriber-only live mode"
-          ]
-        },
-        {
-          "id": "profile_settings",
-          "name": "Profile & Settings",
-          "purpose": "Full settings with monetisation, privacy, and data controls",
-          "visual": "Comprehensive settings. Monetisation section. Privacy. Data download.",
-          "entities": [
-            "User"
-          ],
-          "actions": [
-            "All Startup actions",
-            "Monetisation settings",
-            "Privacy advanced controls",
-            "Download data",
-            "Deactivate account"
-          ]
-        },
-        {
-          "id": "help_centre",
-          "name": "Help Centre",
-          "purpose": "Self-serve help for users and creators",
-          "visual": "Search. User and creator article categories. Contact CTA.",
-          "entities": [
-            "User"
-          ],
-          "actions": [
-            "Search",
-            "Browse",
-            "Creator help section",
-            "Contact support",
-            "Appeal decision"
-          ]
-        }
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 16
+    },
+    {
+      "id": "subscriptions_creator",
+      "name": "Creator Subscriptions",
+      "priority": "secondary",
+      "purpose": "Fans subscribe for exclusive content from a creator",
+      "visual": "Subscription tier cards. Perks list. Subscribe CTA. Subscriber count.",
+      "entities": [
+        "User"
       ],
-      "interaction_patterns": [
-        "All MVP and Startup interaction patterns",
-        "Tip animation \u2014 hearts float from sender to creator on live",
-        "Subscriber badge on comments \u2014 crown or badge icon next to username",
-        "Sponsored post label always visible \u2014 clear disclosure",
-        "Shopping tag tap \u2014 mini product card slides up from bottom",
-        "Creator earnings chart \u2014 animates in on dashboard load",
-        "Moderation queue card \u2014 swipe right approve, swipe left remove",
-        "Brand deal status chip \u2014 applied, in review, accepted, rejected"
-      ]
+      "actions": [
+        "View subscription tiers",
+        "Subscribe",
+        "View exclusive content",
+        "Cancel subscription"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 17
+    },
+    {
+      "id": "brand_partnerships",
+      "name": "Brand Partnerships",
+      "priority": "secondary",
+      "purpose": "Creator applies and manages brand deal campaigns",
+      "visual": "Campaign list. Brief. Rate card. Application status. Deliverables.",
+      "entities": [
+        "User"
+      ],
+      "actions": [
+        "Browse campaigns",
+        "View brief",
+        "Set rate card",
+        "Apply to campaign",
+        "Submit deliverable",
+        "View campaign analytics"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 18
+    },
+    {
+      "id": "creator_analytics",
+      "name": "Creator Analytics",
+      "priority": "secondary",
+      "purpose": "Deep analytics \u2014 reach, engagement, follower growth, earnings",
+      "visual": "Reach chart. Engagement rate. Top posts. Follower growth. Earnings.",
+      "entities": [
+        "User",
+        "Post"
+      ],
+      "actions": [
+        "View reach",
+        "View engagement",
+        "View top posts",
+        "View follower growth",
+        "View earnings",
+        "Export report"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 19
+    },
+    {
+      "id": "content_calendar",
+      "name": "Content Calendar",
+      "priority": "secondary",
+      "purpose": "Schedule and manage upcoming posts",
+      "visual": "Calendar view. Scheduled posts. Draft posts. Create CTA.",
+      "entities": [
+        "Post",
+        "User"
+      ],
+      "actions": [
+        "View scheduled posts",
+        "Edit scheduled post",
+        "Move to draft",
+        "Create scheduled post"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 20
+    },
+    {
+      "id": "moderation_admin",
+      "name": "Admin \u2014 Content Moderation",
+      "priority": "secondary",
+      "purpose": "Platform moderates flagged content and accounts",
+      "visual": "Moderation queue. Flagged content cards. Approve or remove. Appeals queue.",
+      "entities": [
+        "Post",
+        "User",
+        "Report"
+      ],
+      "actions": [
+        "Review flagged content",
+        "Approve or remove",
+        "Ban account",
+        "View appeals",
+        "Set moderation rules"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 21
+    },
+    {
+      "id": "admin_dashboard",
+      "name": "Admin Dashboard",
+      "priority": "secondary",
+      "purpose": "Platform KPIs \u2014 DAU, posts, engagement, revenue",
+      "visual": "DAU chart. Posts volume. Engagement rate. Revenue from creator monetisation.",
+      "entities": [
+        "User",
+        "Post"
+      ],
+      "actions": [
+        "View DAU",
+        "View engagement",
+        "View creator revenue",
+        "View moderation stats"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 22
+    },
+    {
+      "id": "help_centre",
+      "name": "Help Centre",
+      "priority": "secondary",
+      "purpose": "Self-serve help for users and creators",
+      "visual": "Search. User and creator article categories. Contact CTA.",
+      "entities": [
+        "User"
+      ],
+      "actions": [
+        "Search",
+        "Browse",
+        "Creator help section",
+        "Contact support",
+        "Appeal decision"
+      ],
+      "skeleton": {
+        "hero": null,
+        "sections": [
+          "content_block"
+        ],
+        "card_count": 3
+      },
+      "generation_priority": 23
     }
-  },
+  ],
+  "screen_count": 23,
+  "primary_count": 5,
+  "secondary_count": 18,
   "layout": {
     "iphone": {
       "nav": "bottom_tab_5",

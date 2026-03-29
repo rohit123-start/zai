@@ -18,12 +18,6 @@ function FeatureIcon({ name }: { name: string }) {
   return <Icon size={13} strokeWidth={2} />;
 }
 
-const COMPLEXITY_OPTIONS = [
-  { id: "MVP", sub: "Simple prototype", screens: "8–10 screens" },
-  { id: "Startup", sub: "Full product", screens: "12–18 screens" },
-  { id: "Scale", sub: "Advanced system", screens: "20–30+ screens" },
-];
-
 const inputBase: React.CSSProperties = {
   width: "100%",
   background: "#0a0a0a",
@@ -71,12 +65,14 @@ export default function NewProjectPage() {
   const [industry, setIndustry] = useState("");
   const [appType, setAppType] = useState("");
   const [projectType, setProjectType] = useState<"new_idea" | "existing_app">("new_idea");
-  const [complexity, setComplexity] = useState("MVP");
   const [features, setFeatures] = useState<string[]>([]);
-  const [setupNotes, setSetupNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [submitPhase, setSubmitPhase] = useState<"creating" | "analysing" | null>(null);
   const [error, setError] = useState("");
+  const [classifyErrors, setClassifyErrors] = useState<string[]>([]);
   const [invalidFields, setInvalidFields] = useState<Set<string>>(new Set());
+  // Keep projectId after creation so retries don't create duplicate projects
+  const [createdProjectId, setCreatedProjectId] = useState<string | null>(null);
 
   const [industries, setIndustries] = useState<Industry[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -162,7 +158,6 @@ export default function NewProjectPage() {
 
     if (invalid.size > 0) {
       setInvalidFields(invalid);
-      // Scroll to first invalid field
       const firstKey = ["name", "description", "industry", "appType"].find((k) => invalid.has(k));
       if (firstKey && fieldRefs.current[firstKey]) {
         fieldRefs.current[firstKey]!.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -172,22 +167,81 @@ export default function NewProjectPage() {
 
     if (!user) return;
     setSubmitting(true);
+    setSubmitPhase("creating");
     setError("");
+    setClassifyErrors([]);
+
     try {
-      const project = await createProjectWithSetup(user.id, {
-        name: name.trim(),
+      // Step 1: Create the project (only on first attempt; reuse on retry)
+      let projectId = createdProjectId;
+      if (!projectId) {
+        const project = await createProjectWithSetup(user.id, {
+          name: name.trim(),
+          description: description.trim(),
+          project_type: projectType,
+          app_type: appType,
+          industry,
+          features,
+        });
+        projectId = project.id;
+        setCreatedProjectId(projectId);
+      }
+
+      // Step 2: Run classify (01.5a, 01.5b, 01.5c) — separate API call
+      setSubmitPhase("analysing");
+      const s1 = {
+        project_name: name.trim(),
         description: description.trim(),
-        project_type: projectType,
-        app_type: appType,
         industry,
-        complexity,
+        app_type: appType,
+        project_type: projectType,
         features,
-        setup_notes: setupNotes.trim() || undefined,
+      };
+
+      const classifyRes = await fetch("/api/classify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId, userId: user.id, s1 }),
       });
-      router.push(`/projects/${project.id}/setup`);
+
+      const classifyData = await classifyRes.json() as {
+        pipelineRunId?: string;
+        error?: string;
+        step?: string;
+        mismatches?: string[];
+        thin_areas?: string[];
+        quality_score?: number;
+        warn_areas?: string[];
+      };
+
+      if (!classifyRes.ok) {
+        // Show classify-specific errors — keep form visible for correction
+        if (classifyData.step === "01.5a" && classifyData.mismatches?.length) {
+          setClassifyErrors([
+            classifyData.error ?? "Description doesn't match the selected category.",
+            ...classifyData.mismatches,
+          ]);
+        } else if (classifyData.step === "01.5c" && classifyData.thin_areas?.length) {
+          setClassifyErrors([
+            classifyData.error ?? "Please add more detail.",
+            ...classifyData.thin_areas,
+          ]);
+        } else {
+          setClassifyErrors([classifyData.error ?? "Analysis failed. Please try again."]);
+        }
+        setSubmitting(false);
+        setSubmitPhase(null);
+        return;
+      }
+
+      // Step 3: Redirect to setup page with the runId
+      const runId = classifyData.pipelineRunId ?? "";
+      router.push(`/projects/${projectId}/setup?runId=${runId}`);
+
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
+      setSubmitPhase(null);
     }
   }
 
@@ -345,21 +399,6 @@ export default function NewProjectPage() {
             </div>
           </div>
 
-          {/* Complexity */}
-          <div>
-            <FieldLabel>Complexity</FieldLabel>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
-              {COMPLEXITY_OPTIONS.map(({ id, sub, screens }) => (
-                <button key={id} type="button" onClick={() => setComplexity(id)}
-                  style={{ background: complexity === id ? "rgba(6,182,212,0.1)" : "#0a0a0a", border: `1px solid ${complexity === id ? "#06b6d4" : "rgba(255,255,255,0.06)"}`, borderRadius: 10, padding: "12px 10px", cursor: "pointer", transition: "all 0.15s", textAlign: "center" }}>
-                  <div style={{ fontFamily: "var(--font-space-grotesk)", fontSize: 13, fontWeight: 600, color: "#fff", marginBottom: 3 }}>{id}</div>
-                  <div style={{ fontSize: 10, color: "#3f3f46", marginBottom: 4 }}>{sub}</div>
-                  <div style={{ fontFamily: "var(--font-dm-mono)", fontSize: 9, color: complexity === id ? "#06b6d4" : "#3f3f46", letterSpacing: "0.3px" }}>{screens}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Features — from features table, filtered by selected product archetype */}
           <div>
             <FieldLabel optional>Features</FieldLabel>
@@ -398,16 +437,21 @@ export default function NewProjectPage() {
             )}
           </div>
 
-          {/* Additional Notes */}
-          <div>
-            <FieldLabel optional>Additional Notes</FieldLabel>
-            <textarea value={setupNotes} onChange={(e) => setSetupNotes(e.target.value)}
-              placeholder="Anything else Zeach should know about your product, users or vision"
-              style={{ ...inputBase, resize: "none", height: 88, lineHeight: "1.6" }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = "#06b6d4"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(6,182,212,0.1)"; }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.boxShadow = "none"; }}
-            />
-          </div>
+          {/* Classify error (mismatch or quality gate) */}
+          {classifyErrors.length > 0 && (
+            <div style={{ padding: "14px 16px", borderRadius: 10, background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)" }}>
+              <p style={{ fontSize: 13, color: "#f87171", fontWeight: 600, marginBottom: classifyErrors.length > 1 ? 8 : 0 }}>
+                {classifyErrors[0]}
+              </p>
+              {classifyErrors.length > 1 && (
+                <ul style={{ margin: 0, paddingLeft: 16, listStyleType: "disc" }}>
+                  {classifyErrors.slice(1).map((msg, i) => (
+                    <li key={i} style={{ fontSize: 12, color: "#fca5a5", lineHeight: 1.6 }}>{msg}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
 
           {error && (
             <p style={{ fontSize: 13, padding: "12px 16px", borderRadius: 10, background: "rgba(239,68,68,0.06)", color: "#f87171", border: "1px solid rgba(239,68,68,0.15)" }}>
@@ -447,9 +491,19 @@ export default function NewProjectPage() {
             onMouseEnter={(e) => { if (!submitting) { e.currentTarget.style.background = "#22d3ee"; e.currentTarget.style.boxShadow = "0 0 32px rgba(6,182,212,0.45)"; } }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "#06b6d4"; e.currentTarget.style.boxShadow = "0 0 24px rgba(6,182,212,0.3)"; }}
           >
-            {submitting ? "Creating…" : "Continue to Visual Style"}
-            {!submitting && (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            {submitting ? (
+              <>
+                <svg style={{ animation: "spin 0.8s linear infinite" }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
+                  <path d="M12 2a10 10 0 0 1 10 10"/>
+                </svg>
+                {submitPhase === "creating" ? "Creating project…" : "Analysing your idea…"}
+              </>
+            ) : (
+              <>
+                Continue to Visual Style
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </>
             )}
           </button>
         </div>
@@ -461,6 +515,7 @@ export default function NewProjectPage() {
           20%,60% { transform: translateX(-4px); }
           40%,80% { transform: translateX(4px); }
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
